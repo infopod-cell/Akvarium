@@ -21,6 +21,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .stat-card{flex:1;background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.08)}
 .stat-card .num{font-size:24px;font-weight:700;color:#4dd9ff}
 .stat-card .lbl{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.swipe-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.35);padding:0 16px 10px}
 .entries{padding:0 16px}
 .entry-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -57,6 +58,26 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .sync-note{font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:12px}
 .modal input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#e0f0ff;font-size:13px;margin-bottom:12px}
 .modal input:focus{outline:none;border-color:#4dd9ff}
+.cal-view{position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);z-index:150;transform:translateX(-100%);transition:transform .3s ease;overflow-y:auto;padding-bottom:40px}
+.cal-view.open{transform:translateX(0)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:16px}
+.cal-head h2{font-size:18px;color:#fff}
+.cal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px;cursor:pointer}
+.cal-tabs{display:flex;gap:8px;padding:0 16px 12px;justify-content:center;flex-wrap:wrap}
+.cal-tab{padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:12px;cursor:pointer}
+.cal-tab.active[data-mode="water"]{background:rgba(77,217,255,.15);border-color:#4dd9ff;color:#4dd9ff}
+.cal-tab.active[data-mode="hunger"]{background:rgba(255,183,77,.15);border-color:#ffb74d;color:#ffb74d}
+.cal-tab.active[data-mode="stress"]{background:rgba(255,107,107,.15);border-color:#ff6b6b;color:#ff6b6b}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px}
+.cal-nav button{background:rgba(255,255,255,.1);border:none;color:#4dd9ff;font-size:20px;width:36px;height:36px;border-radius:10px;cursor:pointer}
+.cal-nav span{font-size:15px;color:#fff;text-transform:capitalize}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:0 16px}
+.cal-wd{font-size:10px;color:rgba(255,255,255,.4);text-align:center;padding:4px 0}
+.cal-day{height:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:10px;font-size:13px;color:#e0f0ff}
+.cal-day.mark-water{background:rgba(77,217,255,.25);color:#4dd9ff;border:1px solid #4dd9ff;font-weight:700}
+.cal-day.mark-hunger{background:rgba(255,183,77,.2);color:#ffb74d;border:1px solid #ffb74d;font-weight:700}
+.cal-day.mark-stress{background:rgba(255,107,107,.2);color:#ff6b6b;border:1px solid #ff6b6b;font-weight:700}
+.cal-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.35);padding:16px}
 </style>
 </head>
 <body>
@@ -83,10 +104,30 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 <div class="stat-card"><div class="num" id="totalDays">0</div><div class="lbl">дней</div></div>
 <div class="stat-card"><div class="num" id="totalPhotos">0</div><div class="lbl">фото</div></div>
 </div>
+<div class="swipe-hint">👉 свайп вправо — календарь подмен, голода и стресса</div>
 
 <div class="entries" id="entriesList"></div>
 
 <button class="fab" onclick="openModal()">+</button>
+
+<div class="cal-view" id="calView">
+<div class="cal-head">
+<h2>📅 Календарь</h2>
+<button class="cal-close" onclick="hideCal()">✕ закрыть</button>
+</div>
+<div class="cal-tabs">
+<button class="cal-tab active" data-mode="water" onclick="setCalMode('water',this)">💧 Подмены</button>
+<button class="cal-tab" data-mode="hunger" onclick="setCalMode('hunger',this)">🍽️ Голод</button>
+<button class="cal-tab" data-mode="stress" onclick="setCalMode('stress',this)">⚠️ Стресс</button>
+</div>
+<div class="cal-nav">
+<button onclick="calPrev()">‹</button>
+<span id="calTitle"></span>
+<button onclick="calNext()">›</button>
+</div>
+<div class="cal-grid" id="calGrid"></div>
+<p class="cal-hint">👈 свайп влево — назад к дневнику</p>
+</div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
 <div class="modal">
@@ -141,8 +182,33 @@ let currentField=null;
 let currentMic=null;
 let baseText='';
 let finalText='';
+let calSets={water:new Set(),hunger:new Set(),stress:new Set()};
+let calDate=new Date();
+let calMode='water';
+let calOpen=false;
 
-function init(){render();updateStats()}
+function pad(n){return String(n).padStart(2,'0')}
+function toISO(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parseDateRU(s){
+const m=String(s).match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
+return m?new Date(+m[3],+m[2]-1,+m[1]):null;
+}
+
+function init(){buildSets();render();updateStats()}
+
+function buildSets(){
+calSets={water:new Set(),hunger:new Set(),stress:new Set()};
+entries.forEach(e=>{
+const d=parseDateRU(e.date);if(!d)return;
+const iso=toISO(d);
+const act=e.actions||e.text||'';
+const app=e.appetite||'';
+const all=act+' '+(e.activity||'')+' '+app+' '+(e.fins||'');
+if(/подмен|подвен|залита|долив|долил|слил/i.test(act))calSets.water.add(iso);
+if(/голод/i.test(app))calSets.hunger.add(iso);
+if(/водоросл|нитчатк|диатомов|ксенокок|жар|вялый|еле плавает|гниль|стресс|белес/i.test(all))calSets.stress.add(iso);
+});
+}
 
 function persist(){
 try{localStorage.setItem('aquaEntries',JSON.stringify(entries));return true}
@@ -151,7 +217,14 @@ catch(e){alert('Память телефона заполнена. Удали с�
 
 function updateStats(){
 document.getElementById('totalEntries').textContent=entries.length;
-const days=new Set(entries.map(e=>String(e.date).split(',')[0])).size;
+let days=0;
+const dates=entries.map(e=>parseDateRU(e.date)).filter(d=>d);
+if(dates.length){
+const first=new Date(Math.min.apply(null,dates));
+const now=new Date();
+days=Math.floor((now-first)/86400000)+1;
+if(days<1)days=1;
+}
 document.getElementById('totalDays').textContent=days;
 document.getElementById('totalPhotos').textContent=entries.filter(e=>e.photo).length;
 }
@@ -179,6 +252,47 @@ fld('📝','Заметка',e.text)+
 '</div>'
 ).join('');
 }
+
+function showCal(){calOpen=true;document.getElementById('calView').classList.add('open');renderCal()}
+function hideCal(){calOpen=false;document.getElementById('calView').classList.remove('open')}
+function setCalMode(m,btn){
+calMode=m;
+document.querySelectorAll('.cal-tab').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+renderCal();
+}
+function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCal()}
+function calNext(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCal()}
+function renderCal(){
+const y=calDate.getFullYear(),m=calDate.getMonth();
+document.getElementById('calTitle').textContent=calDate.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+const lead=(new Date(y,m,1).getDay()+6)%7;
+const dim=new Date(y,m+1,0).getDate();
+const set=calSets[calMode];
+let html='';
+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(w=>{html+='<div class="cal-wd">'+w+'</div>'});
+for(let i=0;i<lead;i++)html+='<div></div>';
+for(let d=1;d<=dim;d++){
+const iso=y+'-'+pad(m+1)+'-'+pad(d);
+html+='<div class="cal-day'+(set.has(iso)?' mark-'+calMode:'')+'">'+d+'</div>';
+}
+document.getElementById('calGrid').innerHTML=html;
+}
+
+let touchX=null,touchY=null;
+document.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;touchY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+if(touchX===null)return;
+const dx=e.changedTouches[0].clientX-touchX;
+const dy=e.changedTouches[0].clientY-touchY;
+touchX=null;
+if(document.getElementById('modalOverlay').classList.contains('active'))return;
+if(document.getElementById('syncOverlay').classList.contains('active'))return;
+if(Math.abs(dx)>70&&Math.abs(dy)<60){
+if(dx>0&&!calOpen)showCal();
+else if(dx<0&&calOpen)hideCal();
+}
+},{passive:true});
 
 function parseCSV(t){
 const rows=[];let row=[],cur='',inQ=false;
@@ -226,7 +340,7 @@ if(imported.length===0){alert('Не нашлось записей для имп�
 if(!confirm('Найдено записей: '+imported.length+'. Добавить их в дневник? (Если уже импортировал — нажми «Отмена», иначе будут повторы.)')){input.value='';return;}
 entries=entries.concat(imported.reverse());
 if(persist())alert('Готово! Добавлено записей: '+imported.length);
-render();updateStats();
+buildSets();render();updateStats();
 input.value='';
 };
 reader.readAsText(input.files[0]);
@@ -320,14 +434,14 @@ const en={date,actions:a,activity:ac,appetite:ap,fins:f,photo:currentPhoto,src:'
 entries.unshift(en);
 if(!persist()){entries.shift();return}
 closeModal();
-render();updateStats();
+buildSets();render();updateStats();
 if(syncUrl)sendRows([en],true);
 }
 
 function deleteEntry(i){
 if(confirm('Удалить эту запись?')){
 entries.splice(i,1);
-persist();render();updateStats();
+persist();buildSets();render();updateStats();
 }
 }
 
