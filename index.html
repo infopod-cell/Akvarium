@@ -7,9 +7,16 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);color:#e0f0ff;min-height:100vh;padding-bottom:90px}
-.header{background:linear-gradient(135deg,#006994,#0099cc);padding:20px 16px 16px;text-align:center;border-radius:0 0 24px 24px;box-shadow:0 4px 20px rgba(0,153,204,.3)}
-.header h1{font-size:22px;color:#fff;margin-bottom:4px}
-.header p{font-size:13px;color:rgba(255,255,255,.7)}
+.header{background:linear-gradient(180deg,#00a6de,#0077aa);padding:14px 10px 10px;display:flex;align-items:center;justify-content:space-between}
+.wave{display:block;width:100%;height:26px}
+.h-side{display:flex;flex-direction:column;align-items:center;gap:3px;width:70px}
+.h-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);font-size:22px;font-weight:700;cursor:pointer;color:#fff;line-height:1}
+.h-btn:active{transform:scale(.92)}
+.h-cap{font-size:9px;color:rgba(255,255,255,.85);text-align:center;line-height:1.1}
+.h-center{flex:1;text-align:center}
+.h-center h1{font-size:20px;color:#fff;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:7px}
+.betta{width:36px;height:24px;flex:none}
+.h-center p{font-size:12px;color:rgba(255,255,255,.75)}
 .stats{display:flex;gap:10px;padding:12px 16px}
 .stat-card{flex:1;background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.08)}
 .stat-card .num{font-size:24px;font-weight:700;color:#4dd9ff}
@@ -17,8 +24,10 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .entries{padding:0 16px}
 .entry-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.entry-date{font-size:11px;color:#4dd9ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.entry-text{font-size:14px;line-height:1.5;color:#e0f0ff;white-space:pre-wrap}
+.entry-date{font-size:12px;color:#4dd9ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.fld{margin:7px 0}
+.fld-l{font-size:11px;color:rgba(77,217,255,.8);margin-bottom:2px}
+.fld-v{font-size:14px;line-height:1.45;color:#e0f0ff;white-space:pre-wrap}
 .entry-photo{margin-top:10px;border-radius:12px;overflow:hidden}
 .entry-photo img{width:100%;display:block;border-radius:12px}
 .del-btn{background:none;border:none;color:#ff6b6b;font-size:18px;cursor:pointer;padding:4px}
@@ -26,15 +35,18 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .fab:active{transform:scale(.92)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.active{display:flex}
-.modal{background:#132a43;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:20px 16px 30px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
+.modal{background:#132a43;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:20px 16px 30px;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal h2{font-size:18px;margin-bottom:16px;color:#fff;text-align:center}
-.modal textarea{width:100%;height:120px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#e0f0ff;font-size:15px;resize:none;font-family:inherit}
+.modal h2{font-size:18px;margin-bottom:14px;color:#fff;text-align:center}
+.modal textarea{width:100%;height:64px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;color:#e0f0ff;font-size:14px;resize:none;font-family:inherit}
 .modal textarea:focus{outline:none;border-color:#4dd9ff}
-.voice-btn{width:100%;padding:14px;border-radius:12px;border:2px dashed rgba(77,217,255,.4);background:rgba(77,217,255,.08);color:#4dd9ff;font-size:15px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
-.voice-btn.recording{border-color:#ff6b6b;background:rgba(255,107,107,.1);color:#ff6b6b;animation:pulse 1s infinite}
+.field-block{margin-bottom:10px}
+.field-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.field-head span{font-size:13px;color:#fff}
+.mic{background:rgba(77,217,255,.1);border:1px dashed rgba(77,217,255,.4);color:#4dd9ff;border-radius:10px;padding:4px 10px;font-size:12px;cursor:pointer}
+.mic.recording{border-color:#ff6b6b;background:rgba(255,107,107,.12);color:#ff6b6b;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.photo-btn{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:14px;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.photo-btn{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:14px;cursor:pointer;margin-bottom:12px}
 .photo-preview{max-width:100%;border-radius:12px;margin-bottom:12px;display:none}
 .save-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0099cc,#006994);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px}
 .save-btn:active{transform:scale(.97)}
@@ -42,17 +54,29 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.4)}
 .empty .icon{font-size:48px;margin-bottom:12px}
 .empty p{font-size:14px}
-.category-select{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.cat-btn{padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:12px;cursor:pointer;transition:all .2s}
-.cat-btn.active{background:rgba(77,217,255,.15);border-color:#4dd9ff;color:#4dd9ff}
+.sync-note{font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:12px}
+.modal input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#e0f0ff;font-size:13px;margin-bottom:12px}
+.modal input:focus{outline:none;border-color:#4dd9ff}
 </style>
 </head>
 <body>
 
 <div class="header">
-<h1>🐠 Мой Аквариум</h1>
+<div class="h-side">
+<button class="h-btn" onclick="exportToSheet()">↑</button>
+<div class="h-cap">в таблицу</div>
+</div>
+<div class="h-center">
+<h1><svg class="betta" viewBox="0 0 72 48"><path d="M44 24c6-14 20-19 26-16-6 6-6 10-2 16-4 6-4 10 2 16-6 3-20-2-26-16z" fill="#d32f2f"/><path d="M24 15c3-9 15-12 21-9-7 4-9 7-9 10z" fill="#d32f2f"/><path d="M26 33c3 9 13 12 18 9-6-4-8-7-8-10z" fill="#d32f2f"/><ellipse cx="28" cy="24" rx="17" ry="10" fill="#ef5350"/><circle cx="18" cy="22" r="2.4" fill="#fff"/><circle cx="18" cy="22" r="1.2" fill="#263238"/><path d="M12 26c2 2 5 2 7 1" stroke="#b71c1c" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Мой Аквариум</h1>
 <p>Дневник наблюдений</p>
 </div>
+<div class="h-side">
+<button class="h-btn" onclick="document.getElementById('csvInput').click()">↓</button>
+<div class="h-cap">добавить таблицу</div>
+</div>
+<input type="file" id="csvInput" accept=".csv,text/csv" style="display:none" onchange="handleCSV(this)">
+</div>
+<svg class="wave" viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,0 H1440 V14 C1240,44 1040,4 720,22 C400,40 200,8 0,26 Z" fill="#0077aa"/></svg>
 
 <div class="stats">
 <div class="stat-card"><div class="num" id="totalEntries">0</div><div class="lbl">записей</div></div>
@@ -68,20 +92,25 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 <div class="modal">
 <h2>✍️ Новая запись</h2>
 
-<button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">
-<span id="voiceIcon">🎤</span>
-<span id="voiceText">Нажми и говори</span>
-</button>
-
-<div class="category-select">
-<button class="cat-btn active" data-cat="Общее" onclick="setCat(this)">🐟 Общее</button>
-<button class="cat-btn" data-cat="Вода" onclick="setCat(this)">💧 Вода</button>
-<button class="cat-btn" data-cat="Рыбы" onclick="setCat(this)">🐠 Рыбы</button>
-<button class="cat-btn" data-cat="Растения" onclick="setCat(this)">🌿 Растения</button>
-<button class="cat-btn" data-cat="Оборудование" onclick="setCat(this)">⚙️ Оборудование</button>
+<div class="field-block">
+<div class="field-head"><span>🛠️ Действия</span><button class="mic" onclick="startFieldVoice('actions',this)">🎤 говорить</button></div>
+<textarea id="f_actions" placeholder="Подмена воды, посадка растений, уборка..."></textarea>
 </div>
 
-<textarea id="entryText" placeholder="Наговори или напиши: температура, состояние рыб, внешний вид аквариума..."></textarea>
+<div class="field-block">
+<div class="field-head"><span>⚡ Активность</span><button class="mic" onclick="startFieldVoice('activity',this)">🎤 говорить</button></div>
+<textarea id="f_activity" placeholder="Активный, бодрый, вялый..."></textarea>
+</div>
+
+<div class="field-block">
+<div class="field-head"><span>🍽️ Аппетит</span><button class="mic" onclick="startFieldVoice('appetite',this)">🎤 говорить</button></div>
+<textarea id="f_appetite" placeholder="Сколько съел, голодный день..."></textarea>
+</div>
+
+<div class="field-block">
+<div class="field-head"><span>🐠 Плавники</span><button class="mic" onclick="startFieldVoice('fins',this)">🎤 говорить</button></div>
+<textarea id="f_fins" placeholder="Распушены, прижаты, пушист..."></textarea>
+</div>
 
 <button class="photo-btn" onclick="document.getElementById('photoInput').click()">📷 Прикрепить фото</button>
 <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
@@ -92,46 +121,120 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 </div>
 </div>
 
+<div class="modal-overlay" id="syncOverlay">
+<div class="modal">
+<h2>🔗 Связь с Google-таблицей</h2>
+<p class="sync-note">Это настроим позже, когда будут силы. Пока просто закрой это окно кнопкой «Позже».</p>
+<input id="syncUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+<button class="save-btn" onclick="saveSyncUrl()">Сохранить ссылку</button>
+<button class="cancel-btn" onclick="closeSync()">Позже</button>
+</div>
+</div>
+
 <script>
 let entries=JSON.parse(localStorage.getItem('aquaEntries')||'[]');
+let syncUrl=localStorage.getItem('aquaSyncUrl')||'';
 let currentPhoto=null;
 let recognition=null;
 let isRecording=false;
-let currentCat='Общее';
-
-const catIcons={'Общее':'🐟','Вода':'💧','Рыбы':'🐠','Растения':'🌿','Оборудование':'⚙️'};
+let currentField=null;
+let currentMic=null;
+let baseText='';
+let finalText='';
 
 function init(){render();updateStats()}
 
+function persist(){
+try{localStorage.setItem('aquaEntries',JSON.stringify(entries));return true}
+catch(e){alert('Память телефона заполнена. Удали старые записи с фото.');return false}
+}
+
 function updateStats(){
 document.getElementById('totalEntries').textContent=entries.length;
-const days=new Set(entries.map(e=>e.date.split(',')[0])).size;
+const days=new Set(entries.map(e=>String(e.date).split(',')[0])).size;
 document.getElementById('totalDays').textContent=days;
-const photos=entries.filter(e=>e.photo).length;
-document.getElementById('totalPhotos').textContent=photos;
+document.getElementById('totalPhotos').textContent=entries.filter(e=>e.photo).length;
+}
+
+function fld(icon,label,v){
+if(!v)return'';
+return '<div class="fld"><div class="fld-l">'+icon+' '+label+'</div><div class="fld-v">'+v+'</div></div>';
 }
 
 function render(){
 const list=document.getElementById('entriesList');
 if(entries.length===0){
-list.innerHTML='<div class="empty"><div class="icon">🐠</div><p>Пока нет записей.<br>Нажми «+» чтобы добавить первую!</p></div>';
+list.innerHTML='<div class="empty"><div class="icon">🐠</div><p>Пока нет записей.<br>Нажми «+» или ↓ «добавить таблицу»!</p></div>';
 return;
 }
-list.innerHTML=entries.map((e,i)=>`
-<div class="entry-card">
-<div class="entry-date">
-<span>${catIcons[e.cat]||'🐟'} ${e.cat} · ${e.date}</span>
-<button class="del-btn" onclick="deleteEntry(${i})">🗑</button>
-</div>
-<div class="entry-text">${e.text}</div>
-${e.photo?`<div class="entry-photo"><img src="${e.photo}" loading="lazy"></div>`:''}
-</div>
-`).join('');
+list.innerHTML=entries.map((e,i)=>
+'<div class="entry-card">'+
+'<div class="entry-date"><span>📅 '+e.date+'</span><button class="del-btn" onclick="deleteEntry('+i+')">🗑</button></div>'+
+fld('🛠️','Действия',e.actions)+
+fld('⚡','Активность',e.activity)+
+fld('🍽️','Аппетит',e.appetite)+
+fld('🐠','Плавники',e.fins)+
+fld('📝','Заметка',e.text)+
+(e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
+'</div>'
+).join('');
+}
+
+function parseCSV(t){
+const rows=[];let row=[],cur='',inQ=false;
+for(let i=0;i<t.length;i++){
+const c=t[i];
+if(inQ){
+if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=false;}
+else cur+=c;
+}else{
+if(c=='"')inQ=true;
+else if(c==','){row.push(cur);cur='';}
+else if(c=='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+else if(c!='\r')cur+=c;
+}
+}
+row.push(cur);rows.push(row);
+return rows.filter(r=>r.join('').trim()!='');
+}
+
+function handleCSV(input){
+if(!input.files||!input.files[0])return;
+const reader=new FileReader();
+reader.onload=(e)=>{
+const t=String(e.target.result).replace(/^\uFEFF/,'');
+const rows=parseCSV(t);
+if(rows.length<2){alert('В файле нет строк с данными.');input.value='';return;}
+const head=rows[0].map(h=>String(h).trim().toLowerCase());
+const idx={};
+head.forEach((h,i)=>{idx[h]=i});
+const col=(r,n)=>(idx[n]!==undefined?String(r[idx[n]]||'').trim():'');
+const imported=[];
+for(let r=1;r<rows.length;r++){
+const row=rows[r];
+const en={
+date:col(row,'дата')||'без даты',
+actions:col(row,'действия'),
+activity:col(row,'активность'),
+appetite:col(row,'аппетит'),
+fins:col(row,'плавники'),
+photo:null,src:'csv'
+};
+if(en.actions||en.activity||en.appetite||en.fins)imported.push(en);
+}
+if(imported.length===0){alert('Не нашлось записей для импорта.');input.value='';return;}
+if(!confirm('Найдено записей: '+imported.length+'. Добавить их в дневник? (Если уже импортировал — нажми «Отмена», иначе будут повторы.)')){input.value='';return;}
+entries=entries.concat(imported.reverse());
+if(persist())alert('Готово! Добавлено записей: '+imported.length);
+render();updateStats();
+input.value='';
+};
+reader.readAsText(input.files[0]);
 }
 
 function openModal(){
 document.getElementById('modalOverlay').classList.add('active');
-document.getElementById('entryText').value='';
+['actions','activity','appetite','fins'].forEach(k=>{document.getElementById('f_'+k).value=''});
 document.getElementById('photoPreview').style.display='none';
 currentPhoto=null;
 }
@@ -141,52 +244,46 @@ document.getElementById('modalOverlay').classList.remove('active');
 if(isRecording)stopVoice();
 }
 
-function closeModalOutside(e){
-if(e.target===e.currentTarget)closeModal();
-}
+function closeModalOutside(e){if(e.target===e.currentTarget)closeModal()}
 
-function setCat(btn){
-document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-currentCat=btn.dataset.cat;
-}
-
-function toggleVoice(){
-if(isRecording){stopVoice();return}
+function startFieldVoice(field,btn){
+if(isRecording&&currentField===field){stopVoice();return}
+if(isRecording)stopVoice();
 if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){
-alert('К сожалению, твой браузер не поддерживает голосовой ввод. Попробуй Chrome.');
+alert('Голосовой ввод работает в Chrome. Открой приложение в Chrome.');
 return;
 }
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 recognition=new SR();
 recognition.lang='ru-RU';
-recognition.interimResults=false;
-recognition.continuous=false;
-recognition.onstart=()=>{
-isRecording=true;
-document.getElementById('voiceBtn').classList.add('recording');
-document.getElementById('voiceIcon').textContent='🔴';
-document.getElementById('voiceText').textContent='Слушаю... Говори!';
-};
+recognition.continuous=true;
+recognition.interimResults=true;
+currentField=field;
+currentMic=btn;
+const ta=document.getElementById('f_'+field);
+baseText=ta.value.trim()?ta.value.trim()+' ':'';
+finalText='';
+recognition.onstart=()=>{isRecording=true;btn.classList.add('recording');btn.textContent='⏹ стоп'};
 recognition.onresult=(e)=>{
-const text=e.results[0][0].transcript;
-const ta=document.getElementById('entryText');
-ta.value=ta.value?ta.value+' '+text:text;
+let interim='';
+for(let i=e.resultIndex;i<e.results.length;i++){
+const t=e.results[i][0].transcript;
+if(e.results[i].isFinal)finalText+=t+' ';else interim+=t;
+}
+ta.value=baseText+finalText+interim;
 };
 recognition.onerror=(e)=>{
-stopVoice();
-if(e.error==='not-allowed')alert('Нужно разрешить доступ к микрофону. Зайди в настройки браузера и разреши.');
+if(e.error==='not-allowed'){stopVoice();alert('Разреши доступ к микрофону в настройках браузера.');}
 };
-recognition.onend=()=>stopVoice();
-recognition.start();
+recognition.onend=()=>{if(isRecording){try{recognition.start()}catch(err){stopVoice()}}};
+try{recognition.start()}catch(err){alert('Не удалось включить микрофон');}
 }
 
 function stopVoice(){
 isRecording=false;
-if(recognition){recognition.stop();recognition=null}
-document.getElementById('voiceBtn').classList.remove('recording');
-document.getElementById('voiceIcon').textContent='🎤';
-document.getElementById('voiceText').textContent='Нажми и говори';
+if(recognition){recognition.onend=null;recognition.stop();recognition=null}
+if(currentMic){currentMic.classList.remove('recording');currentMic.textContent='🎤 говорить'}
+currentField=null;currentMic=null;
 }
 
 function handlePhoto(input){
@@ -213,33 +310,53 @@ reader.readAsDataURL(file);
 }
 
 function saveEntry(){
-const text=document.getElementById('entryText').value.trim();
-if(!text&&!currentPhoto){alert('Наговори что-нибудь или прикрепи фото');return}
-const now=new Date();
-const date=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})+', '+now.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-entries.unshift({text,photo:currentPhoto,date,cat:currentCat});
-try{
-localStorage.setItem('aquaEntries',JSON.stringify(entries));
-}catch(e){
-alert('Память заполнена. Удали старые записи с фото.');
-entries.shift();
-return;
-}
+const a=document.getElementById('f_actions').value.trim();
+const ac=document.getElementById('f_activity').value.trim();
+const ap=document.getElementById('f_appetite').value.trim();
+const f=document.getElementById('f_fins').value.trim();
+if(!a&&!ac&&!ap&&!f&&!currentPhoto){alert('Заполни или наговори хотя бы одну графу');return}
+const date=new Date().toLocaleDateString('ru-RU');
+const en={date,actions:a,activity:ac,appetite:ap,fins:f,photo:currentPhoto,src:'app',synced:false};
+entries.unshift(en);
+if(!persist()){entries.shift();return}
 closeModal();
-render();
-updateStats();
+render();updateStats();
+if(syncUrl)sendRows([en],true);
 }
 
 function deleteEntry(i){
 if(confirm('Удалить эту запись?')){
 entries.splice(i,1);
-localStorage.setItem('aquaEntries',JSON.stringify(entries));
-render();
-updateStats();
+persist();render();updateStats();
 }
 }
+
+function exportToSheet(){
+if(!syncUrl){document.getElementById('syncOverlay').classList.add('active');return}
+const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
+if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
+sendRows(pending,false);
+}
+
+function sendRows(list,silent){
+const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
+fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rows)})
+.then(()=>{list.forEach(e=>e.synced=true);persist();if(!silent)alert('Отправлено в таблицу: '+list.length);})
+.catch(()=>{if(!silent)alert('Не получилось отправить. Попробуй ещё раз кнопкой ↑.');});
+}
+
+function saveSyncUrl(){
+const v=document.getElementById('syncUrlInput').value.trim();
+if(!v.startsWith('https://')){alert('Ссылка должна начинаться с https://');return}
+syncUrl=v;
+localStorage.setItem('aquaSyncUrl',syncUrl);
+closeSync();
+alert('Ссылка сохранена! Теперь записи будут улетать в таблицу.');
+}
+
+function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
 
 init();
 </script>
 </body>
-  </html>
+</html>
