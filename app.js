@@ -221,7 +221,8 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 recognition=new SR();
 recognition.lang='ru-RU';
 recognition.continuous=true;
-recognition.interimResults=true;
+recognition.interimResults=false;
+recognition.maxAlternatives=1;
 currentField=field;
 currentMic=btn;
 const ta=document.getElementById('f_'+field);
@@ -229,12 +230,10 @@ baseText=ta.value.trim()?ta.value.trim()+' ':'';
 finalText='';
 recognition.onstart=()=>{isRecording=true;btn.classList.add('recording');btn.textContent='⏹ стоп'};
 recognition.onresult=(e)=>{
-let interim='';
 for(let i=e.resultIndex;i<e.results.length;i++){
-const t=e.results[i][0].transcript;
-if(e.results[i].isFinal)finalText+=t+' ';else interim+=t;
+if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';
 }
-ta.value=baseText+finalText+interim;
+ta.value=(baseText+finalText).trim();
 };
 recognition.onerror=(e)=>{
 if(e.error==='not-allowed'){stopVoice();alert('Разреши доступ к микрофону в настройках браузера.');}
