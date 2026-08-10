@@ -440,3 +440,28 @@ alert('Ссылка сохранена!');
 function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
 
 init();
+
+function updateCalNext(){
+var el=document.getElementById('calNext');
+var set,label,period;
+if(calMode==='water'){set=calSets.water;label='Следующая подмена воды';period=7;}
+else{set=calSets.hunger;label='Следующий разгрузочный день';period=10;}
+if(!set||set.size===0){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
+var last=null;
+set.forEach(function(s){
+var d;
+if(String(s).indexOf('-')===4){d=new Date(+String(s).slice(0,4),+String(s).slice(5,7)-1,+String(s).slice(8,10));}
+else{d=parseDateRU(s);}
+if(d&&(!last||d>last))last=d;
+});
+if(!last){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
+var next=new Date(last.getTime()+period*86400000);
+var today=new Date();today.setHours(0,0,0,0);
+var diff=Math.round((next-today)/86400000);
+var extra='';
+if(diff>0)extra=' (через '+diff+' дн.)';
+else if(diff===0)extra=' (сегодня!)';
+else extra=' (просрочено на '+(-diff)+' дн.)';
+el.textContent=label+': '+next.toLocaleDateString('ru-RU')+extra;
+el.className='cal-next'+(diff<0?' late':'');
+}
