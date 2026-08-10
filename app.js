@@ -93,7 +93,23 @@ div.innerHTML='<div class="field-head"><span>'+ico('cal',CB)+'Дата</span></d
 h2.insertAdjacentElement('afterend',div);
 }
 
-function goHome(){hideCal();hideDiary();hideInfo();}
+/* ===== Экраны и кнопка «назад» ===== */
+function openView(id){document.getElementById(id).classList.add('open');try{history.pushState({aqua:id},'');}catch(e){}}
+function dismiss(id){document.getElementById(id).classList.remove('open');if(id==='calView')calOpen=false;}
+function closeView(id){
+if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}
+}
+window.addEventListener('popstate',function(){
+const order=['settingsView','infoView','calView','diaryView'];
+for(let i=0;i<order.length;i++){
+if(document.getElementById(order[i]).classList.contains('open')){dismiss(order[i]);return;}
+}
+});
+function goHome(){closeView('calView');closeView('diaryView');closeView('infoView');closeView('settingsView');}
+function openDiary(){openView('diaryView')}
+function hideDiary(){closeView('diaryView')}
+function openSettings(){openView('settingsView')}
+function hideSettings(){closeView('settingsView')}
 
 function buildSets(){
 calSets={water:new Set(),hunger:new Set()};
@@ -121,7 +137,8 @@ const now=new Date();
 days=Math.floor((now-first)/86400000)+1;
 if(days<1)days=1;
 }
-document.getElementById('headDays').textContent=days+' '+plural(days,'день','дня','дней')+' аквариуму';
+document.getElementById('headDaysNum').textContent=days;
+document.getElementById('headDaysWord').textContent=plural(days,'день','дня','дней');
 document.getElementById('bannerLine').textContent='записей: '+entries.length+' · фото: '+entries.filter(e=>e.photo).length;
 }
 
@@ -179,11 +196,8 @@ if(entries[i].photo){openLightbox(entries[i].photo);return;}
 alert('Пока нет ни одного фото. Добавь первое через «+»!');
 }
 
-function openDiary(){document.getElementById('diaryView').classList.add('open')}
-function hideDiary(){document.getElementById('diaryView').classList.remove('open')}
-
-function showCal(){calOpen=true;document.getElementById('calView').classList.add('open');renderCal()}
-function hideCal(){calOpen=false;document.getElementById('calView').classList.remove('open')}
+function showCal(){calOpen=true;openView('calView');renderCal()}
+function hideCal(){closeView('calView')}
 function openCal(mode){
 calMode=mode;
 document.querySelectorAll('.cal-tab').forEach(b=>b.classList.toggle('active',b.getAttribute('data-mode')===mode));
@@ -223,8 +237,8 @@ document.getElementById('calGrid').innerHTML=html;
 updateCalNext();
 }
 
-function openInfo(){document.getElementById('infoView').classList.add('open');renderInfo();renderCosts();}
-function hideInfo(){document.getElementById('infoView').classList.remove('open');document.getElementById('infoForm').style.display='none';}
+function openInfo(){openView('infoView');renderInfo();renderCosts();}
+function hideInfo(){closeView('infoView');document.getElementById('infoForm').style.display='none';}
 function renderInfo(){
 const m=String(aquaInfo.size).match(/\d+/g);
 let vol='';
@@ -310,337 +324,4 @@ fld(ico('pencil',CW),'Заметка',e.text)+
 '<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
-                                                     }
-function parseCSV(t){
-const rows=[];let row=[],cur='',inQ=false;
-for(let i=0;i<t.length;i++){
-const c=t[i];
-if(inQ){
-if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=false;}
-else cur+=c;
-}else{
-if(c=='"')inQ=true;
-else if(c==','){row.push(cur);cur='';}
-else if(c=='\n'){row.push(cur);rows.push(row);row=[];cur='';}
-else if(c!='\r')cur+=c;
 }
-}
-row.push(cur);rows.push(row);
-return rows.filter(r=>r.join('').trim()!='');
-}
-
-function handleCSV(input){
-if(!input.files||!input.files[0])return;
-const reader=new FileReader();
-reader.onload=(e)=>{
-const t=String(e.target.result).replace(/^\uFEFF/,'');
-const rows=parseCSV(t);
-if(rows.length<2){alert('В файле нет строк с данными.');input.value='';return;}
-const head=rows[0].map(h=>String(h).trim().toLowerCase());
-const idx={};
-head.forEach((h,i)=>{idx[h]=i});
-const col=(r,n)=>(idx[n]!==undefined?String(r[idx[n]]||'').trim():'');
-const imported=[];
-for(let r=1;r<rows.length;r++){
-const row=rows[r];
-const en={
-date:col(row,'дата')||'без даты',
-actions:col(row,'действия'),
-activity:col(row,'активность'),
-appetite:col(row,'аппетит'),
-fins:col(row,'плавники'),
-photo:null,src:'csv'
-};
-if(en.actions||en.activity||en.appetite||en.fins)imported.push(en);
-}
-if(imported.length===0){alert('Не нашлось записей для импорта.');input.value='';return;}
-if(!confirm('Найдено записей: '+imported.length+'. Добавить их в дневник? (Если уже импортировал — нажми «Отмена», иначе будут повторы.)')){input.value='';return;}
-entries=entries.concat(imported.reverse());
-if(persist())alert('Готово! Добавлено записей: '+imported.length);
-buildSets();render();updateStats();updateTiles();
-input.value='';
-};
-reader.readAsText(input.files[0]);
-}
-
-function openModal(){
-editingIndex=null;
-document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Новая запись';
-document.getElementById('modalOverlay').classList.add('active');
-document.getElementById('dateBlock').style.display='none';
-['actions','activity','appetite','fins'].forEach(k=>{document.getElementById('f_'+k).value=''});
-document.getElementById('photoPreview').style.display='none';
-currentPhoto=null;
-}
-
-function openEdit(i){
-editingIndex=i;
-const e=entries[i];
-document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Редактирование';
-document.getElementById('modalOverlay').classList.add('active');
-document.getElementById('dateBlock').style.display='block';
-document.getElementById('f_date').value=e.date;
-document.getElementById('f_actions').value=e.actions||'';
-document.getElementById('f_activity').value=e.activity||'';
-document.getElementById('f_appetite').value=e.appetite||'';
-document.getElementById('f_fins').value=e.fins||'';
-currentPhoto=e.photo||null;
-const preview=document.getElementById('photoPreview');
-if(currentPhoto){preview.src=currentPhoto;preview.style.display='block'}else{preview.style.display='none'}
-}
-
-function closeModal(){
-document.getElementById('modalOverlay').classList.remove('active');
-if(isRecording)stopVoice();
-editingIndex=null;
-}
-
-function closeModalOutside(e){if(e.target===e.currentTarget)closeModal()}
-
-function startFieldVoice(field,btn){
-if(isRecording&&currentField===field){stopVoice();return}
-if(isRecording)stopVoice();
-if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){
-alert('Голосовой ввод работает в Chrome. Открой приложение в Chrome.');
-return;
-}
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-recognition=new SR();
-recognition.lang='ru-RU';
-recognition.continuous=true;
-recognition.interimResults=false;
-recognition.maxAlternatives=1;
-currentField=field;
-currentMic=btn;
-const ta=document.getElementById('f_'+field);
-baseText=ta.value.trim()?ta.value.trim()+' ':'';
-finalText='';
-recognition.onstart=()=>{isRecording=true;btn.classList.add('recording');btn.textContent='стоп';};
-recognition.onresult=(e)=>{
-for(let i=e.resultIndex;i<e.results.length;i++){
-if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';
-}
-ta.value=(baseText+finalText).trim();
-};
-recognition.onerror=(e)=>{
-if(e.error==='not-allowed'){stopVoice();alert('Разреши доступ к микрофону в настройках браузера.');}
-};
-recognition.onend=()=>{if(isRecording){try{recognition.start()}catch(err){stopVoice()}}};
-try{recognition.start()}catch(err){alert('Не удалось включить микрофон');}
-}
-
-function stopVoice(){
-isRecording=false;
-if(recognition){recognition.onend=null;recognition.stop();recognition=null}
-if(currentMic){currentMic.classList.remove('recording');currentMic.innerHTML=micHTML();}
-currentField=null;currentMic=null;
-}
-
-function handlePhoto(input){
-if(!input.files||!input.files[0])return;
-const file=input.files[0];
-const reader=new FileReader();
-reader.onload=(e)=>{
-const img=new Image();
-img.onload=()=>{
-const canvas=document.createElement('canvas');
-const maxW=800;
-let w=img.width,h=img.height;
-if(w>maxW){h=h*(maxW/w);w=maxW}
-canvas.width=w;canvas.height=h;
-canvas.getContext('2d').drawImage(img,0,0,w,h);
-currentPhoto=canvas.toDataURL('image/jpeg',0.7);
-const preview=document.getElementById('photoPreview');
-preview.src=currentPhoto;
-preview.style.display='block';
-};
-img.src=e.target.result;
-};
-reader.readAsDataURL(file);
-}
-
-function saveEntry(){
-const a=document.getElementById('f_actions').value.trim();
-const ac=document.getElementById('f_activity').value.trim();
-const ap=document.getElementById('f_appetite').value.trim();
-const f=document.getElementById('f_fins').value.trim();
-if(!a&&!ac&&!ap&&!f&&!currentPhoto){alert('Заполни или наговори хотя бы одну графу');return}
-if(editingIndex!==null){
-const e=entries[editingIndex];
-const dv=document.getElementById('f_date').value.trim();
-if(dv){
-if(!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dv)){alert('Дата должна быть в формате ДД.ММ.ГГГГ');return;}
-e.date=dv;
-}
-e.actions=a;e.activity=ac;e.appetite=ap;e.fins=f;e.photo=currentPhoto;e.synced=false;
-persist();closeModal();buildSets();render();updateStats();updateTiles();
-if(syncUrl)sendRows([e],true);
-return;
-}
-const date=new Date().toLocaleDateString('ru-RU');
-const en={date,actions:a,activity:ac,appetite:ap,fins:f,photo:currentPhoto,src:'app',synced:false};
-entries.unshift(en);
-if(!persist()){entries.shift();return}
-closeModal();
-buildSets();render();updateStats();updateTiles();
-if(syncUrl)sendRows([en],true);
-}
-
-function deleteEntry(i){
-if(confirm('Удалить эту запись?')){
-entries.splice(i,1);
-persist();buildSets();render();updateStats();updateTiles();
-}
-}
-
-function exportToSheet(){
-if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');return}
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
-document.getElementById('exportOverlay').classList.add('active');
-}
-
-function doSendNow(){
-closeExport();
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
-sendRows(pending,false);
-}
-
-function openSyncFromExport(){
-closeExport();
-document.getElementById('syncUrlInput').value=syncUrl;
-document.getElementById('syncOverlay').classList.add('active');
-}
-
-function closeExport(){document.getElementById('exportOverlay').classList.remove('active')}
-
-function sendRows(list,silent){
-const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
-fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rows)})
-.then(()=>{list.forEach(e=>e.synced=true);persist();if(!silent)alert('Отправлено в таблицу: '+list.length);})
-.catch(()=>{if(!silent)alert('Не получилось отправить. Попробуй ещё раз кнопкой ↑.');});
-}
-
-function saveSyncUrl(){
-const v=document.getElementById('syncUrlInput').value.trim();
-if(!v.startsWith('https://')){alert('Ссылка должна начинаться с https://');return}
-syncUrl=v;
-localStorage.setItem('aquaSyncUrl',syncUrl);
-closeSync();
-alert('Ссылка сохранена!');
-}
-
-function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
-
-function backupSave(){
-const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings};
-const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-const a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
-a.download='aqua-backup-'+new Date().toISOString().slice(0,10)+'.json';
-a.click();
-setTimeout(function(){URL.revokeObjectURL(a.href)},5000);
-alert('Резервная копия сохранена в «Загрузки».');
-}
-
-function backupRestore(input){
-if(!input.files||!input.files[0])return;
-const r=new FileReader();
-r.onload=function(e){
-try{
-const d=JSON.parse(String(e.target.result));
-if(!d.entries){alert('В файле нет записей.');return;}
-if(!confirm('Восстановить из копии? Текущие данные будут заменены.'))return;
-entries=d.entries||[];
-if(d.costs)costs=d.costs;
-if(d.aquaInfo)aquaInfo=d.aquaInfo;
-if(d.settings)settings=d.settings;
-localStorage.setItem('aquaEntries',JSON.stringify(entries));
-localStorage.setItem('aquaCosts',JSON.stringify(costs));
-localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
-localStorage.setItem('aquaSettings',JSON.stringify(settings));
-applySettings();buildSets();render();updateStats();updateTiles();renderCosts();
-alert('Восстановлено записей: '+entries.length);
-}catch(err){alert('Файл копии не читается.');}
-};
-r.readAsText(input.files[0]);
-input.value='';
-}
-
-/* ===== Полноэкранный просмотр фото ===== */
-(function(){
-var st=document.createElement('style');
-st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:none;align-items:center;justify-content:center}'+
-'#lightbox.open{display:flex}'+
-'#lbImg{max-width:100%;max-height:100vh;touch-action:none;user-select:none;-webkit-user-select:none}'+
-'#lbClose{position:fixed;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;z-index:401;cursor:pointer}'+
-'#lbHint{position:fixed;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;z-index:401}';
-document.head.appendChild(st);
-var lb=document.createElement('div');
-lb.id='lightbox';
-lb.innerHTML='<button id="lbClose">✕</button><img id="lbImg" alt=""><div id="lbHint">щипок или двойной тап — зум · палец — двигать · тап по фону — закрыть</div>';
-document.body.appendChild(lb);
-var img=lb.querySelector('#lbImg');
-var scale=1,x=0,y=0;
-var pointers=new Map();
-var lastDist=0,pinchStartScale=1;
-var panStartX=0,panStartY=0,panBaseX=0,panBaseY=0,panning=false;
-var lastTap=0;
-function apply(){img.style.transform='translate('+x+'px,'+y+'px) scale('+scale+')';}
-function reset(){scale=1;x=0;y=0;apply();}
-function close(){lb.classList.remove('open');img.src='';}
-window.openLightbox=function(src){img.src=src;reset();lb.classList.add('open');};
-lb.addEventListener('click',function(e){if(e.target===lb)close();});
-lb.querySelector('#lbClose').addEventListener('click',close);
-document.addEventListener('click',function(e){
-var t=e.target.closest?e.target.closest('.entry-photo img'):null;
-if(t)openLightbox(t.getAttribute('src'));
-});
-function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
-img.addEventListener('pointerdown',function(e){
-img.setPointerCapture(e.pointerId);
-pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-if(pointers.size===1){
-var now=Date.now();
-if(now-lastTap<300){
-if(scale>1){reset();}else{scale=2.5;apply();}
-lastTap=0;panning=false;
-return;
-}
-lastTap=now;
-panning=true;panStartX=e.clientX;panStartY=e.clientY;panBaseX=x;panBaseY=y;
-}else if(pointers.size===2){
-panning=false;
-var ps=[];pointers.forEach(function(p){ps.push(p);});
-lastDist=dist(ps[0],ps[1]);
-pinchStartScale=scale;
-}
-});
-img.addEventListener('pointermove',function(e){
-if(!pointers.has(e.pointerId))return;
-pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-if(pointers.size===2){
-var ps=[];pointers.forEach(function(p){ps.push(p);});
-var d=dist(ps[0],ps[1]);
-if(lastDist>0){
-scale=Math.min(5,Math.max(1,pinchStartScale*d/lastDist));
-if(scale===1){x=0;y=0;}
-apply();
-}
-}else if(pointers.size===1&&panning&&scale>1){
-x=panBaseX+(e.clientX-panStartX);
-y=panBaseY+(e.clientY-panStartY);
-apply();
-}
-});
-function up(e){
-pointers.delete(e.pointerId);
-if(pointers.size<2)lastDist=0;
-if(pointers.size===0)panning=false;
-}
-img.addEventListener('pointerup',up);
-img.addEventListener('pointercancel',up);
-})();
-
-init();
