@@ -60,7 +60,14 @@ const m=String(s).match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
 return m?new Date(+m[3],+m[2]-1,+m[1]):null;
 }
 
-function init(){injectIcons();applySettings();addDateEditor();buildSets();render();updateStats();updateTiles()}
+function init(){injectIcons();applyBranding();applySettings();addDateEditor();buildSets();render();updateStats();updateTiles()}
+
+function applyBranding(){
+document.title='Аквариум';
+const t=document.querySelector('.h-title');if(t)t.textContent='Аквариум';
+const s=document.querySelector('.h-sub');if(s)s.remove();
+document.querySelectorAll('.cal-close').forEach(b=>b.remove());
+}
 
 function applySettings(){
 document.body.style.zoom=settings.fs;
@@ -93,18 +100,34 @@ div.innerHTML='<div class="field-head"><span>'+ico('cal',CB)+'Дата</span></d
 h2.insertAdjacentElement('afterend',div);
 }
 
-/* ===== Экраны и кнопка «назад» ===== */
-function openView(id){document.getElementById(id).classList.add('open');try{history.pushState({aqua:id},'');}catch(e){}}
-function dismiss(id){document.getElementById(id).classList.remove('open');if(id==='calView')calOpen=false;}
-function closeView(id){
-if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}
-}
-window.addEventListener('popstate',function(){
+/* ===== Слои и кнопка «назад» ===== */
+function pushLayer(){try{history.pushState({aqua:1},'');}catch(e){}}
+function topLayer(){
+if(document.getElementById('lightbox').classList.contains('open'))return 'lightbox';
+if(document.getElementById('modalOverlay').classList.contains('active'))return 'modal';
+if(document.getElementById('syncOverlay').classList.contains('active'))return 'sync';
+if(document.getElementById('exportOverlay').classList.contains('active'))return 'export';
 const order=['settingsView','infoView','calView','diaryView'];
-for(let i=0;i<order.length;i++){
-if(document.getElementById(order[i]).classList.contains('open')){dismiss(order[i]);return;}
+for(let i=0;i<order.length;i++){if(document.getElementById(order[i]).classList.contains('open'))return order[i];}
+return null;
 }
-});
+function dismissLayer(l){
+if(l==='lightbox'){if(window.closeLightbox)window.closeLightbox();return;}
+if(l==='modal'){dismissModal();return;}
+if(l==='sync'){dismissSync();return;}
+if(l==='export'){dismissExport();return;}
+dismiss(l);
+}
+window.addEventListener('popstate',function(){const l=topLayer();if(l)dismissLayer(l);});
+function openView(id){document.getElementById(id).classList.add('open');pushLayer();}
+function dismiss(id){document.getElementById(id).classList.remove('open');if(id==='calView')calOpen=false;}
+function closeView(id){if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}}
+function dismissModal(){const el=document.getElementById('modalOverlay');if(el.classList.contains('active')){el.classList.remove('active');if(isRecording)stopVoice();editingIndex=null;}}
+function closeModal(){if(document.getElementById('modalOverlay').classList.contains('active')){dismissModal();try{history.back();}catch(e){}}}
+function dismissSync(){document.getElementById('syncOverlay').classList.remove('active');}
+function closeSync(){if(document.getElementById('syncOverlay').classList.contains('active')){dismissSync();try{history.back();}catch(e){}}}
+function dismissExport(){document.getElementById('exportOverlay').classList.remove('active');}
+function closeExport(){if(document.getElementById('exportOverlay').classList.contains('active')){dismissExport();try{history.back();}catch(e){}}}
 function goHome(){closeView('calView');closeView('diaryView');closeView('infoView');closeView('settingsView');}
 function openDiary(){openView('diaryView')}
 function hideDiary(){closeView('diaryView')}
@@ -324,7 +347,7 @@ fld(ico('pencil',CW),'Заметка',e.text)+
 '<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
-}
+  }
 function parseCSV(t){
 const rows=[];let row=[],cur='',inQ=false;
 for(let i=0;i<t.length;i++){
@@ -381,6 +404,7 @@ function openModal(){
 editingIndex=null;
 document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Новая запись';
 document.getElementById('modalOverlay').classList.add('active');
+pushLayer();
 document.getElementById('dateBlock').style.display='none';
 ['actions','activity','appetite','fins'].forEach(k=>{document.getElementById('f_'+k).value=''});
 document.getElementById('photoPreview').style.display='none';
@@ -392,6 +416,7 @@ editingIndex=i;
 const e=entries[i];
 document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Редактирование';
 document.getElementById('modalOverlay').classList.add('active');
+pushLayer();
 document.getElementById('dateBlock').style.display='block';
 document.getElementById('f_date').value=e.date;
 document.getElementById('f_actions').value=e.actions||'';
@@ -401,12 +426,6 @@ document.getElementById('f_fins').value=e.fins||'';
 currentPhoto=e.photo||null;
 const preview=document.getElementById('photoPreview');
 if(currentPhoto){preview.src=currentPhoto;preview.style.display='block'}else{preview.style.display='none'}
-}
-
-function closeModal(){
-document.getElementById('modalOverlay').classList.remove('active');
-if(isRecording)stopVoice();
-editingIndex=null;
 }
 
 function closeModalOutside(e){if(e.target===e.currentTarget)closeModal()}
@@ -508,10 +527,11 @@ persist();buildSets();render();updateStats();updateTiles();
 }
 
 function exportToSheet(){
-if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');return}
+if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');pushLayer();return}
 const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
 if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
 document.getElementById('exportOverlay').classList.add('active');
+pushLayer();
 }
 
 function doSendNow(){
@@ -525,9 +545,8 @@ function openSyncFromExport(){
 closeExport();
 document.getElementById('syncUrlInput').value=syncUrl;
 document.getElementById('syncOverlay').classList.add('active');
+pushLayer();
 }
-
-function closeExport(){document.getElementById('exportOverlay').classList.remove('active')}
 
 function sendRows(list,silent){
 const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
@@ -544,8 +563,6 @@ localStorage.setItem('aquaSyncUrl',syncUrl);
 closeSync();
 alert('Ссылка сохранена!');
 }
-
-function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
 
 function backupSave(){
 const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings};
@@ -593,7 +610,7 @@ st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-in
 document.head.appendChild(st);
 var lb=document.createElement('div');
 lb.id='lightbox';
-lb.innerHTML='<button id="lbClose">✕</button><img id="lbImg" alt=""><div id="lbHint">щипок или двойной тап — зум · палец — двигать · тап по фону — закрыть</div>';
+lb.innerHTML='<button id="lbClose">✕</button><img id="lbImg" alt=""><div id="lbHint">щипок или двойной тап — зум · палец — двигать · «назад» или тап по фону — закрыть</div>';
 document.body.appendChild(lb);
 var img=lb.querySelector('#lbImg');
 var scale=1,x=0,y=0;
@@ -604,9 +621,11 @@ var lastTap=0;
 function apply(){img.style.transform='translate('+x+'px,'+y+'px) scale('+scale+')';}
 function reset(){scale=1;x=0;y=0;apply();}
 function close(){lb.classList.remove('open');img.src='';}
-window.openLightbox=function(src){img.src=src;reset();lb.classList.add('open');};
-lb.addEventListener('click',function(e){if(e.target===lb)close();});
-lb.querySelector('#lbClose').addEventListener('click',close);
+function closeLB(){if(lb.classList.contains('open')){close();try{history.back();}catch(e){}}}
+window.openLightbox=function(src){img.src=src;reset();lb.classList.add('open');pushLayer();};
+window.closeLightbox=close;
+lb.addEventListener('click',function(e){if(e.target===lb)closeLB();});
+lb.querySelector('#lbClose').addEventListener('click',closeLB);
 document.addEventListener('click',function(e){
 var t=e.target.closest?e.target.closest('.entry-photo img'):null;
 if(t)openLightbox(t.getAttribute('src'));
