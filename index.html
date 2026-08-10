@@ -13,34 +13,35 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .h-side{display:flex;flex-direction:column;align-items:center;gap:3px;width:70px}
 .h-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);font-size:22px;font-weight:700;cursor:pointer;color:#fff;line-height:1}
 .h-btn:active{transform:scale(.92)}
-.h-cap{font-size:9px;color:rgba(255,255,255,.85);text-align:center;line-height:1.1}
+.h-cap{font-size:10px;color:rgba(255,255,255,.85);text-align:center;line-height:1.1}
 .h-center{flex:1;text-align:center;cursor:pointer}
-.h-center h1{font-size:20px;color:#fff;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:7px}
+.h-center h1{font-size:21px;color:#fff;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:7px}
 .betta{width:36px;height:24px;flex:none}
-.h-center p{font-size:12px;color:rgba(255,255,255,.75)}
-.banner{text-align:center;font-size:12px;color:rgba(255,255,255,.6);padding:12px 16px 10px}
+.h-center p{font-size:13px;color:rgba(255,255,255,.8)}
+.banner{text-align:center;font-size:13px;color:rgba(255,255,255,.6);padding:12px 16px 10px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
-.tile{background:rgba(255,255,255,.07);border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.08);cursor:pointer;min-height:86px}
+.tile{background:rgba(255,255,255,.07);border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.08);cursor:pointer;min-height:92px}
 .tile:active{transform:scale(.97)}
 .tile.wide{grid-column:1/-1}
-.tile .t-l{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:5px}
-.tile .t-v{font-size:18px;font-weight:700;color:#4dd9ff;margin:4px 0 2px}
-.tile .t-s{font-size:11px;color:rgba(255,255,255,.45)}
+.tile .t-l{font-size:13px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px}
+.tile .t-v{font-size:20px;font-weight:700;color:#4dd9ff;margin:4px 0 2px}
+.tile .t-s{font-size:12px;color:rgba(255,255,255,.45)}
 .tile.late .t-v{color:#ff6b6b}
 .tile img{width:100%;height:70px;object-fit:cover;border-radius:10px;margin-top:4px}
 .ico{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .search-row{padding:0 16px 12px}
-.search-row input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:11px 14px;color:#e0f0ff;font-size:14px}
+.search-row input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 14px;color:#e0f0ff;font-size:15px}
 .search-row input:focus{outline:none;border-color:#4dd9ff}
 .entries{padding:0 16px}
 .entry-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.entry-date{font-size:12px;color:#4dd9ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
-.edit-btn{background:none;border:none;color:#ffb74d;cursor:pointer;padding:4px}
-.del-btn{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;padding:4px}
-.fld{margin:7px 0}
-.fld-l{font-size:11px;color:rgba(77,217,255,.8);margin-bottom:2px;display:flex;align-items:center;gap:5px}
-.fld-v{font-size:14px;line-height:1.45;color:#e0f0ff;white-space:pre-wrap}
+.entry-date{font-size:13px;color:#4dd9ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.edit-btn{background:none;border:none;color:#ffb74d;cursor:pointer;padding:6px}
+.del-btn{background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;padding:6px;display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.card-foot{margin-top:10px;text-align:right}
+.fld{margin:8px 0}
+.fld-l{font-size:17px;font-weight:600;color:rgba(77,217,255,.9);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.fld-v{font-size:15px;line-height:1.55;color:#e0f0ff;white-space:pre-wrap}
 .entry-photo{margin-top:10px;border-radius:12px;overflow:hidden}
 .entry-photo img{width:100%;display:block;border-radius:12px}
 .fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#0099cc,#006994);color:#fff;font-size:28px;border:none;box-shadow:0 4px 20px rgba(0,153,204,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:160}
@@ -49,54 +50,80 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .modal-overlay.active{display:flex}
 .modal{background:#132a43;width:100%;max-width:500px;border-radius:24px 24px 0 0;padding:20px 16px 30px;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal h2{font-size:18px;margin-bottom:14px;color:#fff;text-align:center}
-.modal textarea{width:100%;height:64px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;color:#e0f0ff;font-size:14px;resize:none;font-family:inherit}
+.modal h2{font-size:19px;margin-bottom:14px;color:#fff;text-align:center}
+.modal textarea{width:100%;height:70px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px;color:#e0f0ff;font-size:15px;resize:none;font-family:inherit}
 .modal textarea:focus{outline:none;border-color:#4dd9ff}
 .field-block{margin-bottom:10px}
 .field-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.field-head span{font-size:13px;color:#fff;display:flex;align-items:center;gap:5px}
-.mic{background:rgba(77,217,255,.1);border:1px dashed rgba(77,217,255,.4);color:#4dd9ff;border-radius:10px;padding:4px 10px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.field-head span{font-size:15px;color:#fff;display:flex;align-items:center;gap:6px}
+.mic{background:rgba(77,217,255,.1);border:1px dashed rgba(77,217,255,.4);color:#4dd9ff;border-radius:10px;padding:6px 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .mic.recording{border-color:#ff6b6b;background:rgba(255,107,107,.12);color:#ff6b6b;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.photo-btn{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:14px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+.photo-btn{width:100%;padding:13px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:15px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
 .photo-preview{max-width:100%;border-radius:12px;margin:4px 0 12px;display:none}
-.save-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0099cc,#006994);color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px}
+.save-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#0099cc,#006994);color:#fff;font-size:17px;font-weight:600;cursor:pointer;margin-top:8px}
 .save-btn:active{transform:scale(.97)}
-.cancel-btn{width:100%;padding:12px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:14px;cursor:pointer;margin-top:8px}
+.cancel-btn{width:100%;padding:12px;border-radius:12px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:15px;cursor:pointer;margin-top:8px}
 .empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.4)}
 .empty .icon{margin-bottom:12px}
-.empty p{font-size:14px}
-.sync-note{font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:12px}
-.modal input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#e0f0ff;font-size:13px;margin-bottom:12px}
+.empty p{font-size:15px}
+.sync-note{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:12px}
+.modal input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#e0f0ff;font-size:14px;margin-bottom:12px}
 .modal input:focus{outline:none;border-color:#4dd9ff}
 .cal-view{position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);z-index:150;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto;padding-bottom:90px}
 .cal-view.open{transform:translateX(0)}
 .cal-head{display:flex;align-items:center;justify-content:space-between;padding:16px}
-.cal-head h2{font-size:18px;color:#fff;display:flex;align-items:center;gap:7px}
-.cal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px;cursor:pointer}
+.cal-head h2{font-size:19px;color:#fff;display:flex;align-items:center;gap:7px}
+.cal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:15px;cursor:pointer}
 .cal-tabs{display:flex;gap:8px;padding:0 16px 8px;justify-content:center;flex-wrap:wrap}
-.cal-tab{padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.cal-tab{padding:9px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .cal-tab.active[data-mode="water"]{background:rgba(77,217,255,.15);border-color:#4dd9ff;color:#4dd9ff}
 .cal-tab.active[data-mode="hunger"]{background:rgba(255,183,77,.15);border-color:#ffb74d;color:#ffb74d}
-.cal-next{text-align:center;padding:4px 16px 12px;font-size:14px;color:#4dd9ff;font-weight:600}
+.cal-next{text-align:center;padding:4px 16px 12px;font-size:15px;color:#4dd9ff;font-weight:600}
 .cal-next.late{color:#ff6b6b}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px}
 .cal-nav button{background:rgba(255,255,255,.1);border:none;color:#4dd9ff;font-size:20px;width:36px;height:36px;border-radius:10px;cursor:pointer}
-.cal-nav span{font-size:15px;color:#fff;text-transform:capitalize}
+.cal-nav span{font-size:16px;color:#fff;text-transform:capitalize}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:0 16px}
-.cal-wd{font-size:10px;color:rgba(255,255,255,.4);text-align:center;padding:4px 0}
-.cal-day{height:40px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:10px;font-size:13px;color:#e0f0ff}
+.cal-wd{font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding:4px 0}
+.cal-day{height:42px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:10px;font-size:14px;color:#e0f0ff}
 .cal-day.mark-water{background:rgba(77,217,255,.25);color:#4dd9ff;border:1px solid #4dd9ff;font-weight:700}
 .cal-day.mark-hunger{background:rgba(255,183,77,.2);color:#ffb74d;border:1px solid #ffb74d;font-weight:700}
 .info-wrap{padding:0 16px}
 .info-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08)}
-.info-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#fff}
+.info-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px;color:#fff}
 .info-head .ih-l{display:flex;align-items:center;gap:6px}
-.info-total{color:#ffb74d;font-weight:700;font-size:14px}
-.info-card textarea,.info-card input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:13px;margin-bottom:8px;font-family:inherit}
-.cost-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#e0f0ff}
+.info-total{color:#ffb74d;font-weight:700;font-size:15px}
+.info-card textarea,.info-card input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:14px;margin-bottom:8px;font-family:inherit}
+.cost-row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#e0f0ff}
 .cost-row .c-sum{color:#ffb74d;white-space:nowrap}
 .cost-del{background:none;border:none;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;padding:0 2px}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:10px 0;font-size:14px;color:#e0f0ff}
+.set-btns{display:flex;gap:6px}
+.set-btn{padding:7px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:13px;cursor:pointer}
+.set-btn.active{border-color:#4dd9ff;color:#4dd9ff}
+.set-row input{width:70px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:6px;color:#e0f0ff;font-size:14px;text-align:center;margin:0}
+body.light{background:linear-gradient(135deg,#eef4f9,#f8fbfd);color:#16324a}
+body.light .tile,body.light .entry-card,body.light .info-card{background:#fff;border-color:#dce7f0}
+body.light .t-l,body.light .t-s,body.light .banner,body.light .empty,body.light .cal-wd,body.light .cancel-btn,body.light .set-row{color:#6a8098}
+body.light .t-v,body.light .entry-date,body.light .fld-l,body.light .cal-next,body.light .cal-nav button{color:#0077aa}
+body.light .tile.late .t-v,body.light .cal-next.late{color:#d33a3a}
+body.light .fld-v,body.light .cal-day,body.light .cost-row,body.light .cal-nav span,body.light .search-row input,body.light .info-head,body.light .cal-head h2,body.light .modal h2,body.light .field-head span,body.light .set-row input{color:#16324a}
+body.light .search-row input,body.light .cal-day,body.light .modal input,body.light .info-card textarea,body.light .modal textarea{background:#fff;border-color:#cfdcea}
+body.light .cal-view{background:linear-gradient(135deg,#eef4f9,#f8fbfd)}
+body.light .modal{background:#fff}
+body.light .mic{color:#0077aa;border-color:rgba(0,119,170,.5);background:rgba(0,119,170,.08)}
+body.light .photo-btn{background:#fff;border-color:#cfdcea;color:#16324a}
+body.light .info-total,body.light .c-sum{color:#e08c1a}
+body.light .cal-day.mark-water{background:rgba(0,119,170,.15);color:#0077aa;border-color:#0077aa}
+body.light .cal-day.mark-hunger{background:rgba(224,140,26,.15);color:#e08c1a;border-color:#e08c1a}
+body.light .cal-tab{background:#fff;border-color:#cfdcea;color:#6a8098}
+body.light .cal-tab.active[data-mode="water"]{background:rgba(0,119,170,.12);color:#0077aa;border-color:#0077aa}
+body.light .cal-tab.active[data-mode="hunger"]{background:rgba(224,140,26,.12);color:#e08c1a;border-color:#e08c1a}
+body.light .del-btn,body.light .cost-del{color:#93a7b8}
+body.light .edit-btn{color:#e08c1a}
+body.light .set-btn{background:#fff;border-color:#cfdcea;color:#16324a}
+body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 </style>
 </head>
 <body>
@@ -129,7 +156,6 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 </div>
 
 <button class="fab" onclick="openModal()">+</button>
-
 <div class="cal-view" id="diaryView">
 <div class="cal-head">
 <h2><span data-ico="book" data-c="#e0f0ff" data-s="18"></span>Дневник</h2>
@@ -164,7 +190,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 </div>
 <div class="info-wrap">
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="wrench" data-c="#4dd9ff"></span>Параметры</span><button class="mic" onclick="toggleInfoEdit()">✏️ изменить</button></div>
+<div class="info-head"><span class="ih-l"><span data-ico="wrench" data-c="#4dd9ff"></span>Параметры</span><button class="mic" onclick="toggleInfoEdit()">изменить</button></div>
 <div id="infoText"></div>
 <div id="infoForm" style="display:none">
 <div class="fld-l">Размер</div><textarea id="i_size"></textarea>
@@ -185,6 +211,18 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 </div>
 <button class="mic" style="margin-top:8px" onclick="toggleCostForm()">＋ добавить покупку</button>
 </div>
+<div class="info-card">
+<div class="info-head"><span class="ih-l"><span data-ico="gear" data-c="#e0f0ff"></span>Настройки</span></div>
+<div class="set-row"><span>Размер шрифта</span><div class="set-btns"><button class="set-btn" data-fs="1" onclick="setFS(1,this)">А</button><button class="set-btn" data-fs="1.12" onclick="setFS(1.12,this)">А+</button><button class="set-btn" data-fs="1.25" onclick="setFS(1.25,this)">А++</button></div></div>
+<div class="set-row"><span>Тема</span><div class="set-btns"><button class="set-btn" data-th="dark" onclick="setTheme('dark',this)">Тёмная</button><button class="set-btn" data-th="light" onclick="setTheme('light',this)">Светлая</button></div></div>
+<div class="set-row"><span>Подмена воды, дней</span><input id="setWater" inputmode="numeric"></div>
+<div class="set-row"><span>Разгрузка, дней</span><input id="setHunger" inputmode="numeric"></div>
+<button class="mic" onclick="savePeriods()">Сохранить периоды</button>
+<div class="set-row" style="margin-top:12px"><span>Резервная копия</span></div>
+<button class="photo-btn" onclick="backupSave()">Сохранить в файл</button>
+<button class="photo-btn" onclick="document.getElementById('restoreInput').click()">Восстановить из файла</button>
+<input type="file" id="restoreInput" accept=".json,application/json" style="display:none" onchange="backupRestore(this)">
+</div>
 </div>
 </div>
 
@@ -193,22 +231,22 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 <h2 id="modalTitle">Новая запись</h2>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="wrench" data-c="#4dd9ff"></span>Действия</span><button class="mic" data-mic="actions" onclick="startFieldVoice('actions',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="wrench" data-c="#4dd9ff"></span>Действия</span><button class="mic" onclick="startFieldVoice('actions',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_actions" placeholder="Подмена воды, посадка растений, уборка..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="bolt" data-c="#ffb74d"></span>Активность</span><button class="mic" data-mic="activity" onclick="startFieldVoice('activity',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="bolt" data-c="#ffb74d"></span>Активность</span><button class="mic" onclick="startFieldVoice('activity',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_activity" placeholder="Активный, бодрый, вялый..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="plate" data-c="#ffb74d"></span>Аппетит</span><button class="mic" data-mic="appetite" onclick="startFieldVoice('appetite',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="plate" data-c="#ffb74d"></span>Аппетит</span><button class="mic" onclick="startFieldVoice('appetite',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_appetite" placeholder="Сколько съел, разгрузочный день..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="fish" data-c="#4dd9ff"></span>Плавники</span><button class="mic" data-mic="fins" onclick="startFieldVoice('fins',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="fish" data-c="#4dd9ff"></span>Плавники</span><button class="mic" onclick="startFieldVoice('fins',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_fins" placeholder="Распушены, прижаты, пушист..."></textarea>
 </div>
 
@@ -244,4 +282,4 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
