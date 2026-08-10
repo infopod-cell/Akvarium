@@ -16,6 +16,35 @@ let editingIndex=null;
 let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Длина 41 см, Ширина 18 см, Высота 27 см',light:'Kodak e14, 6500K, 630лм, 7Вт',filter:'Naribo F-200, 3вт, 150 л/с',grunt:'морская галька N2 12-20 мм, обкатанная, Prime'};
 let costs=JSON.parse(localStorage.getItem('aquaCosts')||'null')||[{name:'Лампа',sum:300,note:'3 шт'},{name:'Грунт',sum:226,note:''},{name:'Фильтр',sum:360,note:''},{name:'Мох',sum:200,note:'100 + 100'},{name:'Анубиас',sum:300,note:''},{name:'Элодея',sum:200,note:''},{name:'Сифон',sum:200,note:''},{name:'Шприц для флейты',sum:50,note:'3 шт'}];
 
+const CB='#4dd9ff',CO='#ffb74d',CW='#e0f0ff';
+const ICONS={
+drop:'<path d="M12 3c-3.5 4.5-6 8-6 11a6 6 0 0 0 12 0c0-3-2.5-6.5-6-11z"/>',
+plate:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
+camera:'<rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8.5 7L10 4.5h4L15.5 7"/>',
+book:'<path d="M12 6c-2-1.8-5.5-2-8-1v14c2.5-1 6-.8 8 1 2-1.8 5.5-2 8-1V5c-2.5-1-6-.8-8 1z"/><path d="M12 6v14"/>',
+tank:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10c3-2 6 2 9 0s6-2 9 0"/>',
+wrench:'<path d="M20.7 6.4a5 5 0 0 1-6.6 4.7L7 18.2a1.8 1.8 0 0 1-2.6-2.6l7.1-7.1a5 5 0 0 1 6.3-6.2l-2.9 2.9.7 2.6 2.6.7 2.9-2.9c.1.4.1.8.1.8z"/>',
+bolt:'<path fill="currentColor" stroke="none" d="M13 2L5 13h6l-1 9 8-11h-6l1-9z"/>',
+cal:'<rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v5M15 3v5"/>',
+trash:'<path d="M4 7h16M9 7V4h6v3M6.5 7l1 14h9l1-14M10 11v6M14 11v6"/>',
+pencil:'<path d="M4 20l4.5-1L20 7.5 16.5 4 5 15.5 4 20z"/><path d="M13.5 7l3.5 3.5"/>',
+mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/>',
+image:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9.5" cy="10" r="1.5"/><path d="M6 17l4-4 3 3 3-3 4 4"/>',
+search:'<circle cx="11" cy="11" r="6"/><path d="M16.5 16.5L21 21"/>',
+fish:'<path fill="currentColor" stroke="none" d="M4 12s4-6 10-6c4 0 6 3 6 6s-2 6-6 6C8 18 4 12 4 12z"/><path fill="currentColor" stroke="none" d="M18 12l4-4v8z"/><circle cx="8" cy="11" r="1.2" fill="#0a1628" stroke="none"/>',
+rub:'<path d="M9 20V4h5a4 4 0 0 1 0 8H9M7 15h8M7 12h8"/>'
+};
+function ico(n,c,s){
+s=s||15;
+return '<svg class="ico" style="color:'+c+';width:'+s+'px;height:'+s+'px" viewBox="0 0 24 24">'+ICONS[n]+'</svg>';
+}
+function injectIcons(){
+document.querySelectorAll('[data-ico]').forEach(function(el){
+el.innerHTML=ico(el.getAttribute('data-ico'),el.getAttribute('data-c')||CB,el.getAttribute('data-s')||15);
+});
+}
+function micHTML(){return ico('mic','currentColor',12)+' говорить'}
+
 function pad(n){return String(n).padStart(2,'0')}
 function toISO(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function parseDateRU(s){
@@ -23,7 +52,7 @@ const m=String(s).match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
 return m?new Date(+m[3],+m[2]-1,+m[1]):null;
 }
 
-function init(){addDateEditor();buildSets();render();updateStats()}
+function init(){injectIcons();addDateEditor();buildSets();render();updateStats();updateTiles()}
 
 function addDateEditor(){
 const modal=document.querySelector('#modalOverlay .modal');
@@ -32,9 +61,11 @@ const div=document.createElement('div');
 div.className='field-block';
 div.id='dateBlock';
 div.style.display='none';
-div.innerHTML='<div class="field-head"><span>📅 Дата</span></div><input id="f_date" placeholder="ДД.ММ.ГГГГ" maxlength="10">';
+div.innerHTML='<div class="field-head"><span>'+ico('cal',CB)+'Дата</span></div><input id="f_date" placeholder="ДД.ММ.ГГГГ" maxlength="10">';
 h2.insertAdjacentElement('afterend',div);
 }
+
+function goHome(){hideCal();hideDiary();hideInfo();}
 
 function buildSets(){
 calSets={water:new Set(),hunger:new Set()};
@@ -54,7 +85,6 @@ catch(e){alert('Память телефона заполнена. Удали с�
 }
 
 function updateStats(){
-document.getElementById('totalEntries').textContent=entries.length;
 let days=0;
 const dates=entries.map(e=>parseDateRU(e.date)).filter(d=>d);
 if(dates.length){
@@ -63,43 +93,74 @@ const now=new Date();
 days=Math.floor((now-first)/86400000)+1;
 if(days<1)days=1;
 }
-document.getElementById('totalDays').textContent=days;
-document.getElementById('totalPhotos').textContent=entries.filter(e=>e.photo).length;
+document.getElementById('headDays').textContent=days+' дней аквариуму';
+document.getElementById('bannerLine').textContent='записей: '+entries.length+' · фото: '+entries.filter(e=>e.photo).length;
 }
 
-function onSearch(v){searchQuery=v;render()}
-
-function fld(icon,label,v){
-if(!v)return'';
-return '<div class="fld"><div class="fld-l">'+icon+' '+label+'</div><div class="fld-v">'+v+'</div></div>';
+function nextInfo(mode){
+const set=mode==='water'?calSets.water:calSets.hunger;
+const period=mode==='water'?7:10;
+if(!set||set.size===0)return null;
+let last=null;
+set.forEach(s=>{
+let d;
+if(String(s).indexOf('-')===4){d=new Date(+String(s).slice(0,4),+String(s).slice(5,7)-1,+String(s).slice(8,10));}
+else{d=parseDateRU(s);}
+if(d&&(!last||d>last))last=d;
+});
+if(!last)return null;
+const next=new Date(last.getTime()+period*86400000);
+const today=new Date();today.setHours(0,0,0,0);
+const diff=Math.round((next-today)/86400000);
+return {last:last,next:next,diff:diff};
 }
 
-function render(){
-const list=document.getElementById('entriesList');
-const q=searchQuery.trim().toLowerCase();
-let items=entries.map((e,i)=>({e:e,i:i}));
-if(q){items=items.filter(function(it){return ((it.e.actions||'')+' '+(it.e.activity||'')+' '+(it.e.appetite||'')+' '+(it.e.fins||'')+' '+(it.e.text||'')+' '+(it.e.date||'')).toLowerCase().includes(q)});}
-if(items.length===0){
-if(entries.length===0){list.innerHTML='<div class="empty"><div class="icon">🐠</div><p>Пока нет записей.<br>Нажми «+» или ↓ «добавить таблицу»!</p></div>';}
-else{list.innerHTML='<div class="empty"><div class="icon">🔍</div><p>Ничего не нашлось по запросу «'+searchQuery+'»</p></div>';}
-return;
+function updateTiles(){
+const w=nextInfo('water');
+if(w){
+document.getElementById('twVal').textContent=w.diff>0?'через '+w.diff+' дн.':(w.diff===0?'сегодня!':'просрочено '+(-w.diff)+' дн.');
+document.getElementById('twSub').textContent='последняя '+w.last.toLocaleDateString('ru-RU');
+document.getElementById('tileWater').classList.toggle('late',w.diff<0);
+}else{document.getElementById('twVal').textContent='—';document.getElementById('twSub').textContent='нет данных';}
+const h=nextInfo('hunger');
+if(h){
+document.getElementById('thVal').textContent=h.diff>0?'через '+h.diff+' дн.':(h.diff===0?'сегодня!':'просрочено '+(-h.diff)+' дн.');
+document.getElementById('thSub').textContent='последний '+h.last.toLocaleDateString('ru-RU');
+document.getElementById('tileHunger').classList.toggle('late',h.diff<0);
+}else{document.getElementById('thVal').textContent='—';document.getElementById('thSub').textContent='нет данных';}
+const box=document.getElementById('tpBox');
+let ph=null;
+for(let i=0;i<entries.length;i++){if(entries[i].photo){ph=entries[i];break;}}
+if(ph){box.innerHTML='<img src="'+ph.photo+'">';}else{box.innerHTML='<div class="t-v">пока нет</div>';}
+let total=0;costs.forEach(c=>{total+=Number(c.sum)||0;});
+document.getElementById('tcVal').textContent=total+' р';
+if(entries.length){
+const le=entries[0];
+document.getElementById('tdVal').textContent=le.date;
+document.getElementById('tdSub').textContent=(le.actions||le.text||le.activity||'открыть ленту').slice(0,70);
+}else{
+document.getElementById('tdVal').textContent='пока пусто';
+document.getElementById('tdSub').textContent='нажми «+», чтобы начать';
 }
-list.innerHTML=items.map(function(it){
-const e=it.e,i=it.i;
-return '<div class="entry-card">'+
-'<div class="entry-date"><span>📅 '+e.date+'</span><span><button class="edit-btn" onclick="openEdit('+i+')">✏️</button><button class="del-btn" onclick="deleteEntry('+i+')">🗑</button></span></div>'+
-fld('🛠️','Действия',e.actions)+
-fld('⚡','Активность',e.activity)+
-fld('🍽️','Аппетит',e.appetite)+
-fld('🐠','Плавники',e.fins)+
-fld('📝','Заметка',e.text)+
-(e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
-'</div>';
-}).join('');
 }
+
+function tilePhoto(){
+for(let i=0;i<entries.length;i++){
+if(entries[i].photo){openLightbox(entries[i].photo);return;}
+}
+alert('Пока нет ни одного фото. Добавь первое через «+»!');
+}
+
+function openDiary(){document.getElementById('diaryView').classList.add('open')}
+function hideDiary(){document.getElementById('diaryView').classList.remove('open')}
 
 function showCal(){calOpen=true;document.getElementById('calView').classList.add('open');renderCal()}
 function hideCal(){calOpen=false;document.getElementById('calView').classList.remove('open')}
+function openCal(mode){
+calMode=mode;
+document.querySelectorAll('.cal-tab').forEach(b=>b.classList.toggle('active',b.getAttribute('data-mode')===mode));
+showCal();
+}
 function setCalMode(m,btn){
 calMode=m;
 document.querySelectorAll('.cal-tab').forEach(b=>b.classList.remove('active'));
@@ -110,21 +171,12 @@ function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1
 function calNext1(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCal()}
 function updateCalNext(){
 const el=document.getElementById('calNext');
-let set,label,period;
-if(calMode==='water'){set=calSets.water;label='Следующая подмена воды';period=7;}
-else{set=calSets.hunger;label='Следующий разгрузочный день';period=10;}
-if(set.size===0){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
-let last=null;
-set.forEach(s=>{const d=parseDateRU(s);if(d&&(!last||d>last))last=d;});
-const next=new Date(last.getTime()+period*86400000);
-const today=new Date();today.setHours(0,0,0,0);
-const diff=Math.round((next-today)/86400000);
-let extra='';
-if(diff>0)extra=' (через '+diff+' дн.)';
-else if(diff===0)extra=' (сегодня!)';
-else extra=' (просрочено на '+(-diff)+' дн.)';
-el.textContent=label+': '+next.toLocaleDateString('ru-RU')+extra;
-el.className='cal-next'+(diff<0?' late':'');
+const label=calMode==='water'?'Следующая подмена воды':'Следующий разгрузочный день';
+const info=nextInfo(calMode);
+if(!info){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
+const extra=info.diff>0?' (через '+info.diff+' дн.)':(info.diff===0?' (сегодня!)':' (просрочено на '+(-info.diff)+' дн.)');
+el.textContent=label+': '+info.next.toLocaleDateString('ru-RU')+extra;
+el.className='cal-next'+(info.diff<0?' late':'');
 }
 function renderCal(){
 const y=calDate.getFullYear(),m=calDate.getMonth();
@@ -150,10 +202,10 @@ const m=String(aquaInfo.size).match(/\d+/g);
 let vol='';
 if(m&&m.length>=3){vol=' (≈ '+Math.round(m[0]*m[1]*m[2]/1000)+' л)';}
 document.getElementById('infoText').innerHTML=
-fld('📏','Размер',aquaInfo.size+vol)+
-fld('💡','Свет',aquaInfo.light)+
-fld('⚙️','Фильтр',aquaInfo.filter)+
-fld('🪨','Грунт',aquaInfo.grunt);
+fld(ico('search',CB),'Размер',aquaInfo.size+vol)+
+fld(ico('bolt',CO),'Свет',aquaInfo.light)+
+fld(ico('wrench',CB),'Фильтр',aquaInfo.filter)+
+fld(ico('tank',CB),'Грунт',aquaInfo.grunt);
 }
 function toggleInfoEdit(){
 const f=document.getElementById('infoForm');
@@ -190,32 +242,46 @@ localStorage.setItem('aquaCosts',JSON.stringify(costs));
 document.getElementById('c_name').value='';
 document.getElementById('c_sum').value='';
 document.getElementById('c_note').value='';
-renderCosts();
+renderCosts();updateTiles();
 }
 function removeCost(i){
 if(confirm('Удалить покупку «'+costs[i].name+'»?')){
 costs.splice(i,1);
 localStorage.setItem('aquaCosts',JSON.stringify(costs));
-renderCosts();
+renderCosts();updateTiles();
 }
 }
 
-let touchX=null,touchY=null;
-document.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;touchY=e.touches[0].clientY},{passive:true});
-document.addEventListener('touchend',e=>{
-if(touchX===null)return;
-const dx=e.changedTouches[0].clientX-touchX;
-const dy=e.changedTouches[0].clientY-touchY;
-touchX=null;
-if(document.getElementById('modalOverlay').classList.contains('active'))return;
-if(document.getElementById('syncOverlay').classList.contains('active'))return;
-if(document.getElementById('exportOverlay').classList.contains('active'))return;
-if(document.getElementById('infoView').classList.contains('open'))return;
-if(Math.abs(dx)>70&&Math.abs(dy)<60){
-if(dx<0&&!calOpen)showCal();
-else if(dx>0&&calOpen)hideCal();
+function onSearch(v){searchQuery=v;render()}
+
+function fld(icon,label,v){
+if(!v)return'';
+return '<div class="fld"><div class="fld-l">'+icon+label+'</div><div class="fld-v">'+v+'</div></div>';
 }
-},{passive:true});
+
+function render(){
+const list=document.getElementById('entriesList');
+const q=searchQuery.trim().toLowerCase();
+let items=entries.map((e,i)=>({e:e,i:i}));
+if(q){items=items.filter(function(it){return ((it.e.actions||'')+' '+(it.e.activity||'')+' '+(it.e.appetite||'')+' '+(it.e.fins||'')+' '+(it.e.text||'')+' '+(it.e.date||'')).toLowerCase().includes(q)});}
+if(items.length===0){
+if(entries.length===0){list.innerHTML='<div class="empty"><div class="icon">'+ico('fish',CB,48)+'</div><p>Пока нет записей.<br>Нажми «+» или ↓ «добавить таблицу»!</p></div>';}
+else{list.innerHTML='<div class="empty"><div class="icon">'+ico('search',CB,48)+'</div><p>Ничего не нашлось по запросу «'+searchQuery+'»</p></div>';}
+return;
+}
+list.innerHTML=items.map(function(it){
+const e=it.e,i=it.i;
+return '<div class="entry-card">'+
+'<div class="entry-date"><span>'+ico('cal',CB,13)+' '+e.date+'</span><span><button class="edit-btn" onclick="openEdit('+i+')">'+ico('pencil',CO,16)+'</button><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,16)+'</button></span></div>'+
+fld(ico('wrench',CB),'Действия',e.actions)+
+fld(ico('bolt',CO),'Активность',e.activity)+
+fld(ico('plate',CO),'Аппетит',e.appetite)+
+fld(ico('fish',CB),'Плавники',e.fins)+
+fld(ico('pencil',CW),'Заметка',e.text)+
+(e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
+'</div>';
+}).join('');
+}
 
 function parseCSV(t){
 const rows=[];let row=[],cur='',inQ=false;
@@ -263,7 +329,7 @@ if(imported.length===0){alert('Не нашлось записей для имп�
 if(!confirm('Найдено записей: '+imported.length+'. Добавить их в дневник? (Если уже импортировал — нажми «Отмена», иначе будут повторы.)')){input.value='';return;}
 entries=entries.concat(imported.reverse());
 if(persist())alert('Готово! Добавлено записей: '+imported.length);
-buildSets();render();updateStats();
+buildSets();render();updateStats();updateTiles();
 input.value='';
 };
 reader.readAsText(input.files[0]);
@@ -271,7 +337,7 @@ reader.readAsText(input.files[0]);
 
 function openModal(){
 editingIndex=null;
-document.getElementById('modalTitle').textContent='✍️ Новая запись';
+document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Новая запись';
 document.getElementById('modalOverlay').classList.add('active');
 document.getElementById('dateBlock').style.display='none';
 ['actions','activity','appetite','fins'].forEach(k=>{document.getElementById('f_'+k).value=''});
@@ -282,7 +348,7 @@ currentPhoto=null;
 function openEdit(i){
 editingIndex=i;
 const e=entries[i];
-document.getElementById('modalTitle').textContent='✏️ Редактирование';
+document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Редактирование';
 document.getElementById('modalOverlay').classList.add('active');
 document.getElementById('dateBlock').style.display='block';
 document.getElementById('f_date').value=e.date;
@@ -321,7 +387,7 @@ currentMic=btn;
 const ta=document.getElementById('f_'+field);
 baseText=ta.value.trim()?ta.value.trim()+' ':'';
 finalText='';
-recognition.onstart=()=>{isRecording=true;btn.classList.add('recording');btn.textContent='⏹ стоп'};
+recognition.onstart=()=>{isRecording=true;btn.classList.add('recording');btn.textContent='стоп';};
 recognition.onresult=(e)=>{
 for(let i=e.resultIndex;i<e.results.length;i++){
 if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+' ';
@@ -338,7 +404,7 @@ try{recognition.start()}catch(err){alert('Не удалось включить �
 function stopVoice(){
 isRecording=false;
 if(recognition){recognition.onend=null;recognition.stop();recognition=null}
-if(currentMic){currentMic.classList.remove('recording');currentMic.textContent='🎤 говорить'}
+if(currentMic){currentMic.classList.remove('recording');currentMic.innerHTML=micHTML();}
 currentField=null;currentMic=null;
 }
 
@@ -379,7 +445,7 @@ if(!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dv)){alert('Дата должна быть 
 e.date=dv;
 }
 e.actions=a;e.activity=ac;e.appetite=ap;e.fins=f;e.photo=currentPhoto;e.synced=false;
-persist();closeModal();buildSets();render();updateStats();
+persist();closeModal();buildSets();render();updateStats();updateTiles();
 if(syncUrl)sendRows([e],true);
 return;
 }
@@ -388,155 +454,13 @@ const en={date,actions:a,activity:ac,appetite:ap,fins:f,photo:currentPhoto,src:'
 entries.unshift(en);
 if(!persist()){entries.shift();return}
 closeModal();
-buildSets();render();updateStats();
+buildSets();render();updateStats();updateTiles();
 if(syncUrl)sendRows([en],true);
 }
 
 function deleteEntry(i){
 if(confirm('Удалить эту запись?')){
 entries.splice(i,1);
-persist();buildSets();render();updateStats();
+persist();buildSets();render();updateStats();updateTiles();
 }
-}
-
-function exportToSheet(){
-if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');return}
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
-document.getElementById('exportOverlay').classList.add('active');
-}
-
-function doSendNow(){
-closeExport();
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return}
-sendRows(pending,false);
-}
-
-function openSyncFromExport(){
-closeExport();
-document.getElementById('syncUrlInput').value=syncUrl;
-document.getElementById('syncOverlay').classList.add('active');
-}
-
-function closeExport(){document.getElementById('exportOverlay').classList.remove('active')}
-
-function sendRows(list,silent){
-const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
-fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rows)})
-.then(()=>{list.forEach(e=>e.synced=true);persist();if(!silent)alert('Отправлено в таблицу: '+list.length);})
-.catch(()=>{if(!silent)alert('Не получилось отправить. Попробуй ещё раз кнопкой ↑.');});
-}
-
-function saveSyncUrl(){
-const v=document.getElementById('syncUrlInput').value.trim();
-if(!v.startsWith('https://')){alert('Ссылка должна начинаться с https://');return}
-syncUrl=v;
-localStorage.setItem('aquaSyncUrl',syncUrl);
-closeSync();
-alert('Ссылка сохранена!');
-}
-
-function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
-
-init();
-
-function updateCalNext(){
-var el=document.getElementById('calNext');
-var set,label,period;
-if(calMode==='water'){set=calSets.water;label='Следующая подмена воды';period=7;}
-else{set=calSets.hunger;label='Следующий разгрузочный день';period=10;}
-if(!set||set.size===0){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
-var last=null;
-set.forEach(function(s){
-var d;
-if(String(s).indexOf('-')===4){d=new Date(+String(s).slice(0,4),+String(s).slice(5,7)-1,+String(s).slice(8,10));}
-else{d=parseDateRU(s);}
-if(d&&(!last||d>last))last=d;
-});
-if(!last){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
-var next=new Date(last.getTime()+period*86400000);
-var today=new Date();today.setHours(0,0,0,0);
-var diff=Math.round((next-today)/86400000);
-var extra='';
-if(diff>0)extra=' (через '+diff+' дн.)';
-else if(diff===0)extra=' (сегодня!)';
-else extra=' (просрочено на '+(-diff)+' дн.)';
-el.textContent=label+': '+next.toLocaleDateString('ru-RU')+extra;
-el.className='cal-next'+(diff<0?' late':'');
-}
-
-/* ===== Полноэкранный просмотр фото ===== */
-(function(){
-var st=document.createElement('style');
-st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:none;align-items:center;justify-content:center}'+
-'#lightbox.open{display:flex}'+
-'#lbImg{max-width:100%;max-height:100vh;touch-action:none;user-select:none;-webkit-user-select:none}'+
-'#lbClose{position:fixed;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;z-index:401;cursor:pointer}'+
-'#lbHint{position:fixed;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;z-index:401}';
-document.head.appendChild(st);
-var lb=document.createElement('div');
-lb.id='lightbox';
-lb.innerHTML='<button id="lbClose">✕</button><img id="lbImg" alt=""><div id="lbHint">щипок или двойной тап — зум · палец — двигать · тап по фону — закрыть</div>';
-document.body.appendChild(lb);
-var img=lb.querySelector('#lbImg');
-var scale=1,x=0,y=0;
-var pointers=new Map();
-var lastDist=0,pinchStartScale=1;
-var panStartX=0,panStartY=0,panBaseX=0,panBaseY=0,panning=false;
-var lastTap=0;
-function apply(){img.style.transform='translate('+x+'px,'+y+'px) scale('+scale+')';}
-function reset(){scale=1;x=0;y=0;apply();}
-function close(){lb.classList.remove('open');img.src='';}
-window.openLightbox=function(src){img.src=src;reset();lb.classList.add('open');};
-lb.addEventListener('click',function(e){if(e.target===lb)close();});
-lb.querySelector('#lbClose').addEventListener('click',close);
-document.addEventListener('click',function(e){
-var t=e.target.closest?e.target.closest('.entry-photo img'):null;
-if(t)openLightbox(t.getAttribute('src'));
-});
-function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
-img.addEventListener('pointerdown',function(e){
-img.setPointerCapture(e.pointerId);
-pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-if(pointers.size===1){
-var now=Date.now();
-if(now-lastTap<300){
-if(scale>1){reset();}else{scale=2.5;apply();}
-lastTap=0;panning=false;
-return;
-}
-lastTap=now;
-panning=true;panStartX=e.clientX;panStartY=e.clientY;panBaseX=x;panBaseY=y;
-}else if(pointers.size===2){
-panning=false;
-var ps=[];pointers.forEach(function(p){ps.push(p);});
-lastDist=dist(ps[0],ps[1]);
-pinchStartScale=scale;
-}
-});
-img.addEventListener('pointermove',function(e){
-if(!pointers.has(e.pointerId))return;
-pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-if(pointers.size===2){
-var ps=[];pointers.forEach(function(p){ps.push(p);});
-var d=dist(ps[0],ps[1]);
-if(lastDist>0){
-scale=Math.min(5,Math.max(1,pinchStartScale*d/lastDist));
-if(scale===1){x=0;y=0;}
-apply();
-}
-}else if(pointers.size===1&&panning&&scale>1){
-x=panBaseX+(e.clientX-panStartX);
-y=panBaseY+(e.clientY-panStartY);
-apply();
-}
-});
-function up(e){
-pointers.delete(e.pointerId);
-if(pointers.size<2)lastDist=0;
-if(pointers.size===0)panning=false;
-}
-img.addEventListener('pointerup',up);
-img.addEventListener('pointercancel',up);
-})();
+  }
