@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a1628">
 <title>Мой Аквариум</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -13,7 +14,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .h-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);font-size:22px;font-weight:700;cursor:pointer;color:#fff;line-height:1}
 .h-btn:active{transform:scale(.92)}
 .h-cap{font-size:9px;color:rgba(255,255,255,.85);text-align:center;line-height:1.1}
-.h-center{flex:1;text-align:center}
+.h-center{flex:1;text-align:center;cursor:pointer}
 .h-center h1{font-size:20px;color:#fff;margin-bottom:2px;display:flex;align-items:center;justify-content:center;gap:7px}
 .betta{width:36px;height:24px;flex:none}
 .h-center p{font-size:12px;color:rgba(255,255,255,.75)}
@@ -67,10 +68,12 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .cal-head{display:flex;align-items:center;justify-content:space-between;padding:16px}
 .cal-head h2{font-size:18px;color:#fff}
 .cal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px;cursor:pointer}
-.cal-tabs{display:flex;gap:8px;padding:0 16px 12px;justify-content:center;flex-wrap:wrap}
+.cal-tabs{display:flex;gap:8px;padding:0 16px 8px;justify-content:center;flex-wrap:wrap}
 .cal-tab{padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:12px;cursor:pointer}
 .cal-tab.active[data-mode="water"]{background:rgba(77,217,255,.15);border-color:#4dd9ff;color:#4dd9ff}
 .cal-tab.active[data-mode="hunger"]{background:rgba(255,183,77,.15);border-color:#ffb74d;color:#ffb74d}
+.cal-next{text-align:center;padding:4px 16px 12px;font-size:14px;color:#4dd9ff;font-weight:600}
+.cal-next.late{color:#ff6b6b}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px}
 .cal-nav button{background:rgba(255,255,255,.1);border:none;color:#4dd9ff;font-size:20px;width:36px;height:36px;border-radius:10px;cursor:pointer}
 .cal-nav span{font-size:15px;color:#fff;text-transform:capitalize}
@@ -80,6 +83,14 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .cal-day.mark-water{background:rgba(77,217,255,.25);color:#4dd9ff;border:1px solid #4dd9ff;font-weight:700}
 .cal-day.mark-hunger{background:rgba(255,183,77,.2);color:#ffb74d;border:1px solid #ffb74d;font-weight:700}
 .cal-hint{text-align:center;font-size:11px;color:rgba(255,255,255,.35);padding:16px}
+.info-wrap{padding:0 16px}
+.info-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08)}
+.info-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px;color:#fff}
+.info-total{color:#ffb74d;font-weight:700;font-size:14px}
+.info-card textarea,.info-card input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:13px;margin-bottom:8px;font-family:inherit}
+.cost-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#e0f0ff}
+.cost-row .c-sum{color:#ffb74d;white-space:nowrap}
+.cost-del{background:none;border:none;color:#ff6b6b;font-size:14px;cursor:pointer;padding:0 2px}
 </style>
 </head>
 <body>
@@ -89,9 +100,9 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 <button class="h-btn" onclick="exportToSheet()">↑</button>
 <div class="h-cap">в таблицу</div>
 </div>
-<div class="h-center">
+<div class="h-center" onclick="openInfo()">
 <h1><svg class="betta" viewBox="0 0 72 48"><path d="M44 24c6-14 20-19 26-16-6 6-6 10-2 16-4 6-4 10 2 16-6 3-20-2-26-16z" fill="#d32f2f"/><path d="M24 15c3-9 15-12 21-9-7 4-9 7-9 10z" fill="#d32f2f"/><path d="M26 33c3 9 13 12 18 9-6-4-8-7-8-10z" fill="#d32f2f"/><ellipse cx="28" cy="24" rx="17" ry="10" fill="#ef5350"/><circle cx="18" cy="22" r="2.4" fill="#fff"/><circle cx="18" cy="22" r="1.2" fill="#263238"/><path d="M12 26c2 2 5 2 7 1" stroke="#b71c1c" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>Мой Аквариум</h1>
-<p>Дневник наблюдений</p>
+<p>Дневник наблюдений · нажми, чтобы открыть параметры</p>
 </div>
 <div class="h-side">
 <button class="h-btn" onclick="document.getElementById('csvInput').click()">↓</button>
@@ -106,7 +117,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 <div class="stat-card"><div class="num" id="totalDays">0</div><div class="lbl">дней</div></div>
 <div class="stat-card"><div class="num" id="totalPhotos">0</div><div class="lbl">фото</div></div>
 </div>
-<div class="swipe-hint">👈 свайп влево — календарь подмен и голода</div>
+<div class="swipe-hint">👈 свайп влево — календарь подмен и разгрузочных дней</div>
 
 <div class="search-row"><input id="searchInput" placeholder="🔍 Поиск по дневнику..." oninput="onSearch(this.value)"></div>
 
@@ -121,15 +132,47 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 </div>
 <div class="cal-tabs">
 <button class="cal-tab active" data-mode="water" onclick="setCalMode('water',this)">💧 Подмены</button>
-<button class="cal-tab" data-mode="hunger" onclick="setCalMode('hunger',this)">🍽️ Голод</button>
+<button class="cal-tab" data-mode="hunger" onclick="setCalMode('hunger',this)">🍽️ Разгрузочный день</button>
 </div>
+<div class="cal-next" id="calNext"></div>
 <div class="cal-nav">
 <button onclick="calPrev()">‹</button>
 <span id="calTitle"></span>
-<button onclick="calNext()">›</button>
+<button onclick="calNext1()">›</button>
 </div>
 <div class="cal-grid" id="calGrid"></div>
 <p class="cal-hint">👉 свайп вправо — назад к дневнику</p>
+</div>
+
+<div class="cal-view" id="infoView">
+<div class="cal-head">
+<h2>🐠 Мой аквариум</h2>
+<button class="cal-close" onclick="hideInfo()">✕ закрыть</button>
+</div>
+<div class="info-wrap">
+<div class="info-card">
+<div class="info-head"><span>📐 Параметры</span><button class="mic" onclick="toggleInfoEdit()">✏️ изменить</button></div>
+<div id="infoText"></div>
+<div id="infoForm" style="display:none">
+<div class="fld-l">Размер</div><textarea id="i_size"></textarea>
+<div class="fld-l">Свет</div><textarea id="i_light"></textarea>
+<div class="fld-l">Фильтр</div><textarea id="i_filter"></textarea>
+<div class="fld-l">Грунт</div><textarea id="i_grunt"></textarea>
+<button class="save-btn" onclick="saveInfo()">💾 Сохранить</button>
+</div>
+</div>
+<div class="info-card">
+<div class="info-head"><span>💰 Затраты</span><span class="info-total" id="costTotal"></span></div>
+<div id="costList"></div>
+<div id="costForm" style="display:none">
+<div class="fld-l">Название</div><input id="c_name" placeholder="Например: кондиционер">
+<div class="fld-l">Сумма (р)</div><input id="c_sum" inputmode="numeric" placeholder="0">
+<div class="fld-l">Примечание</div><input id="c_note" placeholder="3 шт">
+<button class="save-btn" onclick="addCost()">＋ Добавить покупку</button>
+</div>
+<button class="mic" style="margin-top:8px" onclick="toggleCostForm()">＋ добавить покупку</button>
+</div>
+</div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
@@ -148,7 +191,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 
 <div class="field-block">
 <div class="field-head"><span>🍽️ Аппетит</span><button class="mic" onclick="startFieldVoice('appetite',this)">🎤 говорить</button></div>
-<textarea id="f_appetite" placeholder="Сколько съел, голодный день..."></textarea>
+<textarea id="f_appetite" placeholder="Сколько съел, разгрузочный день..."></textarea>
 </div>
 
 <div class="field-block">
