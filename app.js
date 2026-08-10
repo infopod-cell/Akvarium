@@ -465,3 +465,78 @@ else extra=' (просрочено на '+(-diff)+' дн.)';
 el.textContent=label+': '+next.toLocaleDateString('ru-RU')+extra;
 el.className='cal-next'+(diff<0?' late':'');
 }
+
+/* ===== Полноэкранный просмотр фото ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:none;align-items:center;justify-content:center}'+
+'#lightbox.open{display:flex}'+
+'#lbImg{max-width:100%;max-height:100vh;touch-action:none;user-select:none;-webkit-user-select:none}'+
+'#lbClose{position:fixed;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;z-index:401;cursor:pointer}'+
+'#lbHint{position:fixed;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;z-index:401}';
+document.head.appendChild(st);
+var lb=document.createElement('div');
+lb.id='lightbox';
+lb.innerHTML='<button id="lbClose">✕</button><img id="lbImg" alt=""><div id="lbHint">щипок или двойной тап — зум · палец — двигать · тап по фону — закрыть</div>';
+document.body.appendChild(lb);
+var img=lb.querySelector('#lbImg');
+var scale=1,x=0,y=0;
+var pointers=new Map();
+var lastDist=0,pinchStartScale=1;
+var panStartX=0,panStartY=0,panBaseX=0,panBaseY=0,panning=false;
+var lastTap=0;
+function apply(){img.style.transform='translate('+x+'px,'+y+'px) scale('+scale+')';}
+function reset(){scale=1;x=0;y=0;apply();}
+function close(){lb.classList.remove('open');img.src='';}
+window.openLightbox=function(src){img.src=src;reset();lb.classList.add('open');};
+lb.addEventListener('click',function(e){if(e.target===lb)close();});
+lb.querySelector('#lbClose').addEventListener('click',close);
+document.addEventListener('click',function(e){
+var t=e.target.closest?e.target.closest('.entry-photo img'):null;
+if(t)openLightbox(t.getAttribute('src'));
+});
+function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+img.addEventListener('pointerdown',function(e){
+img.setPointerCapture(e.pointerId);
+pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+if(pointers.size===1){
+var now=Date.now();
+if(now-lastTap<300){
+if(scale>1){reset();}else{scale=2.5;apply();}
+lastTap=0;panning=false;
+return;
+}
+lastTap=now;
+panning=true;panStartX=e.clientX;panStartY=e.clientY;panBaseX=x;panBaseY=y;
+}else if(pointers.size===2){
+panning=false;
+var ps=[];pointers.forEach(function(p){ps.push(p);});
+lastDist=dist(ps[0],ps[1]);
+pinchStartScale=scale;
+}
+});
+img.addEventListener('pointermove',function(e){
+if(!pointers.has(e.pointerId))return;
+pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+if(pointers.size===2){
+var ps=[];pointers.forEach(function(p){ps.push(p);});
+var d=dist(ps[0],ps[1]);
+if(lastDist>0){
+scale=Math.min(5,Math.max(1,pinchStartScale*d/lastDist));
+if(scale===1){x=0;y=0;}
+apply();
+}
+}else if(pointers.size===1&&panning&&scale>1){
+x=panBaseX+(e.clientX-panStartX);
+y=panBaseY+(e.clientY-panStartY);
+apply();
+}
+});
+function up(e){
+pointers.delete(e.pointerId);
+if(pointers.size<2)lastDist=0;
+if(pointers.size===0)panning=false;
+}
+img.addEventListener('pointerup',up);
+img.addEventListener('pointercancel',up);
+})();
