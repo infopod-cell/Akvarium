@@ -13,6 +13,8 @@ let calMode='water';
 let calOpen=false;
 let searchQuery='';
 let editingIndex=null;
+let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Длина 41 см, Ширина 18 см, Высота 27 см',light:'Kodak e14, 6500K, 630лм, 7Вт',filter:'Naribo F-200, 3вт, 150 л/с',grunt:'морская галька N2 12-20 мм, обкатанная, Prime'};
+let costs=JSON.parse(localStorage.getItem('aquaCosts')||'null')||[{name:'Лампа',sum:300,note:'3 шт'},{name:'Грунт',sum:226,note:''},{name:'Фильтр',sum:360,note:''},{name:'Мох',sum:200,note:'100 + 100'},{name:'Анубиас',sum:300,note:''},{name:'Элодея',sum:200,note:''},{name:'Сифон',sum:200,note:''},{name:'Шприц для флейты',sum:50,note:'3 шт'}];
 
 function pad(n){return String(n).padStart(2,'0')}
 function toISO(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -21,7 +23,18 @@ const m=String(s).match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
 return m?new Date(+m[3],+m[2]-1,+m[1]):null;
 }
 
-function init(){buildSets();render();updateStats()}
+function init(){addDateEditor();buildSets();render();updateStats()}
+
+function addDateEditor(){
+const modal=document.querySelector('#modalOverlay .modal');
+const h2=modal.querySelector('h2');
+const div=document.createElement('div');
+div.className='field-block';
+div.id='dateBlock';
+div.style.display='none';
+div.innerHTML='<div class="field-head"><span>📅 Дата</span></div><input id="f_date" placeholder="ДД.ММ.ГГГГ" maxlength="10">';
+h2.insertAdjacentElement('afterend',div);
+}
 
 function buildSets(){
 calSets={water:new Set(),hunger:new Set()};
@@ -31,7 +44,7 @@ const iso=toISO(d);
 const act=e.actions||e.text||'';
 const app=e.appetite||'';
 if(/подмен|подвен|залита|долив|долил|слил/i.test(act))calSets.water.add(iso);
-if(/голод/i.test(app))calSets.hunger.add(iso);
+if(/голод|разгруз/i.test(app))calSets.hunger.add(iso);
 });
 }
 
@@ -94,7 +107,25 @@ btn.classList.add('active');
 renderCal();
 }
 function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCal()}
-function calNext(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCal()}
+function calNext1(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCal()}
+function updateCalNext(){
+const el=document.getElementById('calNext');
+let set,label,period;
+if(calMode==='water'){set=calSets.water;label='Следующая подмена воды';period=7;}
+else{set=calSets.hunger;label='Следующий разгрузочный день';period=10;}
+if(set.size===0){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
+let last=null;
+set.forEach(s=>{const d=parseDateRU(s);if(d&&(!last||d>last))last=d;});
+const next=new Date(last.getTime()+period*86400000);
+const today=new Date();today.setHours(0,0,0,0);
+const diff=Math.round((next-today)/86400000);
+let extra='';
+if(diff>0)extra=' (через '+diff+' дн.)';
+else if(diff===0)extra=' (сегодня!)';
+else extra=' (просрочено на '+(-diff)+' дн.)';
+el.textContent=label+': '+next.toLocaleDateString('ru-RU')+extra;
+el.className='cal-next'+(diff<0?' late':'');
+}
 function renderCal(){
 const y=calDate.getFullYear(),m=calDate.getMonth();
 document.getElementById('calTitle').textContent=calDate.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
@@ -109,6 +140,64 @@ const iso=y+'-'+pad(m+1)+'-'+pad(d);
 html+='<div class="cal-day'+(set.has(iso)?' mark-'+calMode:'')+'">'+d+'</div>';
 }
 document.getElementById('calGrid').innerHTML=html;
+updateCalNext();
+}
+
+function openInfo(){document.getElementById('infoView').classList.add('open');renderInfo();renderCosts();}
+function hideInfo(){document.getElementById('infoView').classList.remove('open');document.getElementById('infoForm').style.display='none';}
+function renderInfo(){
+const m=String(aquaInfo.size).match(/\d+/g);
+let vol='';
+if(m&&m.length>=3){vol=' (≈ '+Math.round(m[0]*m[1]*m[2]/1000)+' л)';}
+document.getElementById('infoText').innerHTML=
+fld('📏','Размер',aquaInfo.size+vol)+
+fld('💡','Свет',aquaInfo.light)+
+fld('⚙️','Фильтр',aquaInfo.filter)+
+fld('🪨','Грунт',aquaInfo.grunt);
+}
+function toggleInfoEdit(){
+const f=document.getElementById('infoForm');
+if(f.style.display==='none'){
+document.getElementById('i_size').value=aquaInfo.size;
+document.getElementById('i_light').value=aquaInfo.light;
+document.getElementById('i_filter').value=aquaInfo.filter;
+document.getElementById('i_grunt').value=aquaInfo.grunt;
+f.style.display='block';
+}else{f.style.display='none';}
+}
+function saveInfo(){
+aquaInfo={size:document.getElementById('i_size').value.trim(),light:document.getElementById('i_light').value.trim(),filter:document.getElementById('i_filter').value.trim(),grunt:document.getElementById('i_grunt').value.trim()};
+localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
+document.getElementById('infoForm').style.display='none';
+renderInfo();
+}
+function renderCosts(){
+let total=0;
+document.getElementById('costList').innerHTML=costs.map(function(c,i){
+total+=Number(c.sum)||0;
+return '<div class="cost-row"><span>'+c.name+(c.note?' <span style="opacity:.5">('+c.note+')</span>':'')+'</span><span class="c-sum">'+(Number(c.sum)||0)+' р <button class="cost-del" onclick="removeCost('+i+')">✕</button></span></div>';
+}).join('');
+document.getElementById('costTotal').textContent='Итого: '+total+' р';
+}
+function toggleCostForm(){const f=document.getElementById('costForm');f.style.display=f.style.display==='none'?'block':'none';}
+function addCost(){
+const n=document.getElementById('c_name').value.trim();
+const s=Number(String(document.getElementById('c_sum').value).replace(',','.'))||0;
+const note=document.getElementById('c_note').value.trim();
+if(!n){alert('Впиши название покупки');return;}
+costs.push({name:n,sum:s,note:note});
+localStorage.setItem('aquaCosts',JSON.stringify(costs));
+document.getElementById('c_name').value='';
+document.getElementById('c_sum').value='';
+document.getElementById('c_note').value='';
+renderCosts();
+}
+function removeCost(i){
+if(confirm('Удалить покупку «'+costs[i].name+'»?')){
+costs.splice(i,1);
+localStorage.setItem('aquaCosts',JSON.stringify(costs));
+renderCosts();
+}
 }
 
 let touchX=null,touchY=null;
@@ -121,6 +210,7 @@ touchX=null;
 if(document.getElementById('modalOverlay').classList.contains('active'))return;
 if(document.getElementById('syncOverlay').classList.contains('active'))return;
 if(document.getElementById('exportOverlay').classList.contains('active'))return;
+if(document.getElementById('infoView').classList.contains('open'))return;
 if(Math.abs(dx)>70&&Math.abs(dy)<60){
 if(dx<0&&!calOpen)showCal();
 else if(dx>0&&calOpen)hideCal();
@@ -183,6 +273,7 @@ function openModal(){
 editingIndex=null;
 document.getElementById('modalTitle').textContent='✍️ Новая запись';
 document.getElementById('modalOverlay').classList.add('active');
+document.getElementById('dateBlock').style.display='none';
 ['actions','activity','appetite','fins'].forEach(k=>{document.getElementById('f_'+k).value=''});
 document.getElementById('photoPreview').style.display='none';
 currentPhoto=null;
@@ -193,6 +284,8 @@ editingIndex=i;
 const e=entries[i];
 document.getElementById('modalTitle').textContent='✏️ Редактирование';
 document.getElementById('modalOverlay').classList.add('active');
+document.getElementById('dateBlock').style.display='block';
+document.getElementById('f_date').value=e.date;
 document.getElementById('f_actions').value=e.actions||'';
 document.getElementById('f_activity').value=e.activity||'';
 document.getElementById('f_appetite').value=e.appetite||'';
@@ -280,6 +373,11 @@ const f=document.getElementById('f_fins').value.trim();
 if(!a&&!ac&&!ap&&!f&&!currentPhoto){alert('Заполни или наговори хотя бы одну графу');return}
 if(editingIndex!==null){
 const e=entries[editingIndex];
+const dv=document.getElementById('f_date').value.trim();
+if(dv){
+if(!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(dv)){alert('Дата должна быть в формате ДД.ММ.ГГГГ');return;}
+e.date=dv;
+}
 e.actions=a;e.activity=ac;e.appetite=ap;e.fins=f;e.photo=currentPhoto;e.synced=false;
 persist();closeModal();buildSets();render();updateStats();
 if(syncUrl)sendRows([e],true);
