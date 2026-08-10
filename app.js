@@ -15,6 +15,7 @@ let searchQuery='';
 let editingIndex=null;
 let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Длина 41 см, Ширина 18 см, Высота 27 см',light:'Kodak e14, 6500K, 630лм, 7Вт',filter:'Naribo F-200, 3вт, 150 л/с',grunt:'морская галька N2 12-20 мм, обкатанная, Prime'};
 let costs=JSON.parse(localStorage.getItem('aquaCosts')||'null')||[{name:'Лампа',sum:300,note:'3 шт'},{name:'Грунт',sum:226,note:''},{name:'Фильтр',sum:360,note:''},{name:'Мох',sum:200,note:'100 + 100'},{name:'Анубиас',sum:300,note:''},{name:'Элодея',sum:200,note:''},{name:'Сифон',sum:200,note:''},{name:'Шприц для флейты',sum:50,note:'3 шт'}];
+let settings=JSON.parse(localStorage.getItem('aquaSettings')||'null')||{fs:1,theme:'dark',water:7,hunger:10};
 
 const CB='#4dd9ff',CO='#ffb74d',CW='#e0f0ff';
 const ICONS={
@@ -32,7 +33,8 @@ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12
 image:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9.5" cy="10" r="1.5"/><path d="M6 17l4-4 3 3 3-3 4 4"/>',
 search:'<circle cx="11" cy="11" r="6"/><path d="M16.5 16.5L21 21"/>',
 fish:'<path fill="currentColor" stroke="none" d="M4 12s4-6 10-6c4 0 6 3 6 6s-2 6-6 6C8 18 4 12 4 12z"/><path fill="currentColor" stroke="none" d="M18 12l4-4v8z"/><circle cx="8" cy="11" r="1.2" fill="#0a1628" stroke="none"/>',
-rub:'<path d="M9 20V4h5a4 4 0 0 1 0 8H9M7 15h8M7 12h8"/>'
+rub:'<path d="M9 20V4h5a4 4 0 0 1 0 8H9M7 15h8M7 12h8"/>',
+gear:'<circle cx="12" cy="12" r="3.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'
 };
 function ico(n,c,s){
 s=s||15;
@@ -44,6 +46,12 @@ el.innerHTML=ico(el.getAttribute('data-ico'),el.getAttribute('data-c')||CB,el.ge
 });
 }
 function micHTML(){return ico('mic','currentColor',12)+' говорить'}
+function plural(n,one,few,many){
+const m10=n%10,m100=n%100;
+if(m10===1&&m100!==11)return one;
+if(m10>=2&&m10<=4&&(m100<12||m100>14))return few;
+return many;
+}
 
 function pad(n){return String(n).padStart(2,'0')}
 function toISO(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -52,7 +60,27 @@ const m=String(s).match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/);
 return m?new Date(+m[3],+m[2]-1,+m[1]):null;
 }
 
-function init(){injectIcons();addDateEditor();buildSets();render();updateStats();updateTiles()}
+function init(){injectIcons();applySettings();addDateEditor();buildSets();render();updateStats();updateTiles()}
+
+function applySettings(){
+document.body.style.zoom=settings.fs;
+document.body.classList.toggle('light',settings.theme==='light');
+document.querySelectorAll('[data-fs]').forEach(b=>b.classList.toggle('active',Number(b.getAttribute('data-fs'))===Number(settings.fs)));
+document.querySelectorAll('[data-th]').forEach(b=>b.classList.toggle('active',b.getAttribute('data-th')===settings.theme));
+const w=document.getElementById('setWater');if(w)w.value=settings.water;
+const h=document.getElementById('setHunger');if(h)h.value=settings.hunger;
+}
+function setFS(v){settings.fs=v;localStorage.setItem('aquaSettings',JSON.stringify(settings));applySettings();}
+function setTheme(t){settings.theme=t;localStorage.setItem('aquaSettings',JSON.stringify(settings));applySettings();}
+function savePeriods(){
+const w=Math.max(1,Math.min(60,Number(document.getElementById('setWater').value)||7));
+const h=Math.max(1,Math.min(60,Number(document.getElementById('setHunger').value)||10));
+settings.water=w;settings.hunger=h;
+localStorage.setItem('aquaSettings',JSON.stringify(settings));
+applySettings();updateTiles();
+if(calOpen)renderCal();
+alert('Сохранено: подмена каждые '+w+' '+plural(w,'день','дня','дней')+', разгрузка каждые '+h+' '+plural(h,'день','дня','дней'));
+}
 
 function addDateEditor(){
 const modal=document.querySelector('#modalOverlay .modal');
@@ -93,13 +121,13 @@ const now=new Date();
 days=Math.floor((now-first)/86400000)+1;
 if(days<1)days=1;
 }
-document.getElementById('headDays').textContent=days+' дней аквариуму';
+document.getElementById('headDays').textContent=days+' '+plural(days,'день','дня','дней')+' аквариуму';
 document.getElementById('bannerLine').textContent='записей: '+entries.length+' · фото: '+entries.filter(e=>e.photo).length;
 }
 
 function nextInfo(mode){
 const set=mode==='water'?calSets.water:calSets.hunger;
-const period=mode==='water'?7:10;
+const period=mode==='water'?settings.water:settings.hunger;
 if(!set||set.size===0)return null;
 let last=null;
 set.forEach(s=>{
@@ -272,17 +300,17 @@ return;
 list.innerHTML=items.map(function(it){
 const e=it.e,i=it.i;
 return '<div class="entry-card">'+
-'<div class="entry-date"><span>'+ico('cal',CB,13)+' '+e.date+'</span><span><button class="edit-btn" onclick="openEdit('+i+')">'+ico('pencil',CO,16)+'</button><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,16)+'</button></span></div>'+
+'<div class="entry-date"><span>'+ico('cal',CB,13)+' '+e.date+'</span><button class="edit-btn" onclick="openEdit('+i+')">'+ico('pencil',CO,20)+'</button></div>'+
 fld(ico('wrench',CB),'Действия',e.actions)+
 fld(ico('bolt',CO),'Активность',e.activity)+
 fld(ico('plate',CO),'Аппетит',e.appetite)+
 fld(ico('fish',CB),'Плавники',e.fins)+
 fld(ico('pencil',CW),'Заметка',e.text)+
 (e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
+'<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
-}
-
+                                                     }
 function parseCSV(t){
 const rows=[];let row=[],cur='',inQ=false;
 for(let i=0;i<t.length;i++){
@@ -463,7 +491,7 @@ if(confirm('Удалить эту запись?')){
 entries.splice(i,1);
 persist();buildSets();render();updateStats();updateTiles();
 }
-  }
+}
 
 function exportToSheet(){
 if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');return}
@@ -504,6 +532,41 @@ alert('Ссылка сохранена!');
 }
 
 function closeSync(){document.getElementById('syncOverlay').classList.remove('active')}
+
+function backupSave(){
+const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings};
+const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='aqua-backup-'+new Date().toISOString().slice(0,10)+'.json';
+a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href)},5000);
+alert('Резервная копия сохранена в «Загрузки».');
+}
+
+function backupRestore(input){
+if(!input.files||!input.files[0])return;
+const r=new FileReader();
+r.onload=function(e){
+try{
+const d=JSON.parse(String(e.target.result));
+if(!d.entries){alert('В файле нет записей.');return;}
+if(!confirm('Восстановить из копии? Текущие данные будут заменены.'))return;
+entries=d.entries||[];
+if(d.costs)costs=d.costs;
+if(d.aquaInfo)aquaInfo=d.aquaInfo;
+if(d.settings)settings=d.settings;
+localStorage.setItem('aquaEntries',JSON.stringify(entries));
+localStorage.setItem('aquaCosts',JSON.stringify(costs));
+localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
+localStorage.setItem('aquaSettings',JSON.stringify(settings));
+applySettings();buildSets();render();updateStats();updateTiles();renderCosts();
+alert('Восстановлено записей: '+entries.length);
+}catch(err){alert('Файл копии не читается.');}
+};
+r.readAsText(input.files[0]);
+input.value='';
+}
 
 /* ===== Полноэкранный просмотр фото ===== */
 (function(){
