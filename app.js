@@ -993,3 +993,110 @@ dismiss=function(id){origDismiss(id);if(id==='diaryView'){var inp=document.getEl
 
 renderWaterTests();
 })();
+
+/* ===== Календарь в карточке, сегменты, график по тапу, скролл сверху ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='.cal-card{padding:8px 6px 12px}'+
+'.cal-card .cal-counter{padding:4px 10px 0}'+
+'.cal-card .cal-nav{padding:6px 8px 10px}'+
+'.cal-card .cal-grid{padding:0 8px}'+
+'.cc-bar{display:flex;gap:3px;height:8px;margin:12px 10px 6px;background:none;overflow:visible}'+
+'.cc-fill{display:none}'+
+'.cc-seg{flex:1;border-radius:4px;background:rgba(255,255,255,.12)}'+
+'.cc-seg.on{background:linear-gradient(90deg,#0077aa,#4dd9ff);box-shadow:0 0 6px rgba(77,217,255,.4)}'+
+'#calCounter.hunger .cc-seg.on{background:linear-gradient(90deg,#cc7000,#ffb74d);box-shadow:0 0 6px rgba(255,183,77,.4)}'+
+'#calCounter.late .cc-seg.on{background:#ff6b6b;box-shadow:0 0 6px rgba(255,107,107,.4)}'+
+'#wtChips{display:none}'+
+'.wtc{cursor:pointer}'+
+'.wtc.active{border-color:#4dd9ff;box-shadow:0 0 10px rgba(77,217,255,.25)}'+
+'body.light .cc-bar{background:none}'+
+'body.light .cc-seg{background:rgba(22,50,74,.12)}'+
+'body.light .cc-seg.on{background:#0077aa;box-shadow:none}'+
+'body.light .wtc.active{border-color:#0077aa}';
+document.head.appendChild(st);
+
+var cc=document.getElementById('calCounter');
+if(cc&&cc.parentNode.className.indexOf('wt-card')===-1){
+var card=document.createElement('div');
+card.className='wt-card cal-card';
+cc.parentNode.insertBefore(card,cc);
+card.appendChild(cc);
+card.appendChild(document.querySelector('.cal-nav'));
+card.appendChild(document.getElementById('calGrid'));
+}
+var bar=document.querySelector('.cc-bar');
+if(bar&&!bar.id)bar.id='ccBar';
+
+updateCalCounter=function(){
+var box=document.getElementById('calCounter');
+var cap=document.getElementById('ccCap');
+var numEl=document.getElementById('ccNum');
+var wordEl=document.getElementById('ccWord');
+var thrEl=document.getElementById('ccThrough');
+var dateEl=document.getElementById('ccDate');
+cap.textContent=calMode==='water'?'следующая подмена воды':'следующий разгрузочный день';
+box.classList.toggle('hunger',calMode==='hunger');
+var info=nextInfo(calMode);
+var period=calMode==='water'?settings.water:settings.hunger;
+var b=document.getElementById('ccBar');
+if(!info){
+dateEl.textContent='нет данных';
+thrEl.textContent='';numEl.textContent='—';wordEl.textContent='';
+box.classList.remove('late');
+if(b)b.innerHTML='';
+return;
+}
+dateEl.textContent=info.next.toLocaleDateString('ru-RU');
+if(info.diff>0){thrEl.textContent='через';numEl.textContent=info.diff;wordEl.textContent=plural(info.diff,'день','дня','дней');}
+else if(info.diff===0){thrEl.textContent='';numEl.textContent='сегодня!';wordEl.textContent='';}
+else{thrEl.textContent='просрочено на';numEl.textContent=-info.diff;wordEl.textContent=plural(-info.diff,'день','дня','дней');}
+box.classList.toggle('late',info.diff<0);
+if(b){
+b.innerHTML='';
+var elapsed=period-info.diff;
+if(elapsed<0)elapsed=0;
+if(elapsed>period)elapsed=period;
+var segs=Math.min(period,15);
+var filled=Math.round(elapsed/period*segs);
+for(var i=0;i<segs;i++){
+var s=document.createElement('div');
+s.className='cc-seg'+(i<filled?' on':'');
+b.appendChild(s);
+}
+}
+};
+
+var KEYS=['ph','gh','kh','cl','no3','no2'];
+var NAMES={ph:'pH',gh:'Жёсткость',kh:'Карбонат',cl:'Хлор',no3:'Нитрат',no2:'Нитрит'};
+var sel='no3';
+function markActive(){
+var grid=document.getElementById('wtGrid');
+if(!grid)return;
+for(var i=0;i<grid.children.length;i++){
+grid.children[i].classList.toggle('active',KEYS[i]===sel);
+}
+var ch=document.getElementById('wtChart');
+if(ch&&ch.closest){
+var card2=ch.closest('.wt-card');
+if(card2){var t=card2.querySelector('.wt-title');if(t)t.textContent='График тестов: '+NAMES[sel];}
+}
+}
+var origSet=window.setWtChart;
+window.setWtChart=function(k){sel=k;origSet(k);markActive();};
+document.addEventListener('click',function(e){
+var c=e.target&&e.target.closest?e.target.closest('.wtc'):null;
+if(c&&c.parentNode&&c.parentNode.id==='wtGrid'){
+var idx=Array.prototype.indexOf.call(c.parentNode.children,c);
+if(idx>=0&&KEYS[idx])window.setWtChart(KEYS[idx]);
+}
+});
+var origRender=render;
+render=function(){origRender();markActive();};
+
+var origOpenView=openView;
+openView=function(id){origOpenView(id);var v=document.getElementById(id);if(v)v.scrollTop=0;};
+
+markActive();
+if(document.getElementById('calView').classList.contains('open'))updateCalCounter();
+})();
