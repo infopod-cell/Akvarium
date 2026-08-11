@@ -5,21 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#0a1628">
 <title>Мой Аквариум</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);color:#e0f0ff;min-height:100vh;padding-bottom:90px}
-.header{position:relative;overflow:hidden;background:linear-gradient(180deg,#032a44 0%,#0a76ad 62%,rgba(10,118,173,0) 100%);padding:14px 10px 44px;display:flex;align-items:center;justify-content:space-between}
-.h-side{display:flex;flex-direction:column;align-items:center;gap:3px;width:64px}
-.h-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);font-size:22px;font-weight:700;cursor:pointer;color:#fff;line-height:1}
-.h-btn:active{transform:scale(.92)}
-.h-cap{font-size:10px;color:rgba(255,255,255,.85);text-align:center;line-height:1.1}
-.h-center{flex:1;padding:0 8px;cursor:pointer}
+body{font-family:'Rubik','Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);color:#e0f0ff;min-height:100vh;padding-bottom:90px}
+.header{position:relative;overflow:hidden;background:linear-gradient(180deg,#032a44 0%,#0a76ad 62%,rgba(10,118,173,0) 100%);padding:16px 10px 44px;display:flex;align-items:center;justify-content:space-between}
+.h-center{flex:1;padding:0 16px;cursor:pointer}
 .h-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.h-title{font-size:19px;font-weight:700;color:#fff}
+.h-title{font-size:23px;font-weight:700;color:#fff}
 .h-days{display:flex;align-items:baseline;gap:5px;color:#fff}
 .h-days .num{font-size:30px;font-weight:800;text-shadow:0 0 12px rgba(77,217,255,.55)}
 .h-days .word{font-size:12px;color:rgba(255,255,255,.85)}
-.h-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
 .bubbles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .bubbles i{position:absolute;bottom:-12px;border-radius:50%;background:rgba(255,255,255,.22);animation:rise linear infinite}
 .bubbles i:nth-child(1){left:12%;width:8px;height:8px;animation-duration:7s}
@@ -32,11 +30,11 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .wave{position:absolute;bottom:0;left:0;width:100%;height:36px}
 .wave1{fill:#00a6de;opacity:.30}
 .wave2{fill:#00a6de;opacity:.14;bottom:8px}
-.banner{text-align:center;font-size:13px;color:rgba(255,255,255,.6);padding:10px 16px 10px}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
-.tile{background:rgba(255,255,255,.07);border-radius:16px;padding:12px;border:1px solid rgba(255,255,255,.08);cursor:pointer;min-height:92px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 16px 0}
+.tile{background:rgba(255,255,255,.07);border-radius:16px;padding:12px;border:1px solid rgba(77,217,255,.18);box-shadow:0 0 16px rgba(77,217,255,.08);cursor:pointer;min-height:92px}
 .tile:active{transform:scale(.97)}
 .tile.wide{grid-column:1/-1}
+.tile.late{border-color:rgba(255,107,107,.5);box-shadow:0 0 16px rgba(255,107,107,.22)}
 .tile .t-l{font-size:13px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px}
 .tile .t-v{font-size:20px;font-weight:700;color:#4dd9ff;margin:4px 0 2px}
 .tile .t-s{font-size:12px;color:rgba(255,255,255,.45)}
@@ -50,7 +48,7 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .entry-card{background:rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .entry-date{font-size:13px;color:#4dd9ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-weight:600}
-.edit-btn{background:none;border:none;color:#ffb74d;cursor:pointer;padding:6px}
+.edit-btn{background:none;border:none;color:#ff9432;cursor:pointer;padding:6px}
 .del-btn{background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;padding:6px;display:inline-flex;align-items:center;gap:6px;font-size:12px}
 .card-foot{margin-top:10px;text-align:right}
 .fld{margin:8px 0}
@@ -88,14 +86,25 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .cal-view.open{transform:translateX(0)}
 .cal-head{display:flex;align-items:center;justify-content:space-between;padding:16px}
 .cal-head h2{font-size:19px;color:#fff;display:flex;align-items:center;gap:7px}
-.cal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:6px 12px;font-size:15px;cursor:pointer}
 .cal-tabs{display:flex;gap:8px;padding:0 16px 8px;justify-content:center;flex-wrap:wrap}
 .cal-tab{padding:9px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .cal-tab.active[data-mode="water"]{background:rgba(77,217,255,.15);border-color:#4dd9ff;color:#4dd9ff}
 .cal-tab.active[data-mode="hunger"]{background:rgba(255,183,77,.15);border-color:#ffb74d;color:#ffb74d}
-.cal-next{text-align:center;padding:4px 16px 12px;font-size:15px;color:#4dd9ff;font-weight:600}
-.cal-next.late{color:#ff6b6b}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px 12px}
+.cal-counter{padding:6px 20px 0}
+.cc-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cc-cap{font-size:13px;color:rgba(255,255,255,.6)}
+.cc-date{font-size:20px;font-weight:700;color:#fff;margin-top:2px}
+.cc-right{display:flex;align-items:baseline;gap:6px;text-align:right}
+.cc-through{font-size:13px;color:rgba(255,255,255,.7)}
+.cc-num{font-size:34px;font-weight:800;color:#4dd9ff;text-shadow:0 0 14px rgba(77,217,255,.6)}
+.cc-word{font-size:14px;color:rgba(255,255,255,.8)}
+.cc-bar{height:8px;margin:12px 0 6px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}
+.cc-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#0077aa,#4dd9ff);box-shadow:0 0 10px rgba(77,217,255,.5);width:0%}
+#calCounter.hunger .cc-num{color:#ffb74d;text-shadow:0 0 14px rgba(255,183,77,.6)}
+#calCounter.hunger .cc-fill{background:linear-gradient(90deg,#cc7000,#ffb74d);box-shadow:0 0 10px rgba(255,183,77,.5)}
+#calCounter.late .cc-num{color:#ff6b6b;text-shadow:0 0 14px rgba(255,107,107,.6)}
+#calCounter.late .cc-fill{background:#ff6b6b;box-shadow:0 0 10px rgba(255,107,107,.5)}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 12px}
 .cal-nav button{background:rgba(255,255,255,.1);border:none;color:#4dd9ff;font-size:20px;width:36px;height:36px;border-radius:10px;cursor:pointer}
 .cal-nav span{font-size:16px;color:#fff;text-transform:capitalize}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:0 16px}
@@ -119,9 +128,11 @@ body{font-family:'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,
 .set-row input{width:70px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:6px;color:#e0f0ff;font-size:14px;text-align:center;margin:0}
 body.light{background:linear-gradient(135deg,#eef4f9,#f8fbfd);color:#16324a}
 body.light .tile,body.light .entry-card,body.light .info-card{background:#fff;border-color:#dce7f0}
-body.light .t-l,body.light .t-s,body.light .banner,body.light .empty,body.light .cal-wd,body.light .cancel-btn,body.light .set-row{color:#6a8098}
-body.light .t-v,body.light .entry-date,body.light .fld-l,body.light .cal-next,body.light .cal-nav button{color:#0077aa}
-body.light .tile.late .t-v,body.light .cal-next.late{color:#d33a3a}
+body.light .tile{box-shadow:0 2px 10px rgba(22,50,74,.08)}
+body.light .tile.late{box-shadow:0 0 12px rgba(211,58,58,.25);border-color:rgba(211,58,58,.4)}
+body.light .t-l,body.light .t-s,body.light .empty,body.light .cal-wd,body.light .cancel-btn,body.light .set-row{color:#6a8098}
+body.light .t-v,body.light .entry-date,body.light .fld-l,body.light .cal-nav button{color:#0077aa}
+body.light .tile.late .t-v{color:#d33a3a}
 body.light .fld-v,body.light .cal-day,body.light .cost-row,body.light .cal-nav span,body.light .search-row input,body.light .info-head,body.light .cal-head h2,body.light .modal h2,body.light .field-head span,body.light .set-row input{color:#16324a}
 body.light .search-row input,body.light .cal-day,body.light .modal input,body.light .info-card textarea,body.light .modal textarea{background:#fff;border-color:#cfdcea}
 body.light .cal-view{background:linear-gradient(135deg,#eef4f9,#f8fbfd)}
@@ -138,25 +149,22 @@ body.light .del-btn,body.light .cost-del{color:#93a7b8}
 body.light .edit-btn{color:#e08c1a}
 body.light .set-btn{background:#fff;border-color:#cfdcea;color:#16324a}
 body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
+body.light .cc-cap,body.light .cc-through,body.light .cc-word{color:#6a8098}
+body.light .cc-date{color:#16324a}
+body.light .cc-num{color:#0077aa;text-shadow:none}
+body.light #calCounter.hunger .cc-num{color:#e08c1a}
+body.light #calCounter.late .cc-num{color:#d33a3a}
+body.light .cc-bar{background:rgba(22,50,74,.12)}
 </style>
 </head>
 <body>
 
 <div class="header">
-<div class="h-side">
-<button class="h-btn" onclick="exportToSheet()">↑</button>
-<div class="h-cap">в таблицу</div>
-</div>
 <div class="h-center" onclick="goHome()">
 <div class="h-row">
 <div class="h-title">Мой Аквариум</div>
 <div class="h-days"><span class="num" id="headDaysNum">0</span><span class="word" id="headDaysWord">дней</span></div>
 </div>
-<div class="h-sub">дневник наблюдений</div>
-</div>
-<div class="h-side">
-<button class="h-btn" onclick="document.getElementById('csvInput').click()">↓</button>
-<div class="h-cap">добавить таблицу</div>
 </div>
 <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none" onchange="handleCSV(this)">
 <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
@@ -166,22 +174,19 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 </div>
 </div>
 
-<div class="banner" id="bannerLine"></div>
-
 <div class="tiles">
-<div class="tile" id="tileWater" onclick="openCal('water')"><div class="t-l"><span data-ico="drop" data-c="#4dd9ff"></span>Подмены</div><div class="t-v" id="twVal">—</div><div class="t-s" id="twSub"></div></div>
-<div class="tile" id="tileHunger" onclick="openCal('hunger')"><div class="t-l"><span data-ico="plate" data-c="#ffb74d"></span>Разгрузочный день</div><div class="t-v" id="thVal">—</div><div class="t-s" id="thSub"></div></div>
-<div class="tile wide" onclick="openDiary()"><div class="t-l"><span data-ico="book" data-c="#e0f0ff"></span>Дневник</div><div class="t-v" id="tdVal">—</div><div class="t-s" id="tdSub"></div></div>
-<div class="tile" onclick="tilePhoto()"><div class="t-l"><span data-ico="camera" data-c="#e0f0ff"></span>Последнее фото</div><div id="tpBox"><div class="t-v">пока нет</div></div></div>
-<div class="tile" onclick="openInfo()"><div class="t-l"><span data-ico="tank" data-c="#4dd9ff"></span>Аквариум</div><div class="t-v" id="tcVal">—</div><div class="t-s">параметры и затраты</div></div>
-<div class="tile wide" onclick="openSettings()"><div class="t-l"><span data-ico="gear" data-c="#e0f0ff"></span>Настройки</div><div class="t-s">шрифт, тема, периоды, резервная копия</div></div>
+<div class="tile" id="tileWater" onclick="openCal('water')"><div class="t-l"><span data-ico="drop"></span>Подмены</div><div class="t-v" id="twVal">—</div><div class="t-s" id="twSub"></div></div>
+<div class="tile" id="tileHunger" onclick="openCal('hunger')"><div class="t-l"><span data-ico="plate"></span>Разгрузочный день</div><div class="t-v" id="thVal">—</div><div class="t-s" id="thSub"></div></div>
+<div class="tile wide" onclick="openDiary()"><div class="t-l"><span data-ico="book"></span>Дневник</div><div class="t-v" id="tdVal">—</div><div class="t-s" id="tdSub"></div></div>
+<div class="tile" onclick="tilePhoto()"><div class="t-l"><span data-ico="camera"></span>Последнее фото</div><div id="tpBox"><div class="t-v">пока нет</div></div></div>
+<div class="tile" onclick="openInfo()"><div class="t-l"><span data-ico="tank"></span>Аквариум</div><div class="t-s">параметры и затраты</div></div>
+<div class="tile wide" onclick="openSettings()"><div class="t-l"><span data-ico="gear"></span>Настройки</div><div class="t-s">оформление, периоды, таблица, резервная копия</div></div>
 </div>
 
 <button class="fab" onclick="openModal()">+</button>
 <div class="cal-view" id="diaryView">
 <div class="cal-head">
-<h2><span data-ico="book" data-c="#e0f0ff" data-s="18"></span>Дневник</h2>
-<button class="cal-close" onclick="hideDiary()">✕ закрыть</button>
+<h2><span data-ico="book" data-s="18"></span>Дневник</h2>
 </div>
 <div class="search-row"><input id="searchInput" placeholder="Поиск по дневнику..." oninput="onSearch(this.value)"></div>
 <div class="entries" id="entriesList"></div>
@@ -189,14 +194,21 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 
 <div class="cal-view" id="calView">
 <div class="cal-head">
-<h2><span data-ico="cal" data-c="#4dd9ff" data-s="18"></span>Календарь</h2>
-<button class="cal-close" onclick="hideCal()">✕ закрыть</button>
+<h2><span data-ico="cal" data-s="18"></span>Календарь</h2>
 </div>
 <div class="cal-tabs">
 <button class="cal-tab active" data-mode="water" onclick="setCalMode('water',this)"><span data-ico="drop" data-c="currentColor"></span>Подмены</button>
 <button class="cal-tab" data-mode="hunger" onclick="setCalMode('hunger',this)"><span data-ico="plate" data-c="currentColor"></span>Разгрузочный день</button>
 </div>
-<div class="cal-next" id="calNext"></div>
+<div id="calCounter">
+<div class="cal-counter">
+<div class="cc-row">
+<div class="cc-left"><div class="cc-cap" id="ccCap">следующая подмена воды</div><div class="cc-date" id="ccDate">—</div></div>
+<div class="cc-right"><span class="cc-through" id="ccThrough">через</span><span class="cc-num" id="ccNum">—</span><span class="cc-word" id="ccWord"></span></div>
+</div>
+<div class="cc-bar"><div class="cc-fill" id="ccFill"></div></div>
+</div>
+</div>
 <div class="cal-nav">
 <button onclick="calPrev()">‹</button>
 <span id="calTitle"></span>
@@ -207,12 +219,11 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 
 <div class="cal-view" id="infoView">
 <div class="cal-head">
-<h2><span data-ico="fish" data-c="#4dd9ff" data-s="18"></span>Мой аквариум</h2>
-<button class="cal-close" onclick="hideInfo()">✕ закрыть</button>
+<h2><span data-ico="fish" data-s="18"></span>Мой аквариум</h2>
 </div>
 <div class="info-wrap">
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="wrench" data-c="#4dd9ff"></span>Параметры</span><button class="mic" onclick="toggleInfoEdit()">изменить</button></div>
+<div class="info-head"><span class="ih-l"><span data-ico="wrench"></span>Параметры</span><button class="mic" onclick="toggleInfoEdit()">изменить</button></div>
 <div id="infoText"></div>
 <div id="infoForm" style="display:none">
 <div class="fld-l">Размер</div><textarea id="i_size"></textarea>
@@ -220,16 +231,18 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 <div class="fld-l">Фильтр</div><textarea id="i_filter"></textarea>
 <div class="fld-l">Грунт</div><textarea id="i_grunt"></textarea>
 <button class="save-btn" onclick="saveInfo()">Сохранить</button>
+<button class="cancel-btn" onclick="closeInfoEdit()">Отмена</button>
 </div>
 </div>
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="rub" data-c="#ffb74d"></span>Затраты</span><span class="info-total" id="costTotal"></span></div>
+<div class="info-head"><span class="ih-l"><span data-ico="rub"></span>Затраты</span><span class="info-total" id="costTotal"></span></div>
 <div id="costList"></div>
 <div id="costForm" style="display:none">
 <div class="fld-l">Название</div><input id="c_name" placeholder="Например: кондиционер">
 <div class="fld-l">Сумма (р)</div><input id="c_sum" inputmode="numeric" placeholder="0">
 <div class="fld-l">Примечание</div><input id="c_note" placeholder="3 шт">
 <button class="save-btn" onclick="addCost()">＋ Добавить покупку</button>
+<button class="cancel-btn" onclick="closeCostForm()">Отмена</button>
 </div>
 <button class="mic" style="margin-top:8px" onclick="toggleCostForm()">＋ добавить покупку</button>
 </div>
@@ -238,23 +251,28 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 
 <div class="cal-view" id="settingsView">
 <div class="cal-head">
-<h2><span data-ico="gear" data-c="#e0f0ff" data-s="18"></span>Настройки</h2>
-<button class="cal-close" onclick="hideSettings()">✕ закрыть</button>
+<h2><span data-ico="gear" data-s="18"></span>Настройки</h2>
 </div>
 <div class="info-wrap">
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="gear" data-c="#4dd9ff"></span>Оформление</span></div>
+<div class="info-head"><span class="ih-l"><span data-ico="gear"></span>Оформление</span></div>
 <div class="set-row"><span>Размер шрифта</span><div class="set-btns"><button class="set-btn" data-fs="1" onclick="setFS(1)">А</button><button class="set-btn" data-fs="1.12" onclick="setFS(1.12)">А+</button><button class="set-btn" data-fs="1.25" onclick="setFS(1.25)">А++</button></div></div>
 <div class="set-row"><span>Тема</span><div class="set-btns"><button class="set-btn" data-th="dark" onclick="setTheme('dark')">Тёмная</button><button class="set-btn" data-th="light" onclick="setTheme('light')">Светлая</button></div></div>
 </div>
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="cal" data-c="#4dd9ff"></span>Периоды</span></div>
+<div class="info-head"><span class="ih-l"><span data-ico="cal"></span>Периоды</span></div>
 <div class="set-row"><span>Подмена воды, дней</span><input id="setWater" inputmode="numeric"></div>
 <div class="set-row"><span>Разгрузка, дней</span><input id="setHunger" inputmode="numeric"></div>
 <button class="mic" onclick="savePeriods()">Сохранить периоды</button>
 </div>
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="image" data-c="#ffb74d"></span>Резервная копия</span></div>
+<div class="info-head"><span class="ih-l"><span data-ico="rub"></span>Таблица</span></div>
+<button class="photo-btn" onclick="exportToSheet()">Отправить в таблицу</button>
+<button class="photo-btn" onclick="document.getElementById('csvInput').click()">Добавить из таблицы (CSV)</button>
+<button class="photo-btn" onclick="openSyncFromSettings()">Ссылка робота</button>
+</div>
+<div class="info-card">
+<div class="info-head"><span class="ih-l"><span data-ico="image"></span>Резервная копия</span></div>
 <button class="photo-btn" onclick="backupSave()">Сохранить в файл</button>
 <button class="photo-btn" onclick="document.getElementById('restoreInput').click()">Восстановить из файла</button>
 <input type="file" id="restoreInput" accept=".json,application/json" style="display:none" onchange="backupRestore(this)">
@@ -267,27 +285,27 @@ body.light .set-btn.active{border-color:#0077aa;color:#0077aa}
 <h2 id="modalTitle">Новая запись</h2>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="wrench" data-c="#4dd9ff"></span>Действия</span><button class="mic" onclick="startFieldVoice('actions',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="wrench"></span>Действия</span><button class="mic" onclick="startFieldVoice('actions',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_actions" placeholder="Подмена воды, посадка растений, уборка..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="bolt" data-c="#ffb74d"></span>Активность</span><button class="mic" onclick="startFieldVoice('activity',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="bolt"></span>Активность</span><button class="mic" onclick="startFieldVoice('activity',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_activity" placeholder="Активный, бодрый, вялый..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="plate" data-c="#ffb74d"></span>Аппетит</span><button class="mic" onclick="startFieldVoice('appetite',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="plate"></span>Аппетит</span><button class="mic" onclick="startFieldVoice('appetite',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_appetite" placeholder="Сколько съел, разгрузочный день..."></textarea>
 </div>
 
 <div class="field-block">
-<div class="field-head"><span><span data-ico="fish" data-c="#4dd9ff"></span>Плавники</span><button class="mic" onclick="startFieldVoice('fins',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
+<div class="field-head"><span><span data-ico="fish"></span>Плавники</span><button class="mic" onclick="startFieldVoice('fins',this)"><span data-ico="mic" data-c="currentColor"></span>говорить</button></div>
 <textarea id="f_fins" placeholder="Распушены, прижаты, пушист..."></textarea>
 </div>
 
-<button class="photo-btn" onclick="document.getElementById('photoCam').click()"><span data-ico="camera" data-c="#e0f0ff"></span>Сфотографировать</button>
-<button class="photo-btn" onclick="document.getElementById('photoGal').click()"><span data-ico="image" data-c="#e0f0ff"></span>Из галереи</button>
+<button class="photo-btn" onclick="document.getElementById('photoCam').click()"><span data-ico="camera" data-c="currentColor"></span>Сфотографировать</button>
+<button class="photo-btn" onclick="document.getElementById('photoGal').click()"><span data-ico="image" data-c="currentColor"></span>Из галереи</button>
 <input type="file" id="photoCam" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
 <input type="file" id="photoGal" accept="image/*" style="display:none" onchange="handlePhoto(this)">
 <img class="photo-preview" id="photoPreview">
