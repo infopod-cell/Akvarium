@@ -839,6 +839,114 @@ var e=entries[i];
 var t=parseTests((e.actions||'')+' '+(e.text||''));
 for(var k in series){
 var v=(e.tests&&e.tests[k]!==undefined)?e.tests[k]:t[k];
+
+  /* ===== Тесты воды: карточки, график, парсер, поиск ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='body *{font-weight:400!important}'+
+'.search-row{position:relative}'+
+'.search-row input{padding-right:36px}'+
+'#searchClear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.5);font-size:15px;padding:6px;cursor:pointer;display:none}'+
+'.wt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
+'.wt-grid input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:13px}'+
+'.wt-card{margin:12px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}'+
+'.wt-title{font-size:15px;color:#fff;margin-bottom:10px}'+
+'.wt-gridcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}'+
+'.wtc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;text-align:center}'+
+'.wtc-n{font-size:12px;color:rgba(255,255,255,.6)}'+
+'.wtc-v{font-size:24px;margin:2px 0}'+
+'.wtc-u{font-size:11px;color:rgba(255,255,255,.45)}'+
+'.wtc-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;margin-top:4px}'+
+'.wtc-d{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px}'+
+'.wt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}'+
+'.wt-chip{padding:6px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:12px;cursor:pointer}'+
+'.wt-chip.active{border-color:#4dd9ff;color:#4dd9ff}'+
+'.wt-empty{font-size:13px;color:rgba(255,255,255,.4)}'+
+'.wt-gl{stroke:rgba(255,255,255,.12)}.wt-lb{fill:rgba(255,255,255,.45);font-size:8px}.wt-ln{stroke:#4dd9ff;stroke-width:2;fill:none}.wt-dt{fill:#4dd9ff}.wt-vl{fill:#e0f0ff;font-size:8px}'+
+'body.light .wt-card{background:#fff;border-color:#dce7f0}body.light .wt-title{color:#16324a}body.light .wtc{background:#fff;border-color:#dce7f0}body.light .wtc-n{color:#6a8098}body.light .wtc-u{color:#93a7b8}body.light .wtc-d{color:#93a7b8}body.light .wt-chip{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-chip.active{border-color:#0077aa;color:#0077aa}body.light .wt-grid input{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-lb{fill:#93a7b8}body.light .wt-vl{fill:#16324a}body.light .wt-ln{stroke:#0077aa}body.light .wt-dt{fill:#0077aa}body.light .wt-gl{stroke:rgba(22,50,74,.15)}body.light #searchClear{color:#93a7b8}';
+document.head.appendChild(st);
+
+var modal=document.querySelector('#modalOverlay .modal');
+if(!document.getElementById('t_ph')){
+var photoBtn=modal.querySelector('.photo-btn');
+var tb=document.createElement('div');
+tb.className='field-block';
+tb.innerHTML='<div class="field-head"><span>'+ico('drop',OR)+'Тесты воды (необязательно)</span></div><div class="wt-grid"><input id="t_ph" placeholder="pH" inputmode="decimal"><input id="t_kh" placeholder="Карбонат (KH)" inputmode="numeric"><input id="t_gh" placeholder="Жёсткость (GH)" inputmode="numeric"><input id="t_cl" placeholder="Хлор" inputmode="decimal"><input id="t_no3" placeholder="Нитрат" inputmode="numeric"><input id="t_no2" placeholder="Нитрит" inputmode="decimal"></div>';
+photoBtn.insertAdjacentElement('beforebegin',tb);
+}
+
+var cv=document.getElementById('calView');
+var wrap=document.createElement('div');
+wrap.innerHTML='<div class="wt-card"><div class="wt-title">Последние тесты воды</div><div class="wt-gridcards" id="wtGrid"></div></div><div class="wt-card"><div class="wt-title">График тестов</div><div class="wt-chips" id="wtChips"></div><div id="wtChart"></div></div>';
+cv.appendChild(wrap);
+
+var PARAMS=[
+{k:'ph',n:'pH',min:6,max:8},
+{k:'gh',n:'Жёсткость',unit:1,deg:'°dH',min:50,max:150},
+{k:'kh',n:'Карбонат',unit:1,deg:'°dKH',min:40,max:150},
+{k:'cl',n:'Хлор',unit:1,min:0,max:0},
+{k:'no3',n:'Нитрат',unit:1,min:0,max:25,warn:50},
+{k:'no2',n:'Нитрит',unit:1,min:0,max:0,warn:0.3}
+];
+var COL={ok:'#3ddc84',warn:'#ffb74d',lo:'#ffb74d',hi:'#ff6b6b'};
+var TXT={ok:'норма',warn:'внимание',lo:'низко',hi:'высоко'};
+var curChart='no3';
+function num(s){return Number(String(s).replace(',','.'));}
+function statusOf(p,v){
+if(p.k==='cl')return v===0?'ok':'hi';
+if(p.k==='no2')return v===0?'ok':(v<=(p.warn||0.3)?'warn':'hi');
+if(p.k==='no3')return v<=p.max?'ok':(v<=(p.warn||50)?'warn':'hi');
+if(v<p.min)return 'lo';
+if(v>p.max)return 'hi';
+return 'ok';
+}
+
+function parseTests(text){
+var t=String(text||''),res={},m;
+function ok(k,v){
+if(v===undefined||isNaN(v))return false;
+if(k==='ph')return v>=4&&v<=10;
+if(k==='gh'||k==='kh')return v>=1&&v<=600;
+if(k==='no3')return v<=200;
+if(k==='no2')return v<=10;
+if(k==='cl')return v<=10;
+return true;
+}
+m=t.match(/(?:ph|рн)[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('ph',num(m[1])))res.ph=num(m[1]);
+m=t.match(/нитрат[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('no3',num(m[1])))res.no3=num(m[1]);
+m=t.match(/нитрит[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('no2',num(m[1])))res.no2=num(m[1]);
+m=t.match(/хлор[а-я]*[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('cl',num(m[1])))res.cl=num(m[1]);
+m=t.match(/(?:^|[^а-я])кн[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('kh',num(m[1])))res.kh=num(m[1]);
+m=t.match(/карбонат[а-я]*[^\d\n]{0,20}?(\d+(?:[.,]\d+)?)/i);
+if(m&&ok('kh',num(m[1])))res.kh=num(m[1]);
+var seg=t.match(/карбонат[а-я]*[^\n]{0,60}/i);
+if(seg){var dm=seg[0].match(/с\s*(\d+(?:[.,]\d+)?)\s*до\s*(\d+(?:[.,]\d+)?)/);if(dm&&ok('kh',num(dm[2])))res.kh=num(dm[2]);}
+var re=/ж[её]сткость/gi,mm2;
+while((mm2=re.exec(t))){
+var before=t.slice(Math.max(0,mm2.index-20),mm2.index);
+var after=t.slice(mm2.index,mm2.index+60);
+var dm2=after.match(/с\s*(\d+(?:[.,]\d+)?)\s*до\s*(\d+(?:[.,]\d+)?)/);
+var vm=after.match(/(\d+(?:[.,]\d+)?)/);
+var val=dm2?num(dm2[2]):(vm?num(vm[1]):null);
+if(val===null)continue;
+if(/карбонат/i.test(before)){if(ok('kh',val))res.kh=val;}
+else{if(ok('gh',val))res.gh=val;}
+}
+return res;
+}
+
+function collectSeries(){
+var series={ph:[],gh:[],kh:[],cl:[],no3:[],no2:[]};
+for(var i=entries.length-1;i>=0;i--){
+var e=entries[i];
+var t=parseTests((e.actions||'')+' '+(e.text||''));
+for(var k in series){
+var v=(e.tests&&e.tests[k]!==undefined)?e.tests[k]:t[k];
 if(v!==undefined)series[k].push({d:e.date,v:v});
 }
 }
@@ -880,13 +988,20 @@ var series=collectSeries();
 var html='';
 PARAMS.forEach(function(p){
 var arr=series[p.k];
-if(!arr.length){html+='<div class="wt-row"><span class="wt-n">'+p.n+'</span><span class="wt-v wt-empty">пока нет данных</span><span class="wt-d"></span></div>';return;}
-var last=arr[arr.length-1],extra='';
-if(p.k==='kh')extra=' ≈ '+(last.v/17.86).toFixed(1)+'°dKH';
-if(p.k==='gh')extra=' ≈ '+(last.v/17.86).toFixed(1)+'°dH';
-html+='<div class="wt-row"><span class="wt-n">'+p.n+'</span><span class="wt-v">'+last.v+' мг/л'+extra+'</span><span class="wt-d">'+last.d.slice(0,5)+'</span></div>';
+if(!arr.length){html+='<div class="wtc"><div class="wtc-n">'+p.n+'</div><div class="wtc-v" style="color:rgba(255,255,255,.3)">—</div><div class="wtc-u">'+(p.unit?'мг/л':'')+'</div><div class="wtc-d">нет данных</div></div>';return;}
+var last=arr[arr.length-1];
+var prev=arr.length>1?arr[arr.length-2]:null;
+var s=statusOf(p,last.v);
+var arrow=prev?(last.v>prev.v?' ↑':(last.v<prev.v?' ↓':'')):'';
+var extra='';
+if(p.deg)extra=' ≈ '+(last.v/17.86).toFixed(1)+p.deg;
+html+='<div class="wtc"><div class="wtc-n">'+p.n+'</div>'+
+'<div class="wtc-v" style="color:'+COL[s]+'">'+last.v+'</div>'+
+'<div class="wtc-u">'+(p.unit?'мг/л'+extra:'')+'</div>'+
+'<span class="wtc-badge" style="color:'+COL[s]+';background:'+COL[s]+'22">'+TXT[s]+arrow+'</span>'+
+'<div class="wtc-d">'+last.d.slice(0,5)+'</div></div>';
 });
-document.getElementById('wtList').innerHTML=html;
+document.getElementById('wtGrid').innerHTML=html;
 document.getElementById('wtChips').innerHTML=PARAMS.map(function(p){
 return '<button class="wt-chip'+(p.k===curChart?' active':'')+'" onclick="setWtChart(\''+p.k+'\')">'+p.n+'</button>';
 }).join('');
@@ -902,7 +1017,7 @@ if(v!=='')t[k]=num(v);
 }
 return t;
 }
-function clearTestInputs(){for(var id of ['t_ph','t_kh','t_gh','t_cl','t_no3','t_no2'])document.getElementById(id).value='';}
+function clearTestInputs(){['t_ph','t_kh','t_gh','t_cl','t_no3','t_no2'].forEach(function(id){document.getElementById(id).value=''});}
 function fillTestInputs(i){
 clearTestInputs();
 var t=entries[i].tests||{},ids={ph:'t_ph',kh:'t_kh',gh:'t_gh',cl:'t_cl',no3:'t_no3',no2:'t_no2'};
@@ -927,5 +1042,22 @@ if(target){target.tests=t;persist();}
 };
 var origRender=render;
 render=function(){origRender();renderWaterTests();};
+
+/* крестик в поиске + автосброс */
+var sr=document.querySelector('.search-row');
+if(sr&&!document.getElementById('searchClear')){
+var cb=document.createElement('button');
+cb.id='searchClear';cb.textContent='✕';
+sr.appendChild(cb);
+cb.onclick=function(){
+var inp=document.getElementById('searchInput');
+inp.value='';searchQuery='';cb.style.display='none';render();
+};
+}
+var origOnSearch=onSearch;
+onSearch=function(v){origOnSearch(v);var c=document.getElementById('searchClear');if(c)c.style.display=v.trim()?'block':'none';};
+var origDismiss=dismiss;
+dismiss=function(id){origDismiss(id);if(id==='diaryView'){var inp=document.getElementById('searchInput');if(inp)inp.value='';searchQuery='';var c=document.getElementById('searchClear');if(c)c.style.display='none';render();}};
+
 renderWaterTests();
 })();
