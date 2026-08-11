@@ -772,3 +772,160 @@ else{me.style.display='none';}
 addMileLine();
 updateStats();
 
+/* ===== Тесты воды: поля, карточка, график, парсер ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='.wt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
+'.wt-grid input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:13px}'+
+'.wt-card{margin:12px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}'+
+'.wt-title{font-size:15px;color:#fff;margin-bottom:8px}'+
+'.wt-row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:4px 0;color:#e0f0ff}'+
+'.wt-row .wt-n{color:rgba(255,255,255,.6);white-space:nowrap}'+
+'.wt-row .wt-v{flex:1}'+
+'.wt-row .wt-d{color:rgba(255,255,255,.4);font-size:12px;white-space:nowrap}'+
+'.wt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}'+
+'.wt-chip{padding:6px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:12px;cursor:pointer}'+
+'.wt-chip.active{border-color:#4dd9ff;color:#4dd9ff}'+
+'.wt-empty{font-size:13px;color:rgba(255,255,255,.4)}'+
+'.wt-gl{stroke:rgba(255,255,255,.12)}.wt-lb{fill:rgba(255,255,255,.45);font-size:8px}.wt-ln{stroke:#4dd9ff;stroke-width:2;fill:none}.wt-dt{fill:#4dd9ff}.wt-vl{fill:#e0f0ff;font-size:8px}'+
+'body.light .wt-card{background:#fff;border-color:#dce7f0}body.light .wt-title{color:#16324a}body.light .wt-row{color:#16324a}body.light .wt-row .wt-n{color:#6a8098}body.light .wt-row .wt-d{color:#93a7b8}body.light .wt-chip{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-chip.active{border-color:#0077aa;color:#0077aa}body.light .wt-grid input{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-lb{fill:#93a7b8}body.light .wt-vl{fill:#16324a}body.light .wt-ln{stroke:#0077aa}body.light .wt-dt{fill:#0077aa}body.light .wt-gl{stroke:rgba(22,50,74,.15)}';
+document.head.appendChild(st);
+
+var modal=document.querySelector('#modalOverlay .modal');
+var photoBtn=modal.querySelector('.photo-btn');
+var tb=document.createElement('div');
+tb.className='field-block';
+tb.innerHTML='<div class="field-head"><span>'+ico('drop',OR)+'Тесты воды (необязательно)</span></div><div class="wt-grid"><input id="t_ph" placeholder="pH" inputmode="decimal"><input id="t_kh" placeholder="Карбонат (KH)" inputmode="numeric"><input id="t_gh" placeholder="Жёсткость (GH)" inputmode="numeric"><input id="t_cl" placeholder="Хлор" inputmode="decimal"><input id="t_no3" placeholder="Нитрат" inputmode="numeric"><input id="t_no2" placeholder="Нитрит" inputmode="decimal"></div>';
+photoBtn.insertAdjacentElement('beforebegin',tb);
+
+var cv=document.getElementById('calView');
+var wrap=document.createElement('div');
+wrap.innerHTML='<div class="wt-card"><div class="wt-title">Последние тесты воды</div><div id="wtList"></div></div><div class="wt-card"><div class="wt-title">График тестов</div><div class="wt-chips" id="wtChips"></div><div id="wtChart"></div></div>';
+cv.appendChild(wrap);
+
+var PARAMS=[{k:'ph',n:'pH'},{k:'gh',n:'Жёсткость'},{k:'kh',n:'Карбонат'},{k:'cl',n:'Хлор'},{k:'no3',n:'Нитрат'},{k:'no2',n:'Нитрит'}];
+var curChart='no3';
+function num(s){return Number(String(s).replace(',','.'));}
+
+function parseTests(text){
+var t=String(text||''),res={},m;
+m=t.match(/(?:ph|рн)[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m)res.ph=num(m[1]);
+m=t.match(/нитрат[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m)res.no3=num(m[1]);
+m=t.match(/нитрит[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
+if(m)res.no2=num(m[1]);
+m=t.match(/хлор[а-я]*[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
+if(m)res.cl=num(m[1]);
+m=t.match(/(?:^|[^а-я])кн[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
+if(m)res.kh=num(m[1]);
+var re=/ж[её]сткость/gi,mm2;
+while((mm2=re.exec(t))){
+var before=t.slice(Math.max(0,mm2.index-20),mm2.index);
+var after=t.slice(mm2.index,mm2.index+60);
+var dm=after.match(/с\s*(\d+(?:[.,]\d+)?)\s*до\s*(\d+(?:[.,]\d+)?)/);
+var vm=after.match(/(\d+(?:[.,]\d+)?)/);
+var val=dm?num(dm[2]):(vm?num(vm[1]):null);
+if(val===null)continue;
+if(/карбонат/i.test(before))res.kh=val;else res.gh=val;
+}
+return res;
+}
+
+function collectSeries(){
+var series={ph:[],gh:[],kh:[],cl:[],no3:[],no2:[]};
+for(var i=entries.length-1;i>=0;i--){
+var e=entries[i];
+var t=parseTests((e.actions||'')+' '+(e.text||''));
+for(var k in series){
+var v=(e.tests&&e.tests[k]!==undefined)?e.tests[k]:t[k];
+if(v!==undefined)series[k].push({d:e.date,v:v});
+}
+}
+return series;
+}
+
+function renderWtChart(series){
+var box=document.getElementById('wtChart');
+var arr=series[curChart]||[];
+if(arr.length<2){box.innerHTML='<div class="wt-empty">Для графика нужно хотя бы два теста этого параметра.</div>';return;}
+var W=340,H=150,PL=34,PR=10,PT=14,PB=26;
+var vs=arr.map(function(a){return a.v});
+var min=Math.min.apply(null,vs),max=Math.max.apply(null,vs);
+if(min===max){min-=1;max+=1;}
+var pad=(max-min)*0.15;min-=pad;max+=pad;
+var n=arr.length;
+function x(i){return PL+i*(W-PL-PR)/(n-1);}
+function y(v){return PT+(H-PT-PB)*(1-(v-min)/(max-min));}
+var pts=arr.map(function(a,i){return x(i)+','+y(a.v)}).join(' ');
+var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+for(var g=0;g<=2;g++){
+var gv=min+(max-min)*g/2,gy=y(gv);
+svg+='<line class="wt-gl" x1="'+PL+'" y1="'+gy+'" x2="'+(W-PR)+'" y2="'+gy+'"/>';
+svg+='<text class="wt-lb" x="'+(PL-4)+'" y="'+(gy+3)+'" text-anchor="end">'+(Math.round(gv*10)/10)+'</text>';
+}
+svg+='<polyline class="wt-ln" points="'+pts+'"/>';
+arr.forEach(function(a,i){
+svg+='<circle class="wt-dt" cx="'+x(i)+'" cy="'+y(a.v)+'" r="3"/>';
+svg+='<text class="wt-vl" x="'+x(i)+'" y="'+(y(a.v)-6)+'" text-anchor="middle">'+a.v+'</text>';
+});
+svg+='<text class="wt-lb" x="'+x(0)+'" y="'+(H-8)+'">'+arr[0].d.slice(0,5)+'</text>';
+svg+='<text class="wt-lb" x="'+x(n-1)+'" y="'+(H-8)+'" text-anchor="end">'+arr[n-1].d.slice(0,5)+'</text>';
+svg+='</svg>';
+box.innerHTML=svg;
+}
+
+function renderWaterTests(){
+var series=collectSeries();
+var html='';
+PARAMS.forEach(function(p){
+var arr=series[p.k];
+if(!arr.length){html+='<div class="wt-row"><span class="wt-n">'+p.n+'</span><span class="wt-v wt-empty">пока нет данных</span><span class="wt-d"></span></div>';return;}
+var last=arr[arr.length-1],extra='';
+if(p.k==='kh')extra=' ≈ '+(last.v/17.86).toFixed(1)+'°dKH';
+if(p.k==='gh')extra=' ≈ '+(last.v/17.86).toFixed(1)+'°dH';
+html+='<div class="wt-row"><span class="wt-n">'+p.n+'</span><span class="wt-v">'+last.v+' мг/л'+extra+'</span><span class="wt-d">'+last.d.slice(0,5)+'</span></div>';
+});
+document.getElementById('wtList').innerHTML=html;
+document.getElementById('wtChips').innerHTML=PARAMS.map(function(p){
+return '<button class="wt-chip'+(p.k===curChart?' active':'')+'" onclick="setWtChart(\''+p.k+'\')">'+p.n+'</button>';
+}).join('');
+renderWtChart(series);
+}
+window.setWtChart=function(k){curChart=k;renderWaterTests();};
+
+function readTestInputs(){
+var t={},ids={ph:'t_ph',kh:'t_kh',gh:'t_gh',cl:'t_cl',no3:'t_no3',no2:'t_no2'};
+for(var k in ids){
+var v=document.getElementById(ids[k]).value.trim();
+if(v!=='')t[k]=num(v);
+}
+return t;
+}
+function clearTestInputs(){for(var id of ['t_ph','t_kh','t_gh','t_cl','t_no3','t_no2'])document.getElementById(id).value='';}
+function fillTestInputs(i){
+clearTestInputs();
+var t=entries[i].tests||{},ids={ph:'t_ph',kh:'t_kh',gh:'t_gh',cl:'t_cl',no3:'t_no3',no2:'t_no2'};
+for(var k in ids){if(t[k]!==undefined)document.getElementById(ids[k]).value=t[k];}
+}
+
+var origOpenModal=openModal;
+openModal=function(){origOpenModal();clearTestInputs();};
+var origOpenEdit=openEdit;
+openEdit=function(i){origOpenEdit(i);fillTestInputs(i);};
+var origSave=saveEntry;
+saveEntry=function(){
+var t=readTestInputs(),ei=editingIndex;
+var wasOpen=document.getElementById('modalOverlay').classList.contains('active');
+origSave();
+var stillOpen=document.getElementById('modalOverlay').classList.contains('active');
+if(wasOpen&&stillOpen)return;
+if(Object.keys(t).length){
+var target=(ei!==null)?entries[ei]:entries[0];
+if(target){target.tests=t;persist();}
+}
+};
+var origRender=render;
+render=function(){origRender();renderWaterTests();};
+renderWaterTests();
+})();
