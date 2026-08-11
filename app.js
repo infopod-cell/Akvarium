@@ -772,75 +772,7 @@ else{me.style.display='none';}
 addMileLine();
 updateStats();
 
-/* ===== Тесты воды: поля, карточка, график, парсер ===== */
-(function(){
-var st=document.createElement('style');
-st.textContent='.wt-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
-'.wt-grid input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px;color:#e0f0ff;font-size:13px}'+
-'.wt-card{margin:12px 16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}'+
-'.wt-title{font-size:15px;color:#fff;margin-bottom:8px}'+
-'.wt-row{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:4px 0;color:#e0f0ff}'+
-'.wt-row .wt-n{color:rgba(255,255,255,.6);white-space:nowrap}'+
-'.wt-row .wt-v{flex:1}'+
-'.wt-row .wt-d{color:rgba(255,255,255,.4);font-size:12px;white-space:nowrap}'+
-'.wt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}'+
-'.wt-chip{padding:6px 11px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#e0f0ff;font-size:12px;cursor:pointer}'+
-'.wt-chip.active{border-color:#4dd9ff;color:#4dd9ff}'+
-'.wt-empty{font-size:13px;color:rgba(255,255,255,.4)}'+
-'.wt-gl{stroke:rgba(255,255,255,.12)}.wt-lb{fill:rgba(255,255,255,.45);font-size:8px}.wt-ln{stroke:#4dd9ff;stroke-width:2;fill:none}.wt-dt{fill:#4dd9ff}.wt-vl{fill:#e0f0ff;font-size:8px}'+
-'body.light .wt-card{background:#fff;border-color:#dce7f0}body.light .wt-title{color:#16324a}body.light .wt-row{color:#16324a}body.light .wt-row .wt-n{color:#6a8098}body.light .wt-row .wt-d{color:#93a7b8}body.light .wt-chip{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-chip.active{border-color:#0077aa;color:#0077aa}body.light .wt-grid input{background:#fff;border-color:#cfdcea;color:#16324a}body.light .wt-lb{fill:#93a7b8}body.light .wt-vl{fill:#16324a}body.light .wt-ln{stroke:#0077aa}body.light .wt-dt{fill:#0077aa}body.light .wt-gl{stroke:rgba(22,50,74,.15)}';
-document.head.appendChild(st);
-
-var modal=document.querySelector('#modalOverlay .modal');
-var photoBtn=modal.querySelector('.photo-btn');
-var tb=document.createElement('div');
-tb.className='field-block';
-tb.innerHTML='<div class="field-head"><span>'+ico('drop',OR)+'Тесты воды (необязательно)</span></div><div class="wt-grid"><input id="t_ph" placeholder="pH" inputmode="decimal"><input id="t_kh" placeholder="Карбонат (KH)" inputmode="numeric"><input id="t_gh" placeholder="Жёсткость (GH)" inputmode="numeric"><input id="t_cl" placeholder="Хлор" inputmode="decimal"><input id="t_no3" placeholder="Нитрат" inputmode="numeric"><input id="t_no2" placeholder="Нитрит" inputmode="decimal"></div>';
-photoBtn.insertAdjacentElement('beforebegin',tb);
-
-var cv=document.getElementById('calView');
-var wrap=document.createElement('div');
-wrap.innerHTML='<div class="wt-card"><div class="wt-title">Последние тесты воды</div><div id="wtList"></div></div><div class="wt-card"><div class="wt-title">График тестов</div><div class="wt-chips" id="wtChips"></div><div id="wtChart"></div></div>';
-cv.appendChild(wrap);
-
-var PARAMS=[{k:'ph',n:'pH'},{k:'gh',n:'Жёсткость'},{k:'kh',n:'Карбонат'},{k:'cl',n:'Хлор'},{k:'no3',n:'Нитрат'},{k:'no2',n:'Нитрит'}];
-var curChart='no3';
-function num(s){return Number(String(s).replace(',','.'));}
-
-function parseTests(text){
-var t=String(text||''),res={},m;
-m=t.match(/(?:ph|рн)[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
-if(m)res.ph=num(m[1]);
-m=t.match(/нитрат[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
-if(m)res.no3=num(m[1]);
-m=t.match(/нитрит[а-я]*[^\d\n]{0,15}?(\d+(?:[.,]\d+)?)/i);
-if(m)res.no2=num(m[1]);
-m=t.match(/хлор[а-я]*[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
-if(m)res.cl=num(m[1]);
-m=t.match(/(?:^|[^а-я])кн[^\d\n]{0,10}?(\d+(?:[.,]\d+)?)/i);
-if(m)res.kh=num(m[1]);
-var re=/ж[её]сткость/gi,mm2;
-while((mm2=re.exec(t))){
-var before=t.slice(Math.max(0,mm2.index-20),mm2.index);
-var after=t.slice(mm2.index,mm2.index+60);
-var dm=after.match(/с\s*(\d+(?:[.,]\d+)?)\s*до\s*(\d+(?:[.,]\d+)?)/);
-var vm=after.match(/(\d+(?:[.,]\d+)?)/);
-var val=dm?num(dm[2]):(vm?num(vm[1]):null);
-if(val===null)continue;
-if(/карбонат/i.test(before))res.kh=val;else res.gh=val;
-}
-return res;
-}
-
-function collectSeries(){
-var series={ph:[],gh:[],kh:[],cl:[],no3:[],no2:[]};
-for(var i=entries.length-1;i>=0;i--){
-var e=entries[i];
-var t=parseTests((e.actions||'')+' '+(e.text||''));
-for(var k in series){
-var v=(e.tests&&e.tests[k]!==undefined)?e.tests[k]:t[k];
-
-  /* ===== Тесты воды: карточки, график, парсер, поиск ===== */
+/* ===== Тесты воды: карточки, график, парсер, поиск ===== */
 (function(){
 var st=document.createElement('style');
 st.textContent='body *{font-weight:400!important}'+
