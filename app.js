@@ -17,7 +17,7 @@ let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Дли
 let costs=JSON.parse(localStorage.getItem('aquaCosts')||'null')||[{name:'Лампа',sum:300,note:'3 шт'},{name:'Грунт',sum:226,note:''},{name:'Фильтр',sum:360,note:''},{name:'Мох',sum:200,note:'100 + 100'},{name:'Анубиас',sum:300,note:''},{name:'Элодея',sum:200,note:''},{name:'Сифон',sum:200,note:''},{name:'Шприц для флейты',sum:50,note:'3 шт'}];
 let settings=JSON.parse(localStorage.getItem('aquaSettings')||'null')||{fs:1,theme:'dark',water:7,hunger:10};
 
-const CB='#4dd9ff',CO='#ffb74d',CW='#e0f0ff';
+const CB='#4dd9ff',CO='#ffb74d',CW='#e0f0ff',OR='#ff9432';
 const ICONS={
 drop:'<path d="M12 3c-3.5 4.5-6 8-6 11a6 6 0 0 0 12 0c0-3-2.5-6.5-6-11z"/>',
 plate:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
@@ -42,7 +42,8 @@ return '<svg class="ico" style="color:'+c+';width:'+s+'px;height:'+s+'px" viewBo
 }
 function injectIcons(){
 document.querySelectorAll('[data-ico]').forEach(function(el){
-el.innerHTML=ico(el.getAttribute('data-ico'),el.getAttribute('data-c')||CB,el.getAttribute('data-s')||15);
+const c=el.getAttribute('data-c');
+el.innerHTML=ico(el.getAttribute('data-ico'),c==='currentColor'?'currentColor':OR,el.getAttribute('data-s')||15);
 });
 }
 function micHTML(){return ico('mic','currentColor',12)+' говорить'}
@@ -63,10 +64,9 @@ return m?new Date(+m[3],+m[2]-1,+m[1]):null;
 function init(){injectIcons();applyBranding();applySettings();addDateEditor();buildSets();render();updateStats();updateTiles()}
 
 function applyBranding(){
-document.title='Аквариум';
-const t=document.querySelector('.h-title');if(t)t.textContent='Аквариум';
-const s=document.querySelector('.h-sub');if(s)s.remove();
+document.title='Мой Аквариум';
 document.querySelectorAll('.cal-close').forEach(b=>b.remove());
+const s=document.querySelector('.h-sub');if(s)s.remove();
 }
 
 function applySettings(){
@@ -96,7 +96,7 @@ const div=document.createElement('div');
 div.className='field-block';
 div.id='dateBlock';
 div.style.display='none';
-div.innerHTML='<div class="field-head"><span>'+ico('cal',CB)+'Дата</span></div><input id="f_date" placeholder="ДД.ММ.ГГГГ" maxlength="10">';
+div.innerHTML='<div class="field-head"><span>'+ico('cal',OR)+'Дата</span></div><input id="f_date" placeholder="ДД.ММ.ГГГГ" maxlength="10">';
 h2.insertAdjacentElement('afterend',div);
 }
 
@@ -162,7 +162,6 @@ if(days<1)days=1;
 }
 document.getElementById('headDaysNum').textContent=days;
 document.getElementById('headDaysWord').textContent=plural(days,'день','дня','дней');
-document.getElementById('bannerLine').textContent='записей: '+entries.length+' · фото: '+entries.filter(e=>e.photo).length;
 }
 
 function nextInfo(mode){
@@ -200,8 +199,6 @@ const box=document.getElementById('tpBox');
 let ph=null;
 for(let i=0;i<entries.length;i++){if(entries[i].photo){ph=entries[i];break;}}
 if(ph){box.innerHTML='<img src="'+ph.photo+'">';}else{box.innerHTML='<div class="t-v">пока нет</div>';}
-let total=0;costs.forEach(c=>{total+=Number(c.sum)||0;});
-document.getElementById('tcVal').textContent=total+' р';
 if(entries.length){
 const le=entries[0];
 document.getElementById('tdVal').textContent=le.date;
@@ -234,14 +231,43 @@ renderCal();
 }
 function calPrev(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCal()}
 function calNext1(){calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCal()}
-function updateCalNext(){
-const el=document.getElementById('calNext');
-const label=calMode==='water'?'Следующая подмена воды':'Следующий разгрузочный день';
+function updateCalCounter(){
+const box=document.getElementById('calCounter');
+const cap=document.getElementById('ccCap');
+const numEl=document.getElementById('ccNum');
+const wordEl=document.getElementById('ccWord');
+const thrEl=document.getElementById('ccThrough');
+const dateEl=document.getElementById('ccDate');
+const fill=document.getElementById('ccFill');
+cap.textContent=calMode==='water'?'следующая подмена воды':'следующий разгрузочный день';
+box.classList.toggle('hunger',calMode==='hunger');
 const info=nextInfo(calMode);
-if(!info){el.textContent='Пока нет данных для этого календаря';el.className='cal-next';return;}
-const extra=info.diff>0?' (через '+info.diff+' дн.)':(info.diff===0?' (сегодня!)':' (просрочено на '+(-info.diff)+' дн.)');
-el.textContent=label+': '+info.next.toLocaleDateString('ru-RU')+extra;
-el.className='cal-next'+(info.diff<0?' late':'');
+if(!info){
+dateEl.textContent='нет данных';
+thrEl.textContent='';numEl.textContent='—';wordEl.textContent='';
+fill.style.width='0%';
+box.classList.remove('late');
+return;
+}
+dateEl.textContent=info.next.toLocaleDateString('ru-RU');
+if(info.diff>0){
+thrEl.textContent='через';
+numEl.textContent=info.diff;
+wordEl.textContent=plural(info.diff,'день','дня','дней');
+}else if(info.diff===0){
+thrEl.textContent='';
+numEl.textContent='сегодня!';
+wordEl.textContent='';
+}else{
+thrEl.textContent='просрочено на';
+numEl.textContent=-info.diff;
+wordEl.textContent=plural(-info.diff,'день','дня','дней');
+}
+box.classList.toggle('late',info.diff<0);
+const span=info.next-info.last;
+let pct=span>0?Math.round(((new Date()-info.last)/span)*100):100;
+if(pct<0)pct=0;if(pct>100)pct=100;
+fill.style.width=pct+'%';
 }
 function renderCal(){
 const y=calDate.getFullYear(),m=calDate.getMonth();
@@ -257,20 +283,25 @@ const iso=y+'-'+pad(m+1)+'-'+pad(d);
 html+='<div class="cal-day'+(set.has(iso)?' mark-'+calMode:'')+'">'+d+'</div>';
 }
 document.getElementById('calGrid').innerHTML=html;
-updateCalNext();
+updateCalCounter();
 }
 
 function openInfo(){openView('infoView');renderInfo();renderCosts();}
-function hideInfo(){closeView('infoView');document.getElementById('infoForm').style.display='none';}
+function hideInfo(){closeView('infoView');closeInfoEdit();closeCostForm();}
+function closeInfoEdit(){document.getElementById('infoForm').style.display='none';}
+function closeCostForm(){
+document.getElementById('costForm').style.display='none';
+['c_name','c_sum','c_note'].forEach(id=>{document.getElementById(id).value=''});
+}
 function renderInfo(){
 const m=String(aquaInfo.size).match(/\d+/g);
 let vol='';
 if(m&&m.length>=3){vol=' (≈ '+Math.round(m[0]*m[1]*m[2]/1000)+' л)';}
 document.getElementById('infoText').innerHTML=
-fld(ico('search',CB),'Размер',aquaInfo.size+vol)+
-fld(ico('bolt',CO),'Свет',aquaInfo.light)+
-fld(ico('wrench',CB),'Фильтр',aquaInfo.filter)+
-fld(ico('tank',CB),'Грунт',aquaInfo.grunt);
+fld(ico('search',OR),'Размер',aquaInfo.size+vol)+
+fld(ico('bolt',OR),'Свет',aquaInfo.light)+
+fld(ico('wrench',OR),'Фильтр',aquaInfo.filter)+
+fld(ico('tank',OR),'Грунт',aquaInfo.grunt);
 }
 function toggleInfoEdit(){
 const f=document.getElementById('infoForm');
@@ -285,7 +316,7 @@ f.style.display='block';
 function saveInfo(){
 aquaInfo={size:document.getElementById('i_size').value.trim(),light:document.getElementById('i_light').value.trim(),filter:document.getElementById('i_filter').value.trim(),grunt:document.getElementById('i_grunt').value.trim()};
 localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
-document.getElementById('infoForm').style.display='none';
+closeInfoEdit();
 renderInfo();
 }
 function renderCosts(){
@@ -304,16 +335,14 @@ const note=document.getElementById('c_note').value.trim();
 if(!n){alert('Впиши название покупки');return;}
 costs.push({name:n,sum:s,note:note});
 localStorage.setItem('aquaCosts',JSON.stringify(costs));
-document.getElementById('c_name').value='';
-document.getElementById('c_sum').value='';
-document.getElementById('c_note').value='';
-renderCosts();updateTiles();
+closeCostForm();
+renderCosts();
 }
 function removeCost(i){
 if(confirm('Удалить покупку «'+costs[i].name+'»?')){
 costs.splice(i,1);
 localStorage.setItem('aquaCosts',JSON.stringify(costs));
-renderCosts();updateTiles();
+renderCosts();
 }
 }
 
@@ -330,24 +359,24 @@ const q=searchQuery.trim().toLowerCase();
 let items=entries.map((e,i)=>({e:e,i:i}));
 if(q){items=items.filter(function(it){return ((it.e.actions||'')+' '+(it.e.activity||'')+' '+(it.e.appetite||'')+' '+(it.e.fins||'')+' '+(it.e.text||'')+' '+(it.e.date||'')).toLowerCase().includes(q)});}
 if(items.length===0){
-if(entries.length===0){list.innerHTML='<div class="empty"><div class="icon">'+ico('fish',CB,48)+'</div><p>Пока нет записей.<br>Нажми «+» или ↓ «добавить таблицу»!</p></div>';}
-else{list.innerHTML='<div class="empty"><div class="icon">'+ico('search',CB,48)+'</div><p>Ничего не нашлось по запросу «'+searchQuery+'»</p></div>';}
+if(entries.length===0){list.innerHTML='<div class="empty"><div class="icon">'+ico('fish',OR,48)+'</div><p>Пока нет записей.<br>Нажми «+» или добавь таблицу в настройках!</p></div>';}
+else{list.innerHTML='<div class="empty"><div class="icon">'+ico('search',OR,48)+'</div><p>Ничего не нашлось по запросу «'+searchQuery+'»</p></div>';}
 return;
 }
 list.innerHTML=items.map(function(it){
 const e=it.e,i=it.i;
 return '<div class="entry-card">'+
-'<div class="entry-date"><span>'+ico('cal',CB,13)+' '+e.date+'</span><button class="edit-btn" onclick="openEdit('+i+')">'+ico('pencil',CO,20)+'</button></div>'+
-fld(ico('wrench',CB),'Действия',e.actions)+
-fld(ico('bolt',CO),'Активность',e.activity)+
-fld(ico('plate',CO),'Аппетит',e.appetite)+
-fld(ico('fish',CB),'Плавники',e.fins)+
-fld(ico('pencil',CW),'Заметка',e.text)+
+'<div class="entry-date"><span>'+ico('cal',OR,13)+' '+e.date+'</span><button class="edit-btn" onclick="openEdit('+i+')">'+ico('pencil',OR,20)+'</button></div>'+
+fld(ico('wrench',OR),'Действия',e.actions)+
+fld(ico('bolt',OR),'Активность',e.activity)+
+fld(ico('plate',OR),'Аппетит',e.appetite)+
+fld(ico('fish',OR),'Плавники',e.fins)+
+fld(ico('pencil',OR),'Заметка',e.text)+
 (e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
-'<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',CW,14)+' удалить запись</button></div>'+
+'<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',OR,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
-  }
+                 }
 function parseCSV(t){
 const rows=[];let row=[],cur='',inQ=false;
 for(let i=0;i<t.length;i++){
@@ -402,7 +431,7 @@ reader.readAsText(input.files[0]);
 
 function openModal(){
 editingIndex=null;
-document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Новая запись';
+document.getElementById('modalTitle').innerHTML=ico('pencil',OR,18)+' Новая запись';
 document.getElementById('modalOverlay').classList.add('active');
 pushLayer();
 document.getElementById('dateBlock').style.display='none';
@@ -414,7 +443,7 @@ currentPhoto=null;
 function openEdit(i){
 editingIndex=i;
 const e=entries[i];
-document.getElementById('modalTitle').innerHTML=ico('pencil',CO,18)+' Редактирование';
+document.getElementById('modalTitle').innerHTML=ico('pencil',OR,18)+' Редактирование';
 document.getElementById('modalOverlay').classList.add('active');
 pushLayer();
 document.getElementById('dateBlock').style.display='block';
@@ -543,6 +572,10 @@ sendRows(pending,false);
 
 function openSyncFromExport(){
 closeExport();
+openSyncFromSettings();
+}
+
+function openSyncFromSettings(){
 document.getElementById('syncUrlInput').value=syncUrl;
 document.getElementById('syncOverlay').classList.add('active');
 pushLayer();
@@ -552,7 +585,7 @@ function sendRows(list,silent){
 const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
 fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rows)})
 .then(()=>{list.forEach(e=>e.synced=true);persist();if(!silent)alert('Отправлено в таблицу: '+list.length);})
-.catch(()=>{if(!silent)alert('Не получилось отправить. Попробуй ещё раз кнопкой ↑.');});
+.catch(()=>{if(!silent)alert('Не получилось отправить. Попробуй ещё раз через Настройки → Таблица.');});
 }
 
 function saveSyncUrl(){
