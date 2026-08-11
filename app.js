@@ -710,3 +710,59 @@ img.addEventListener('pointercancel',up);
 })();
 
 init();
+
+/* ===== Праздничные даты ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='.h-mile{font-size:12px;color:#ffd76a;margin-top:3px;text-shadow:0 0 8px rgba(255,215,106,.5)}'+
+'.h-days .num.gold{color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.8)}'+
+'.header.party .bubbles i{background:rgba(255,215,106,.4)}';
+document.head.appendChild(st);
+})();
+function addMileLine(){
+const row=document.querySelector('.h-row');
+if(!row||document.getElementById('headMile'))return;
+const div=document.createElement('div');
+div.className='h-mile';div.id='headMile';div.style.display='none';
+row.insertAdjacentElement('afterend',div);
+}
+function testDaysOverride(){
+try{
+const p=new URLSearchParams(location.search).get('testdays');
+if(p&&Number(p)>0)return Math.floor(Number(p));
+}catch(e){}
+return null;
+}
+function milestoneInfo(days,first){
+if(!first||days<1)return null;
+if(days%100===0)return{txt:'сегодня аквариуму '+days+' '+plural(days,'день','дня','дней')+'!'};
+const now=new Date();
+let m=(now.getFullYear()-first.getFullYear())*12+(now.getMonth()-first.getMonth());
+if(now.getDate()<first.getDate())m--;
+if(m>0&&now.getDate()===first.getDate()){
+if(m%12===0)return{txt:'сегодня аквариуму '+(m/12)+' '+plural(m/12,'год','года','лет')+'!'};
+return{txt:'сегодня аквариуму '+m+' '+plural(m,'месяц','месяца','месяцев')+'!'};
+}
+return null;
+}
+function updateStats(){
+let first=null;
+const dates=entries.map(e=>parseDateRU(e.date)).filter(d=>d);
+if(dates.length)first=new Date(Math.min.apply(null,dates));
+const td=testDaysOverride();
+let days=0;
+if(td){first=new Date(Date.now()-(td-1)*86400000);days=td;}
+else if(first){days=Math.floor((new Date()-first)/86400000)+1;if(days<1)days=1;}
+document.getElementById('headDaysNum').textContent=days;
+document.getElementById('headDaysWord').textContent=plural(days,'день','дня','дней');
+const mile=milestoneInfo(days,first);
+document.getElementById('headDaysNum').classList.toggle('gold',!!mile);
+document.querySelector('.header').classList.toggle('party',!!mile);
+const me=document.getElementById('headMile');
+if(me){
+if(mile){me.textContent=mile.txt;me.style.display='block';}
+else{me.style.display='none';}
+}
+}
+addMileLine();
+updateStats();
