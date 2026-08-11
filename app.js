@@ -772,20 +772,3 @@ else{me.style.display='none';}
 addMileLine();
 updateStats();
 
-/* ===== Гирлянда и центральная подпись ===== */
-(function(){
-var st=document.createElement('style');
-st.textContent='#headMile{position:static;text-align:center;margin-top:26px;font-size:13px}'+
-'#garland{position:absolute;right:10px;top:52px;width:150px;display:none;pointer-events:none}'+
-'.header.party #garland{display:block}'+
-'#garland .gl{fill:#ffd76a;filter:drop-shadow(0 0 4px rgba(255,215,106,.9));animation:glow 1.6s ease-in-out infinite}'+
-'#garland .g2{animation-delay:.3s}#garland .g3{animation-delay:.6s}#garland .g4{animation-delay:.9s}#garland .g5{animation-delay:1.2s}'+
-'@keyframes glow{0%,100%{opacity:.35}50%{opacity:1}}';
-document.head.appendChild(st);
-var h=document.querySelector('.header');
-if(!h)return;
-var g=document.createElement('div');
-g.id='garland';
-g.innerHTML='<svg viewBox="0 0 160 30"><path d="M0 3 Q40 20 80 7 Q120 20 160 3" fill="none" stroke="rgba(255,215,106,.55)" stroke-width="1.5"/><circle class="gl g1" cx="20" cy="10" r="3"/><circle class="gl g2" cx="50" cy="12" r="3"/><circle class="gl g3" cx="80" cy="7" r="3"/><circle class="gl g4" cx="110" cy="12" r="3"/><circle class="gl g5" cx="140" cy="10" r="3"/></svg>';
-h.appendChild(g);
-})();
