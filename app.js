@@ -771,3 +771,31 @@ else{me.style.display='none';}
 }
 addMileLine();
 updateStats();
+
+/* ===== Плавающий петушок ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='#swimFish{position:absolute;left:0;top:0;width:46px;height:30px;z-index:1;opacity:.5;color:#ff6b5e;pointer-events:none;animation:swimX 26s linear infinite}'+
+'#swimFish .bob{position:relative;width:100%;height:100%;animation:swimY 7s ease-in-out infinite}'+
+'#swimFish svg{width:100%;height:100%;display:block}'+
+'.h-center{position:relative;z-index:2}'+
+'.header.party #swimFish{color:#ffd76a;opacity:.95}'+
+'#swimFish .rip{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border:1px solid rgba(255,215,106,.7);border-radius:50%;opacity:0}'+
+'.header.party #swimFish .rip{animation:rip 2.2s ease-out infinite}'+
+'.header.party #swimFish .rip.r2{animation-delay:1.1s}'+
+'#swimFish .sp{position:absolute;width:5px;height:5px;border-radius:50%;background:#ffd76a;opacity:0}'+
+'.header.party #swimFish .sp{animation:tw 1.6s ease-in-out infinite}'+
+'#swimFish .sp.s1{left:-8px;top:4px}'+
+'#swimFish .sp.s2{right:-10px;top:14px;animation-delay:.8s}'+
+'@keyframes swimX{0%{transform:translateX(-60px) scaleX(1)}49.5%{transform:translateX(calc(100vw - 10px)) scaleX(1)}50%{transform:translateX(calc(100vw - 10px)) scaleX(-1)}99.5%{transform:translateX(-60px) scaleX(-1)}100%{transform:translateX(-60px) scaleX(1)}}'+
+'@keyframes swimY{0%,100%{transform:translateY(8px)}50%{transform:translateY(34px)}}'+
+'@keyframes rip{0%{transform:scale(.4);opacity:.8}100%{transform:scale(6);opacity:0}}'+
+'@keyframes tw{0%,100%{opacity:0;transform:scale(.5)}50%{opacity:.9;transform:scale(1.2)}}';
+document.head.appendChild(st);
+var h=document.querySelector('.header');
+if(!h)return;
+var f=document.createElement('div');
+f.id='swimFish';
+f.innerHTML='<div class="bob"><span class="rip"></span><span class="rip r2"></span><span class="sp s1"></span><span class="sp s2"></span><svg viewBox="0 0 64 40"><g fill="currentColor"><path d="M6 20C11 9 17 8 21 14C17 20 17 20 21 26C17 32 11 31 6 20Z"/><path d="M20 20a14 9 0 1 0 28 0a14 9 0 1 0-28 0Z"/><path d="M28 12C31 5 40 4 45 9C39 11 33 12 28 12Z"/><path d="M28 28C33 28 39 29 45 31C40 36 31 35 28 28Z"/><circle cx="42" cy="17" r="1.6" fill="rgba(10,22,40,.85)"/></g></svg></div>';
+h.appendChild(f);
+})();
