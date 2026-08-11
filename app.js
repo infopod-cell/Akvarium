@@ -716,7 +716,9 @@ init();
 var st=document.createElement('style');
 st.textContent='.h-mile{font-size:12px;color:#ffd76a;margin-top:3px;text-shadow:0 0 8px rgba(255,215,106,.5)}'+
 '.h-days .num.gold{color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.8)}'+
-'.header.party .bubbles i{background:rgba(255,215,106,.4)}';
+'.header.party .bubbles i{background:rgba(255,215,106,.4)}'+
+'.header.big .h-title{font-size:19px}'+
+'.header.big .h-days .num{font-size:26px}';
 document.head.appendChild(st);
 })();
 function addMileLine(){
@@ -726,9 +728,9 @@ const div=document.createElement('div');
 div.className='h-mile';div.id='headMile';div.style.display='none';
 row.insertAdjacentElement('afterend',div);
 }
-function testDaysOverride(){
+function testParam(name){
 try{
-const p=new URLSearchParams(location.search).get('testdays');
+const p=new URLSearchParams(location.search).get(name);
 if(p&&Number(p)>0)return Math.floor(Number(p));
 }catch(e){}
 return null;
@@ -749,15 +751,18 @@ function updateStats(){
 let first=null;
 const dates=entries.map(e=>parseDateRU(e.date)).filter(d=>d);
 if(dates.length)first=new Date(Math.min.apply(null,dates));
-const td=testDaysOverride();
+const td=testParam('testdays');
+const tm=testParam('testmonths');
 let days=0;
 if(td){first=new Date(Date.now()-(td-1)*86400000);days=td;}
+else if(tm){const now=new Date();first=new Date(now.getFullYear(),now.getMonth()-tm,now.getDate());days=Math.floor((now-first)/86400000)+1;}
 else if(first){days=Math.floor((new Date()-first)/86400000)+1;if(days<1)days=1;}
 document.getElementById('headDaysNum').textContent=days;
 document.getElementById('headDaysWord').textContent=plural(days,'день','дня','дней');
 const mile=milestoneInfo(days,first);
 document.getElementById('headDaysNum').classList.toggle('gold',!!mile);
 document.querySelector('.header').classList.toggle('party',!!mile);
+document.querySelector('.header').classList.toggle('big',days>=100);
 const me=document.getElementById('headMile');
 if(me){
 if(mile){me.textContent=mile.txt;me.style.display='block';}
