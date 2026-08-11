@@ -772,30 +772,20 @@ else{me.style.display='none';}
 addMileLine();
 updateStats();
 
-/* ===== Плавающий петушок ===== */
+/* ===== Гирлянда и центральная подпись ===== */
 (function(){
 var st=document.createElement('style');
-st.textContent='#swimFish{position:absolute;left:0;top:0;width:46px;height:30px;z-index:1;opacity:.5;color:#ff6b5e;pointer-events:none;animation:swimX 26s linear infinite}'+
-'#swimFish .bob{position:relative;width:100%;height:100%;animation:swimY 7s ease-in-out infinite}'+
-'#swimFish svg{width:100%;height:100%;display:block}'+
-'.h-center{position:relative;z-index:2}'+
-'.header.party #swimFish{color:#ffd76a;opacity:.95}'+
-'#swimFish .rip{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border:1px solid rgba(255,215,106,.7);border-radius:50%;opacity:0}'+
-'.header.party #swimFish .rip{animation:rip 2.2s ease-out infinite}'+
-'.header.party #swimFish .rip.r2{animation-delay:1.1s}'+
-'#swimFish .sp{position:absolute;width:5px;height:5px;border-radius:50%;background:#ffd76a;opacity:0}'+
-'.header.party #swimFish .sp{animation:tw 1.6s ease-in-out infinite}'+
-'#swimFish .sp.s1{left:-8px;top:4px}'+
-'#swimFish .sp.s2{right:-10px;top:14px;animation-delay:.8s}'+
-'@keyframes swimX{0%{transform:translateX(-60px) scaleX(1)}49.5%{transform:translateX(calc(100vw - 10px)) scaleX(1)}50%{transform:translateX(calc(100vw - 10px)) scaleX(-1)}99.5%{transform:translateX(-60px) scaleX(-1)}100%{transform:translateX(-60px) scaleX(1)}}'+
-'@keyframes swimY{0%,100%{transform:translateY(8px)}50%{transform:translateY(34px)}}'+
-'@keyframes rip{0%{transform:scale(.4);opacity:.8}100%{transform:scale(6);opacity:0}}'+
-'@keyframes tw{0%,100%{opacity:0;transform:scale(.5)}50%{opacity:.9;transform:scale(1.2)}}';
+st.textContent='#headMile{position:static;text-align:center;margin-top:26px;font-size:13px}'+
+'#garland{position:absolute;right:10px;top:52px;width:150px;display:none;pointer-events:none}'+
+'.header.party #garland{display:block}'+
+'#garland .gl{fill:#ffd76a;filter:drop-shadow(0 0 4px rgba(255,215,106,.9));animation:glow 1.6s ease-in-out infinite}'+
+'#garland .g2{animation-delay:.3s}#garland .g3{animation-delay:.6s}#garland .g4{animation-delay:.9s}#garland .g5{animation-delay:1.2s}'+
+'@keyframes glow{0%,100%{opacity:.35}50%{opacity:1}}';
 document.head.appendChild(st);
 var h=document.querySelector('.header');
 if(!h)return;
-var f=document.createElement('div');
-f.id='swimFish';
-f.innerHTML='<div class="bob"><span class="rip"></span><span class="rip r2"></span><span class="sp s1"></span><span class="sp s2"></span><svg viewBox="0 0 64 40"><g fill="currentColor"><path d="M6 20C11 9 17 8 21 14C17 20 17 20 21 26C17 32 11 31 6 20Z"/><path d="M20 20a14 9 0 1 0 28 0a14 9 0 1 0-28 0Z"/><path d="M28 12C31 5 40 4 45 9C39 11 33 12 28 12Z"/><path d="M28 28C33 28 39 29 45 31C40 36 31 35 28 28Z"/><circle cx="42" cy="17" r="1.6" fill="rgba(10,22,40,.85)"/></g></svg></div>';
-h.appendChild(f);
+var g=document.createElement('div');
+g.id='garland';
+g.innerHTML='<svg viewBox="0 0 160 30"><path d="M0 3 Q40 20 80 7 Q120 20 160 3" fill="none" stroke="rgba(255,215,106,.55)" stroke-width="1.5"/><circle class="gl g1" cx="20" cy="10" r="3"/><circle class="gl g2" cx="50" cy="12" r="3"/><circle class="gl g3" cx="80" cy="7" r="3"/><circle class="gl g4" cx="110" cy="12" r="3"/><circle class="gl g5" cx="140" cy="10" r="3"/></svg>';
+h.appendChild(g);
 })();
