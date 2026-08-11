@@ -909,8 +909,10 @@ arr.forEach(function(a,i){
 svg+='<circle class="wt-dt" cx="'+x(i)+'" cy="'+y(a.v)+'" r="3"/>';
 svg+='<text class="wt-vl" x="'+x(i)+'" y="'+(y(a.v)-6)+'" text-anchor="middle">'+a.v+'</text>';
 });
-svg+='<text class="wt-lb" x="'+x(0)+'" y="'+(H-8)+'">'+arr[0].d.slice(0,5)+'</text>';
-svg+='<text class="wt-lb" x="'+x(n-1)+'" y="'+(H-8)+'" text-anchor="end">'+arr[n-1].d.slice(0,5)+'</text>';
+arr.forEach(function(a,i){
+var yy=(i%2===0)?(H-6):(H-15);
+svg+='<text class="wt-lb" x="'+x(i)+'" y="'+yy+'" text-anchor="middle">'+a.d.slice(0,5)+'</text>';
+});
 svg+='</svg>';
 box.innerHTML=svg;
 }
