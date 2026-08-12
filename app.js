@@ -1102,3 +1102,22 @@ openView=function(id){origOpenView(id);var v=document.getElementById(id);if(v)v.
 markActive();
 if(document.getElementById('calView').classList.contains('open'))updateCalCounter();
 })();
+
+/* ===== Локальный режим: запросы к роботу отключены ===== */
+(function(){
+var of=window.fetch;
+window.fetch=function(u){
+if(typeof u==='string'&&u.indexOf('script.google.com')!==-1){return Promise.resolve(new Response('{}',{status:200}));}
+return of.apply(this,arguments);
+};
+var ox=XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open=function(m,u){
+if(typeof u==='string'&&u.indexOf('script.google.com')!==-1){this.__block=true;}
+return ox.apply(this,arguments);
+};
+var os=XMLHttpRequest.prototype.send;
+XMLHttpRequest.prototype.send=function(){
+if(this.__block){var self=this;setTimeout(function(){if(self.onload)self.onload();if(self.onreadystatechange)self.onreadystatechange();},10);return;}
+return os.apply(this,arguments);
+};
+})();
