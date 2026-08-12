@@ -1515,3 +1515,53 @@ if(el)el.parentNode.removeChild(el);
 if(n>8)clearInterval(t);
 },700);
 })();
+
+/* ===== Файл контекста для нейросети ===== */
+(function(){
+function build(){
+var L=[];
+L.push('МОЙ АКВАРИУМ — контекст для консультации.');
+L.push('Сегодня: '+new Date().toLocaleDateString('ru-RU'));
+var info=localStorage.getItem('aquaInfo');
+if(info){L.push('');L.push('Параметры аквариума: '+info);}
+var set=localStorage.getItem('aquaSettings');
+if(set){L.push('Периоды и настройки: '+set);}
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i),v=localStorage.getItem(k);
+if(!v||v.charAt(0)!=='[')continue;
+var arr=null;try{arr=JSON.parse(v);}catch(e){}
+if(!arr||!arr.length||typeof arr[0]!=='object'||!arr[0].date)continue;
+L.push('');L.push('ДНЕВНИК ('+arr.length+' записей):');
+for(var j=0;j<arr.length;j++){
+var e=arr[j],s=(e.date||'');
+if(e.text)s+=' — '+e.text;
+if(e.activity)s+='; активность: '+e.activity;
+if(e.appetite)s+='; аппетит: '+e.appetite;
+var tk=['no2','no3','gh','kh','ph','nh3','nh4','cl','t','temp'];
+for(var q=0;q<tk.length;q++){if(e[tk[q]]!==undefined&&e[tk[q]]!=='')s+='; '+tk[q]+'='+e[tk[q]];}
+if(e.tests&&typeof e.tests==='object'){for(var t2 in e.tests){s+='; '+t2+'='+e.tests[t2];}}
+L.push(s);
+}
+}
+return L.join('\n');
+}
+var b=null,bs=document.querySelectorAll('button');
+for(var i=0;i<bs.length;i++){if(bs[i].textContent.trim()==='Сохранить в файл'){b=bs[i];break;}}
+if(!b)return;
+var card=b;
+while(card&&card!==document.body&&card.textContent.indexOf('Резервная копия')===-1)card=card.parentElement;
+if(!card||card===document.body||document.getElementById('ctxBtn'))return;
+var nb=document.createElement('button');
+nb.id='ctxBtn';nb.className='ai-btn';
+nb.textContent='📄 Дневник для ИИ';
+nb.onclick=function(){
+var txt=build();
+var bl=new Blob([txt],{type:'text/plain;charset=utf-8'});
+var a=document.createElement('a');
+a.href=URL.createObjectURL(bl);
+a.download='Дневник для ИИ '+new Date().toISOString().slice(0,10)+'.txt';
+document.body.appendChild(a);a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+};
+card.appendChild(nb);
+})();
