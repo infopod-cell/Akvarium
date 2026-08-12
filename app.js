@@ -1430,3 +1430,51 @@ return r;
 return f.apply(this,arguments);
 };
 })();
+
+/* ===== Советник v3: сам находит живую модель ===== */
+(function(){
+var f=window.fetch;
+function gk(){return localStorage.getItem('aquaGeminiKey')||'';}
+window.fetch=function(u,o){
+if(typeof u==='string'&&u.indexOf('generativelanguage.googleapis.com')!==-1&&u.indexOf(':generateContent')!==-1){
+return f.apply(this,arguments).then(function(r){
+if(r.ok)return r;
+var c=r.clone();
+return c.json().then(function(j){
+var msg=(j.error&&j.error.message)||'';
+if(msg.indexOf('not found')===-1&&msg.indexOf('API version')===-1&&msg.indexOf('not supported')===-1)return r;
+return fix(u,o);
+}).catch(function(){return r;});
+});
+}
+return f.apply(this,arguments);
+};
+function list(ver){
+var key=gk();
+return f('https://generativelanguage.googleapis.com/'+ver+'/models?key='+key,{headers:{'x-goog-api-key':key}})
+.then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+}
+function pick(l){
+if(!l||!l.models)return null;
+var ms=l.models;
+for(var i=0;i<ms.length;i++){if(ms[i].name.indexOf('2.5-flash')!==-1)return ms[i].name;}
+for(var i=0;i<ms.length;i++){if(ms[i].name.indexOf('flash')!==-1)return ms[i].name;}
+for(var i=0;i<ms.length;i++){if(ms[i].name.indexOf('gemini')!==-1)return ms[i].name;}
+return null;
+}
+function fix(u,o){
+return list('v1').then(function(l1){
+var nm=pick(l1),ver='v1';
+if(!nm){return list('v1beta').then(function(l2){
+var n2=pick(l2);
+if(!n2)return f(u,o);
+var nu2=u.replace(/\/v1(beta)?\/models\/[^:]+:/,'/v1beta/models/'+n2.replace(/^models\//,'')+':');
+return f(nu2,o);
+});}
+var nu=u.replace(/\/v1(beta)?\/models\/[^:]+:/,'/'+ver+'/models/'+nm.replace(/^models\//,'')+':');
+return f(nu,o);
+});
+}
+var ks=document.getElementById('aiKeyStat');
+if(ks&&gk()){ks.textContent='✅ Ключ сохранён (советник v3)';ks.style.color='#3ddc84';}
+})();
