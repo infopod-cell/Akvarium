@@ -1,0 +1,11 @@
+{
+  "name": "Мой Аквариум",
+  "short_name": "Аквариум",
+  "start_url": "/Akvarium/",
+  "display": "standalone",
+  "background_color": "#0a1428",
+  "theme_color": "#0a1428",
+  "icons": [
+    { "src": "19118369c-0e8c-4f5b-9f05-bd4c79d9c133_1.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
