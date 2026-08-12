@@ -6,6 +6,7 @@
   "background_color": "#0a1428",
   "theme_color": "#0a1428",
   "icons": [
-    { "src": "19118369c-0e8c-4f5b-9f05-bd4c79d9c133_1.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "bettafish.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "bettafish.png", "sizes": "192x192", "type": "image/png" }
   ]
 }
