@@ -1478,3 +1478,27 @@ return f(nu,o);
 var ks=document.getElementById('aiKeyStat');
 if(ks&&gk()){ks.textContent='✅ Ключ сохранён (советник v3)';ks.style.color='#3ddc84';}
 })();
+
+/* ===== Советник v4: диагностика на экране ===== */
+setTimeout(function(){
+var ks=document.getElementById('aiKeyStat');
+if(!ks)return;
+var key=localStorage.getItem('aquaGeminiKey')||'';
+if(!key){ks.textContent='⚠️ Ключ не сохранён';ks.style.color='#ffb74d';return;}
+ks.textContent='🔎 Диагностика...';ks.style.color='#9cd';
+fetch('https://generativelanguage.googleapis.com/v1/models?key='+key,{headers:{'x-goog-api-key':key}})
+.then(function(r){return r.text().then(function(t){return{r:r,t:t};});})
+.then(function(o1){
+var j=null;try{j=JSON.parse(o1.t);}catch(e){}
+var name=null;
+if(j&&j.models){for(var i=0;i<j.models.length;i++){if(j.models[i].name.indexOf('flash')!==-1){name=j.models[i].name;break;}}}
+if(!name){ks.textContent='❌ v1:'+o1.r.status+' '+(o1.t||'').slice(0,100);ks.style.color='#ff6b6b';return;}
+fetch('https://generativelanguage.googleapis.com/v1/models/'+name.replace(/^models\//,'')+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:'ответь одним словом: ок'}]}]})})
+.then(function(r){return r.text().then(function(t){return{r:r,t:t};});})
+.then(function(o2){
+if(o2.r.ok){ks.textContent='✅ Советник v4: связь есть, модель '+name;ks.style.color='#3ddc84';}
+else{ks.textContent='❌ '+o2.r.status+' '+(o2.t||'').slice(0,120);ks.style.color='#ff6b6b';}
+});
+})
+.catch(function(e){ks.textContent='❌ сеть: '+e;ks.style.color='#ff6b6b';});
+},1200);
