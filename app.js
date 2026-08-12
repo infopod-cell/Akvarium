@@ -1502,3 +1502,16 @@ else{ks.textContent='❌ '+o2.r.status+' '+(o2.t||'').slice(0,120);ks.style.colo
 })
 .catch(function(e){ks.textContent='❌ сеть: '+e;ks.style.color='#ff6b6b';});
 },1200);
+
+/* ===== Чистота: следы ИИ спрятаны ===== */
+(function(){
+var n=0;
+var t=setInterval(function(){
+n++;
+['aiTile','aiTile2','aiSetCard'].forEach(function(id){
+var el=document.getElementById(id);
+if(el)el.parentNode.removeChild(el);
+});
+if(n>8)clearInterval(t);
+},700);
+})();
