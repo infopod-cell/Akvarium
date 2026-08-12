@@ -1408,3 +1408,25 @@ c.appendChild(b);
 setTimeout(function(){addTile2();addBtn2();},400);
 setTimeout(function(){addTile2();},2000);
 })();
+
+/* ===== Переходник: новая версия API Gemini ===== */
+(function(){
+var f=window.fetch;
+window.fetch=function(u,o){
+if(typeof u==='string'&&u.indexOf('generativelanguage.googleapis.com')!==-1){
+return f.apply(this,arguments).then(function(r){
+if(r.ok)return r;
+var c=r.clone();
+return c.json().then(function(j){
+var msg=(j.error&&j.error.message)||'';
+if(msg.indexOf('API version')!==-1||msg.indexOf('not found')!==-1){
+var nu=u.indexOf('/v1beta/')!==-1?u.replace('/v1beta/','/v1/'):u.replace('/v1/','/v1beta/');
+return f(nu,o);
+}
+return r;
+}).catch(function(){return r;});
+});
+}
+return f.apply(this,arguments);
+};
+})();
