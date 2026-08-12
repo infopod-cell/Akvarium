@@ -1183,3 +1183,126 @@ setTimeout(updBk,500);
 updBk();
 setInterval(updBk,60000);
 })();
+
+/* ===== ИИ-советник ===== */
+(function(){
+var KEY_LS='aquaGeminiKey';
+function getKey(){return localStorage.getItem(KEY_LS)||'';}
+var st=document.createElement('style');
+st.textContent='.ai-ov{position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box}.ai-h{display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:12px;color:#eaf6ff}.ai-x{background:none;border:1px solid #444;color:#fff;border-radius:10px;padding:6px 12px}.ai-btn{display:block;width:100%;margin:8px 0;padding:12px;border-radius:12px;border:1px solid #2b4a66;background:#16283c;color:#eaf6ff;font-size:15px}.ai-img{width:100%;border-radius:12px;display:none;margin:8px 0}.ai-res{white-space:pre-wrap;font-size:14px;line-height:1.5;background:#122032;border:1px solid #2b4a66;border-radius:12px;padding:12px;margin-top:10px;display:none;color:#eaf6ff}';
+document.head.appendChild(st);
+
+function addSettings(){
+if(document.getElementById('aiSetCard'))return;
+var b=document.querySelectorAll('button'),bk=null;
+for(var i=0;i<b.length;i++){if(b[i].textContent.trim()==='Сохранить в файл'){bk=b[i];break;}}
+if(!bk)return;
+var card=bk;
+while(card&&card!==document.body){if(card.textContent.indexOf('Резервная копия')!==-1)break;card=card.parentElement;}
+if(!card||card===document.body)return;
+var c=document.createElement('div');
+c.id='aiSetCard';
+c.style.cssText='margin-top:14px;border:1px solid #2b4a66;border-radius:16px;padding:14px';
+c.innerHTML='<div style="font-size:16px;margin-bottom:8px;color:#eaf6ff">🤖 ИИ-советник</div><input id="aiKeyInput" placeholder="Вставь ключ AIza..." style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid #2b4a66;background:#0d1826;color:#eaf6ff;font-size:13px"><button class="ai-btn" id="aiKeySave">Сохранить ключ</button><div id="aiKeyStat" style="font-size:12px"></div>';
+card.parentElement.insertBefore(c,card.nextSibling);
+document.getElementById('aiKeySave').addEventListener('click',function(){
+localStorage.setItem(KEY_LS,document.getElementById('aiKeyInput').value.trim());
+document.getElementById('aiKeyStat').textContent='✅ Ключ сохранён в телефоне';
+document.getElementById('aiKeyStat').style.color='#3ddc84';
+});
+}
+
+var ov=null,imgData=null;
+function build(){
+ov=document.createElement('div');ov.className='ai-ov';ov.style.display='none';
+ov.innerHTML='<div class="ai-h"><span>🤖 ИИ-советник</span><button class="ai-x" id="aiClose">✕</button></div><button class="ai-btn" id="aiCam">📷 Сфотографировать</button><button class="ai-btn" id="aiGal">🖼 Выбрать из галереи</button><input type="file" id="aiFileCam" accept="image/*" capture="environment" style="display:none"><input type="file" id="aiFileGal" accept="image/*" style="display:none"><img id="aiImg" class="ai-img"><button class="ai-btn" id="aiGo" style="display:none">🔍 Проанализировать</button><button class="ai-btn" id="aiTest">🔑 Проверить ключ</button><div id="aiStatus" style="font-size:13px;margin-top:6px"></div><div id="aiRes" class="ai-res"></div>';
+document.body.appendChild(ov);
+document.getElementById('aiClose').onclick=function(){ov.style.display='none';};
+document.getElementById('aiCam').onclick=function(){document.getElementById('aiFileCam').click();};
+document.getElementById('aiGal').onclick=function(){document.getElementById('aiFileGal').click();};
+document.getElementById('aiFileCam').onchange=onFile;
+document.getElementById('aiFileGal').onchange=onFile;
+document.getElementById('aiGo').onclick=function(){run(true);};
+document.getElementById('aiTest').onclick=function(){run(false);};
+}
+function onFile(e){
+var f=e.target.files[0];if(!f)return;
+var r=new FileReader();
+r.onload=function(){
+var img=new Image();
+img.onload=function(){
+var mx=1024,sc=Math.min(1,mx/Math.max(img.width,img.height));
+var cv=document.createElement('canvas');
+cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+imgData=cv.toDataURL('image/jpeg',0.8).split(',')[1];
+var pr=document.getElementById('aiImg');
+pr.src='data:image/jpeg;base64,'+imgData;
+pr.style.display='block';
+document.getElementById('aiGo').style.display='block';
+status('Фото готово к анализу','#9cd');
+};
+img.src=r.result;
+};
+r.readAsDataURL(f);
+e.target.value='';
+}
+function status(t,c){var s=document.getElementById('aiStatus');s.textContent=t;s.style.color=c||'#9cd';}
+function callGemini(b64,cb){
+var key=getKey();
+if(!key){status('⚠️ Нет ключа — вставь его в Настройках','#ff6b6b');return;}
+var parts=[{text:'Ты опытный аквариумист. Фото домашнего аквариума с петушком. Оцени: прозрачность воды, состояние рыбки (плавники, окрас, поза), растения, налёт/водоросли, пузыри у поверхности. Ответь по-русски кратко: 3-6 конкретных наблюдений или советов.'}];
+if(b64)parts.push({inline_data:{mime_type:'image/jpeg',data:b64}});
+var models=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+var mi=0;
+function tryNext(){
+if(mi>=models.length){status('❌ Не удалось: '+lastErr,'#ff6b6b');return;}
+var m=models[mi++];
+fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent',{
+method:'POST',
+headers:{'Content-Type':'application/json','x-goog-api-key':key},
+body:JSON.stringify({contents:[{parts:parts}]})
+}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});}).then(function(o){
+if(o.ok&&o.j.candidates&&o.j.candidates[0]){
+var txt=o.j.candidates[0].content.parts.map(function(p){return p.text||'';}).join('');
+cb(txt);
+}else{
+lastErr=(o.j.error&&o.j.error.message)||('HTTP '+o.j);
+tryNext();
+}
+}).catch(function(err){lastErr=String(err);tryNext();});
+}
+var lastErr='';
+tryNext();
+}
+function run(withPhoto){
+if(withPhoto&&!imgData){status('⚠️ Сначала выбери фото','#ffb74d');return;}
+status('🤔 Думаю...','#9cd');
+callGemini(withPhoto?imgData:null,function(txt){
+var r=document.getElementById('aiRes');
+r.textContent=txt;r.style.display='block';
+status('✅ Готово','#3ddc84');
+if(withPhoto)localStorage.setItem('aquaAiLast',txt);
+});
+}
+function addTile(){
+if(document.getElementById('aiTile'))return;
+var leafs=document.querySelectorAll('*');
+var leaf=null;
+for(var i=0;i<leafs.length;i++){
+var el=leafs[i];
+if(el.children.length===0&&el.textContent.trim()==='Настройки'){leaf=el;break;}
+}
+if(!leaf)return;
+var tile=leaf;
+while(tile&&tile.parentElement&&tile.textContent.indexOf('копия')===-1){tile=tile.parentElement;}
+if(!tile)return;
+var ai=tile.cloneNode(false);
+ai.id='aiTile';
+ai.innerHTML='<div style="font-size:16px;color:#eaf6ff">🤖 ИИ-советник</div><div style="font-size:12px;opacity:.7;margin-top:4px">анализ фото аквариума</div>';
+ai.style.cursor='pointer';
+ai.onclick=function(){if(!ov)build();ov.style.display='block';var l=localStorage.getItem('aquaAiLast');if(l){var r=document.getElementById('aiRes');r.textContent=l;r.style.display='block';}};
+tile.parentElement.insertBefore(ai,tile);
+}
+setTimeout(function(){addSettings();addTile();},300);
+})();
