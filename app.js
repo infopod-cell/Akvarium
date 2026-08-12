@@ -1565,3 +1565,52 @@ setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
 };
 card.appendChild(nb);
 })();
+
+/* ===== Сегодня тот самый день! ===== */
+(function(){
+function parseD(s){var m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);if(!m)return null;return new Date(+m[3],+m[2]-1,+m[1]);}
+function tileOf(word){
+var all=document.querySelectorAll('div'),best=null;
+for(var i=0;i<all.length;i++){
+var t=all[i].textContent||'';
+if(t.indexOf(word)!==-1&&t.indexOf('последн')!==-1&&t.length<200){
+if(!best||t.length<best.textContent.length)best=all[i];
+}
+}
+return best;
+}
+function periods(){
+var b=null,bs=document.querySelectorAll('button');
+for(var i=0;i<bs.length;i++){if(bs[i].textContent.trim()==='Сохранить периоды'){b=bs[i];break;}}
+if(!b)return null;
+var card=b;while(card&&card!==document.body&&card.textContent.indexOf('Периоды')===-1)card=card.parentElement;
+if(!card||card===document.body)return null;
+var ins=card.querySelectorAll('input');
+if(ins.length<2)return null;
+return [parseInt(ins[0].value)||7,parseInt(ins[1].value)||10];
+}
+function fix(word,label){
+var t=tileOf(word);if(!t)return;
+var P=periods();if(!P)return;
+var per=(word.indexOf('Подмены')===0)?P[0]:P[1];
+var m=t.textContent.match(/последн\w+\s+(\d{2}\.\d{2}\.\d{4})/);if(!m)return;
+var last=parseD(m[1]);if(!last)return;
+var now=new Date();var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+var days=Math.floor((today-last)/86400000);
+var rem=per-days;
+var big=null,els=t.querySelectorAll('*');
+for(var i=0;i<els.length;i++){var x=els[i];if(x.children.length===0&&/через|Сегодня|Просрочено/.test(x.textContent)){big=x;break;}}
+if(!big)return;
+if(rem<=0){
+var txt='Сегодня '+label+'!';
+if(rem<0)txt+=' (просрочено '+(-rem)+' дн.)';
+big.textContent=txt;
+big.style.color=rem<0?'#ff6b6b':'#ff9432';
+}else{
+big.style.color='';
+}
+}
+function tick(){fix('Подмены воды','подмена воды');fix('Голодный день','голодный день');}
+setTimeout(tick,600);
+setInterval(tick,5000);
+})();
