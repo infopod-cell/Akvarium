@@ -1121,3 +1121,65 @@ if(this.__block){var self=this;setTimeout(function(){if(self.onload)self.onload(
 return os.apply(this,arguments);
 };
 })();
+
+/* ===== Настройки: без таблицы + напоминание о копии ===== */
+(function(){
+function findBtn(t){
+var bs=document.querySelectorAll('button');
+for(var i=0;i<bs.length;i++){if(bs[i].textContent.trim()===t)return bs[i];}
+return null;
+}
+function ancestorWith(el,txts){
+var p=el;
+while(p&&p!==document.body){
+var ok=true;
+for(var i=0;i<txts.length;i++){if(p.textContent.indexOf(txts[i])===-1){ok=false;break;}}
+if(ok)return p;
+p=p.parentElement;
+}
+return null;
+}
+var st=document.createElement('style');
+st.textContent='#bkInfo{font-size:12px;margin-top:10px;text-align:center}';
+document.head.appendChild(st);
+
+var b1=findBtn('Отправить в таблицу');
+if(b1){var card=ancestorWith(b1,['Таблица','Ссылка робота']);if(card)card.style.display='none';}
+
+var nodes=document.querySelectorAll('div,p,span');
+for(var i=0;i<nodes.length;i++){
+var n=nodes[i];
+if(n.children.length===0&&n.textContent.indexOf('таблица,')!==-1){
+n.textContent=n.textContent.replace('таблица, ','');
+}
+}
+
+var b2=findBtn('Сохранить в файл');
+if(b2){
+var card2=ancestorWith(b2,['Резервная копия']);
+if(card2&&!document.getElementById('bkInfo')){
+var info=document.createElement('div');
+info.id='bkInfo';
+card2.appendChild(info);
+}
+}
+function updBk(){
+var el=document.getElementById('bkInfo');
+if(!el)return;
+var t=Number(localStorage.getItem('aquaLastBackup')||0);
+if(!t){el.textContent='⚠️ Копия — твоя единственная страховка. Нажми «Сохранить в файл»!';el.style.color='#ffb74d';return;}
+var d=Math.floor((Date.now()-t)/86400000);
+if(d<=0){el.textContent='✅ Копия сделана сегодня';el.style.color='#3ddc84';}
+else if(d<=7){el.textContent='✅ Копия сделана '+d+' дн. назад';el.style.color='#3ddc84';}
+else{el.textContent='⚠️ Копия была '+d+' дн. назад — обнови её!';el.style.color='#ff6b6b';}
+}
+document.addEventListener('click',function(e){
+var t=e.target&&e.target.closest?e.target.closest('button'):null;
+if(t&&t.textContent.trim()==='Сохранить в файл'){
+localStorage.setItem('aquaLastBackup',String(Date.now()));
+setTimeout(updBk,500);
+}
+});
+updBk();
+setInterval(updBk,60000);
+})();
