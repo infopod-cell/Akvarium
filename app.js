@@ -1610,7 +1610,7 @@ big.style.color=rem<0?'#ff6b6b':'#ff9432';
 big.style.color='';
 }
 }
-function tick(){fix('Подмены воды','подмена воды');fix('Голодный день','голодный день');}
+function tick(){fix('Подмена воды','подмена воды');fix('Голодный день','голодный день');}
 setTimeout(tick,600);
 setInterval(tick,5000);
 })();
