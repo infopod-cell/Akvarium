@@ -1615,93 +1615,111 @@ setTimeout(tick,600);
 setInterval(tick,5000);
 })();
 
-/* ===== Параметры воды: плитка + перенос тестов + температура в график ===== */
+/* ===== Параметры воды v2: единый стиль ===== */
 (function(){
+function leaf(text){var all=document.querySelectorAll('*');for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t===text)return all[i];}return null;}
+function cardOf(el,test){var n=el;while(n&&n!==document.body){if(test(n.textContent||''))return n;n=n.parentElement;}return null;}
 function lastTemp(){var a=localStorage.getItem('aquaTemps');if(a){try{var j=JSON.parse(a);return j.length?j[j.length-1]:null;}catch(e){}}return null;}
 function fmtT(t){return (Math.round(t*10)/10).toString().replace('.',',')+'°C';}
-function addTile(){
-if(document.getElementById('wpTile'))return;
-var all=document.querySelectorAll('*'),leaf=null;
-for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t==='Дневник'){leaf=all[i];break;}} 
-if(!leaf)return;
-var tile=leaf;
-while(tile.parentElement){var p=tile.parentElement;if(p.textContent.length<300){tile=p;}else{break;}}
-var ai=tile.cloneNode(false);
-ai.id='wpTile';
-ai.innerHTML='<div style="display:flex;align-items:center;gap:6px;font-size:16px;color:#eaf6ff"><span>💧</span><span>Параметры воды</span></div><div class="t-v" id="wpBig" style="font-size:26px">—</div><div class="t-s" id="wpSub">температура воды</div>';
-ai.style.cursor='pointer';
+function minDiv(ok){var all=document.querySelectorAll('div'),best=null;for(var i=0;i<all.length;i++){var t=all[i].textContent||'';if(ok(t)){if(!best||t.length<best.textContent.length)best=all[i];}}return best;}
+var wCardRef=null,dClass='';
+function refs(){
+if(!wCardRef){var wl=leaf('Подмена воды');if(wl)wCardRef=cardOf(wl,function(t){return t.indexOf('последняя')!==-1;});}
+if(!dClass){var dl=leaf('Дневник');if(dl){var dc=cardOf(dl,function(t){return /\d{2}\.\d{2}\.\d{4}/.test(t);});if(dc)dClass=dc.className;}}
+return !!wCardRef;
+}
+function buildTile(){
+if(document.getElementById('wpTile'))return true;
+if(!refs())return false;
+var dl=leaf('Дневник');var dCard=cardOf(dl,function(t){return /\d{2}\.\d{2}\.\d{4}/.test(t);});
+if(!dCard)return false;
+var ai=wCardRef.cloneNode(true);
+ai.id='wpTile';ai.className=dClass;ai.style.cursor='pointer';
+var ch=ai.children;
+var sp=ch[0].querySelector('span');
+ch[0].innerHTML=(sp?sp.outerHTML:'')+'<span>Параметры воды</span>';
+ch[1].id='wpBig';ch[2].id='wpSub';
 ai.onclick=openWP;
-tile.parentElement.insertBefore(ai,tile);
+dCard.parentElement.insertBefore(ai,dCard);
 refreshTile();
+return true;
 }
 function refreshTile(){
 var b=document.getElementById('wpBig'),s=document.getElementById('wpSub');
 if(!b)return;
 var lt=lastTemp();
 b.textContent=lt?fmtT(lt.t):'—';
-if(s)s.textContent=lt?('замер '+lt.d):'температура воды';
+if(s)s.textContent=lt?('температура воды · замер '+lt.d):'температура воды';
+var v=document.getElementById('wpTempV');if(v)v.textContent=lt?fmtT(lt.t):'—';
+var d=document.getElementById('wpTempD');if(d)d.textContent=lt?('замер '+lt.d):'';
 }
 var ov=null;
-function openWP(){if(!ov)buildWP();ov.style.display='block';refreshWP();refreshTile();setTimeout(inject,60);}
-function findMin(ok){
-var all=document.querySelectorAll('div'),best=null;
-for(var i=0;i<all.length;i++){var t=all[i].textContent||'';if(ok(t)){if(!best||t.length<best.textContent.length)best=all[i];}}
-return best;
+function openWP(){
+if(!ov)buildWP();
+ov.style.display='block';
+refreshTile();
+setTimeout(injectT,80);
 }
 function buildWP(){
 ov=document.createElement('div');ov.id='wpOv';
 ov.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;display:none';
-ov.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:12px;color:#eaf6ff"><span>💧 Параметры воды</span><button id="wpClose" style="background:none;border:1px solid #444;color:#fff;border-radius:10px;padding:6px 12px">✕</button></div><div style="border:1px solid #2b4a66;border-radius:16px;padding:14px;margin-bottom:14px;text-align:center"><div style="font-size:14px;opacity:.8">🌡 Температура воды</div><div id="wpTempV" style="font-size:34px;color:#4dc3ff;margin-top:4px">—</div><div id="wpTempD" style="font-size:12px;opacity:.7"></div></div><div id="wpHost"></div>';
+var head=document.createElement('div');
+head.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:20px;color:#eaf6ff';
+head.innerHTML='<span></span><button id="wpClose" style="background:none;border:1px solid #3a5a7a;color:#eaf6ff;border-radius:12px;padding:6px 14px;font-size:14px">✕ Закрыть</button>';
+ov.appendChild(head);
+if(refs()){
+var tc=wCardRef.cloneNode(true);
+tc.className=dClass;tc.id='wpTempCard';
+var c=tc.children;
+c[0].innerHTML='<span>🌡️</span><span>Температура воды</span>';
+c[1].id='wpTempV';c[2].id='wpTempD';c[2].className=c[2].className;
+ov.appendChild(tc);
+}
+var host=document.createElement('div');host.id='wpHost';ov.appendChild(host);
 document.body.appendChild(ov);
 document.getElementById('wpClose').onclick=function(){ov.style.display='none';};
-var tests=findMin(function(t){return t.indexOf('Последние тесты воды')!==-1&&t.indexOf('pH')!==-1&&t.length<2000;});
-if(tests){tests.parentNode.removeChild(tests);document.getElementById('wpHost').appendChild(tests);}
-var graph=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
-if(graph){graph.parentNode.removeChild(graph);document.getElementById('wpHost').appendChild(graph);}
-hookGraph();
+var tests=minDiv(function(t){return t.indexOf('Последние тесты воды')!==-1&&t.indexOf('pH')!==-1&&t.length<2000;});
+if(tests){tests.parentNode.removeChild(tests);host.appendChild(tests);}
+var graph=minDiv(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
+if(graph&&graph.querySelector('svg')){graph.parentNode.removeChild(graph);host.appendChild(graph);}
+else if(graph){var g2=minDiv(function(t){return t.indexOf('График тестов')!==-1&&t.length<5000;});if(g2&&g2.querySelector('svg')){g2.parentNode.removeChild(g2);host.appendChild(g2);}else{host.appendChild(graph);}}
+watchGraph();
 }
-function refreshWP(){
-var lt=lastTemp();
-var v=document.getElementById('wpTempV');if(v)v.textContent=lt?fmtT(lt.t):'—';
-var d=document.getElementById('wpTempD');if(d)d.textContent=lt?('замер '+lt.d):'';
-}
-var obs=null;
-function hookGraph(){
-var card=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
-if(!card)return;
-obs=new MutationObserver(function(){setTimeout(inject,60);});
+var obs=null,watched=null;
+function watchGraph(){
+var card=null,ds=document.querySelectorAll('#wpOv div');
+for(var i=0;i<ds.length;i++){if((ds[i].textContent||'').indexOf('График тестов')!==-1&&ds[i].querySelector('svg')){card=ds[i];break;}}
+if(!card||watched===card)return;
+watched=card;
+if(obs)obs.disconnect();
+obs=new MutationObserver(function(){setTimeout(injectT,60);});
 obs.observe(card,{childList:true,subtree:true});
 }
-function inject(){
-if(!ov||ov.style.display==='none')return;
-var card=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
-if(!card)return;
-var svg=card.querySelector('svg');if(!svg)return;
-var old=svg.querySelectorAll('.wpTemp');
-for(var i=0;i<old.length;i++)old[i].parentNode.removeChild(old[i]);
-var a=localStorage.getItem('aquaTemps');if(!a)return;
-var pts;try{pts=JSON.parse(a);}catch(e){return;}
+function injectT(){
+if(!watched)return;
+var svg=watched.querySelector('svg');if(!svg)return;
+var old=svg.querySelectorAll('.wpTemp');for(var i=0;i<old.length;i++)old[i].parentNode.removeChild(old[i]);
+var a=localStorage.getItem('aquaTemps');if(!a)return;var pts;try{pts=JSON.parse(a);}catch(e){return;}
 if(!pts.length)return;
 var W=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width)?svg.viewBox.baseVal.width:(svg.clientWidth||300);
 var H=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.height)?svg.viewBox.baseVal.height:(svg.clientHeight||150);
 var vals=pts.map(function(p){return p.t;});
-var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
-if(mx===mn){mx+=1;mn-=1;}
+var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);if(mx===mn){mx+=1;mn-=1;}
 var n=pts.length;
 function X(i){return n<=1?W/2:20+(i/(n-1))*(W-40);}
 function Y(v){return H-((v-mn)/(mx-mn))*(H*0.6)-H*0.2;}
 var d='M'+X(0).toFixed(1)+' '+Y(vals[0]).toFixed(1);
 for(var i=1;i<n;i++)d+=' L'+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
-var path=document.createElementNS('http://www.w3.org/2000/svg','path');
-path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke','#ff9432');path.setAttribute('stroke-width','2');path.setAttribute('class','wpTemp');
-svg.appendChild(path);
-var lab=document.createElementNS('http://www.w3.org/2000/svg','text');
-lab.setAttribute('x',X(n-1).toFixed(1));lab.setAttribute('y',(Y(vals[n-1])-5).toFixed(1));lab.setAttribute('fill','#ff9432');lab.setAttribute('font-size','10');lab.setAttribute('class','wpTemp');
-lab.textContent=fmtT(vals[n-1]);
-svg.appendChild(lab);
+var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9432');p.setAttribute('stroke-width','2');p.setAttribute('class','wpTemp');
+svg.appendChild(p);
+var t=document.createElementNS('http://www.w3.org/2000/svg','text');
+t.setAttribute('x',X(n-1).toFixed(1));t.setAttribute('y',(Y(vals[n-1])-5).toFixed(1));t.setAttribute('fill','#ff9432');t.setAttribute('font-size','10');t.setAttribute('class','wpTemp');
+t.textContent=(Math.round(vals[n-1]*10)/10).toString().replace('.',',')+'°';
+svg.appendChild(t);
 }
-setTimeout(addTile,500);
-setInterval(function(){addTile();refreshTile();},4000);
+if(!buildTile()){var n=0;var iv=setInterval(function(){n++;if(buildTile()||n>20)clearInterval(iv);},150);}
+setInterval(refreshTile,4000);
 })();
 
 /* ===== Температура: графа в форме + сбор из старых записей ===== */
@@ -1754,76 +1772,4 @@ if(!map[en.date]){putT(en.date,t);map[en.date]=1;}
 localStorage.setItem('aquaTempHarvested','1');
 }
 setTimeout(harvest,1500);
-})();
-
-/* ===== Полировка параметров: единый стиль, график на месте ===== */
-(function(){
-function leaf(text){
-var all=document.querySelectorAll('*');
-for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t===text)return all[i];}
-return null;
-}
-function upTo(el,test){var n=el;while(n&&n!==document.body){if(test(n.textContent||''))return n;n=n.parentElement;}return null;}
-function cardify(el){el.style.background='#182a3d';el.style.border='1px solid #2b4a66';el.style.borderRadius='16px';el.style.padding='14px';el.style.gridColumn='1 / -1';el.style.width='100%';el.style.boxSizing='border-box';}
-var obs=null,watched=null;
-function fix(){
-var wp=document.getElementById('wpTile');
-var dLeaf=leaf('Дневник');
-if(wp&&dLeaf){
-var dCard=upTo(dLeaf,function(t){return /\d{2}\.\d{2}\.\d{4}/.test(t);});
-if(dCard){cardify(wp);if(wp.nextElementSibling!==dCard){dCard.parentElement.insertBefore(wp,dCard);}}
-}
-var ov=document.getElementById('wpOv');
-if(ov){
-var tv=document.getElementById('wpTempV');
-if(tv){var tc=tv.parentElement;tc.style.padding='10px';tc.style.marginBottom='12px';tv.style.fontSize='26px';tv.style.marginTop='2px';}
-var host=document.getElementById('wpHost');
-if(host){
-var good=null,ds=document.querySelectorAll('div');
-for(var i=0;i<ds.length;i++){if((ds[i].textContent||'').indexOf('График тестов')!==-1&&ds[i].querySelector('svg')){good=ds[i];break;}}
-if(good&&good.parentElement!==host){
-var hs=host.querySelectorAll('div');
-for(var i=0;i<hs.length;i++){if((hs[i].textContent||'').indexOf('График тестов')!==-1&&!hs[i].querySelector('svg')&&hs[i].textContent.length<60){host.removeChild(hs[i]);break;}}
-good.parentNode.removeChild(good);
-host.appendChild(good);
-}
-watchGraph();
-}
-}
-}
-function watchGraph(){
-var card=null,ds=document.querySelectorAll('div');
-for(var i=0;i<ds.length;i++){var el=ds[i];if((el.textContent||'').indexOf('График тестов')!==-1&&el.querySelector('svg')&&el.closest('#wpOv')){card=el;break;}}
-if(!card||watched===card)return;
-watched=card;
-if(obs)obs.disconnect();
-obs=new MutationObserver(function(){setTimeout(injectT,60);});
-obs.observe(card,{childList:true,subtree:true});
-injectT();
-}
-function injectT(){
-if(!watched)return;
-var svg=watched.querySelector('svg');if(!svg)return;
-var old=svg.querySelectorAll('.wpTemp');for(var i=0;i<old.length;i++)old[i].parentNode.removeChild(old[i]);
-var a=localStorage.getItem('aquaTemps');if(!a)return;var pts;try{pts=JSON.parse(a);}catch(e){return;}
-if(!pts.length)return;
-var W=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width)?svg.viewBox.baseVal.width:(svg.clientWidth||300);
-var H=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.height)?svg.viewBox.baseVal.height:(svg.clientHeight||150);
-var vals=pts.map(function(p){return p.t;});
-var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);if(mx===mn){mx+=1;mn-=1;}
-var n=pts.length;
-function X(i){return n<=1?W/2:20+(i/(n-1))*(W-40);}
-function Y(v){return H-((v-mn)/(mx-mn))*(H*0.6)-H*0.2;}
-var d='M'+X(0).toFixed(1)+' '+Y(vals[0]).toFixed(1);
-for(var i=1;i<n;i++)d+=' L'+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
-var p=document.createElementNS('http://www.w3.org/2000/svg','path');
-p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9432');p.setAttribute('stroke-width','2');p.setAttribute('class','wpTemp');
-svg.appendChild(p);
-var t=document.createElementNS('http://www.w3.org/2000/svg','text');
-t.setAttribute('x',X(n-1).toFixed(1));t.setAttribute('y',(Y(vals[n-1])-5).toFixed(1));t.setAttribute('fill','#ff9432');t.setAttribute('font-size','10');t.setAttribute('class','wpTemp');
-t.textContent=(Math.round(vals[n-1]*10)/10).toString().replace('.',',')+'°';
-svg.appendChild(t);
-}
-setTimeout(fix,800);
-setInterval(fix,3000);
 })();
