@@ -1614,3 +1614,144 @@ function tick(){fix('Подмена воды','подмена воды');fix('Г
 setTimeout(tick,600);
 setInterval(tick,5000);
 })();
+
+/* ===== Параметры воды: плитка + перенос тестов + температура в график ===== */
+(function(){
+function lastTemp(){var a=localStorage.getItem('aquaTemps');if(a){try{var j=JSON.parse(a);return j.length?j[j.length-1]:null;}catch(e){}}return null;}
+function fmtT(t){return (Math.round(t*10)/10).toString().replace('.',',')+'°C';}
+function addTile(){
+if(document.getElementById('wpTile'))return;
+var all=document.querySelectorAll('*'),leaf=null;
+for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t==='Дневник'&&all[i].querySelectorAll('*').length<=1){leaf=all[i];break;}}
+if(!leaf)return;
+var tile=leaf;
+while(tile.parentElement){var p=tile.parentElement;if(p.textContent.length<300){tile=p;}else{break;}}
+var ai=tile.cloneNode(false);
+ai.id='wpTile';
+ai.innerHTML='<div style="display:flex;align-items:center;gap:6px;font-size:16px;color:#eaf6ff"><span>💧</span><span>Параметры воды</span></div><div class="t-v" id="wpBig" style="font-size:26px">—</div><div class="t-s" id="wpSub">температура воды</div>';
+ai.style.cursor='pointer';
+ai.onclick=openWP;
+tile.parentElement.insertBefore(ai,tile);
+refreshTile();
+}
+function refreshTile(){
+var b=document.getElementById('wpBig'),s=document.getElementById('wpSub');
+if(!b)return;
+var lt=lastTemp();
+b.textContent=lt?fmtT(lt.t):'—';
+if(s)s.textContent=lt?('замер '+lt.d):'температура воды';
+}
+var ov=null;
+function openWP(){if(!ov)buildWP();ov.style.display='block';refreshWP();refreshTile();setTimeout(inject,60);}
+function findMin(ok){
+var all=document.querySelectorAll('div'),best=null;
+for(var i=0;i<all.length;i++){var t=all[i].textContent||'';if(ok(t)){if(!best||t.length<best.textContent.length)best=all[i];}}
+return best;
+}
+function buildWP(){
+ov=document.createElement('div');ov.id='wpOv';
+ov.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;display:none';
+ov.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;font-size:20px;margin-bottom:12px;color:#eaf6ff"><span>💧 Параметры воды</span><button id="wpClose" style="background:none;border:1px solid #444;color:#fff;border-radius:10px;padding:6px 12px">✕</button></div><div style="border:1px solid #2b4a66;border-radius:16px;padding:14px;margin-bottom:14px;text-align:center"><div style="font-size:14px;opacity:.8">🌡 Температура воды</div><div id="wpTempV" style="font-size:34px;color:#4dc3ff;margin-top:4px">—</div><div id="wpTempD" style="font-size:12px;opacity:.7"></div></div><div id="wpHost"></div>';
+document.body.appendChild(ov);
+document.getElementById('wpClose').onclick=function(){ov.style.display='none';};
+var tests=findMin(function(t){return t.indexOf('Последние тесты воды')!==-1&&t.indexOf('pH')!==-1&&t.length<2000;});
+if(tests){tests.parentNode.removeChild(tests);document.getElementById('wpHost').appendChild(tests);}
+var graph=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
+if(graph){graph.parentNode.removeChild(graph);document.getElementById('wpHost').appendChild(graph);}
+hookGraph();
+}
+function refreshWP(){
+var lt=lastTemp();
+var v=document.getElementById('wpTempV');if(v)v.textContent=lt?fmtT(lt.t):'—';
+var d=document.getElementById('wpTempD');if(d)d.textContent=lt?('замер '+lt.d):'';
+}
+var obs=null;
+function hookGraph(){
+var card=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
+if(!card)return;
+obs=new MutationObserver(function(){setTimeout(inject,60);});
+obs.observe(card,{childList:true,subtree:true});
+}
+function inject(){
+if(!ov||ov.style.display==='none')return;
+var card=findMin(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
+if(!card)return;
+var svg=card.querySelector('svg');if(!svg)return;
+var old=svg.querySelectorAll('.wpTemp');
+for(var i=0;i<old.length;i++)old[i].parentNode.removeChild(old[i]);
+var a=localStorage.getItem('aquaTemps');if(!a)return;
+var pts;try{pts=JSON.parse(a);}catch(e){return;}
+if(!pts.length)return;
+var W=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width)?svg.viewBox.baseVal.width:(svg.clientWidth||300);
+var H=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.height)?svg.viewBox.baseVal.height:(svg.clientHeight||150);
+var vals=pts.map(function(p){return p.t;});
+var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+if(mx===mn){mx+=1;mn-=1;}
+var n=pts.length;
+function X(i){return n<=1?W/2:20+(i/(n-1))*(W-40);}
+function Y(v){return H-((v-mn)/(mx-mn))*(H*0.6)-H*0.2;}
+var d='M'+X(0).toFixed(1)+' '+Y(vals[0]).toFixed(1);
+for(var i=1;i<n;i++)d+=' L'+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
+var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+path.setAttribute('d',d);path.setAttribute('fill','none');path.setAttribute('stroke','#ff9432');path.setAttribute('stroke-width','2');path.setAttribute('class','wpTemp');
+svg.appendChild(path);
+var lab=document.createElementNS('http://www.w3.org/2000/svg','text');
+lab.setAttribute('x',X(n-1).toFixed(1));lab.setAttribute('y',(Y(vals[n-1])-5).toFixed(1));lab.setAttribute('fill','#ff9432');lab.setAttribute('font-size','10');lab.setAttribute('class','wpTemp');
+lab.textContent=fmtT(vals[n-1]);
+svg.appendChild(lab);
+}
+setTimeout(addTile,500);
+setInterval(function(){addTile();refreshTile();},4000);
+})();
+
+/* ===== Температура: графа в форме + сбор из старых записей ===== */
+(function(){
+function pd(s){var m=String(s).match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):new Date(0);}
+function loadT(){var a=localStorage.getItem('aquaTemps');if(a){try{return JSON.parse(a);}catch(e){}}return [];}
+function saveT(arr){arr.sort(function(x,y){return pd(x.d)-pd(y.d);});localStorage.setItem('aquaTemps',JSON.stringify(arr));}
+function todayStr(){var n=new Date();function z(x){return (x<10?'0':'')+x;}return z(n.getDate())+'.'+z(n.getMonth()+1)+'.'+n.getFullYear();}
+function putT(d,t){var arr=loadT();var f=null;for(var i=0;i<arr.length;i++){if(arr[i].d===d){f=arr[i];break;}}if(f){f.t=t;}else{arr.push({d:d,t:t});}saveT(arr);}
+function addField(){
+var h=null,all=document.querySelectorAll('div');
+for(var i=0;i<all.length;i++){var t=all[i].textContent||'';if(t.indexOf('Тесты воды')!==-1&&t.length<60&&all[i].offsetParent){h=all[i];break;}}
+if(!h||document.getElementById('tempInput'))return;
+var ph=null,ins=document.querySelectorAll('input');
+for(var i=0;i<ins.length;i++){if(ins[i].placeholder==='pH'){ph=ins[i];break;}}
+var inp=ph?ph.cloneNode(false):document.createElement('input');
+inp.id='tempInput';inp.placeholder='Температура, °C';inp.value='';inp.type='text';inp.inputMode='decimal';
+var wrap=document.createElement('div');wrap.style.cssText='margin:10px 0';wrap.appendChild(inp);
+h.parentElement.insertBefore(wrap,h.nextSibling);
+}
+setInterval(addField,1000);
+document.addEventListener('click',function(e){
+var t=e.target;
+if(t&&t.tagName==='BUTTON'&&t.textContent.trim()==='Сохранить'){
+var inp=document.getElementById('tempInput');
+if(inp&&inp.value){
+var v=parseFloat(inp.value.replace(',','.'));
+if(v>=15&&v<=40){setTimeout(function(){putT(todayStr(),v);},400);}
+inp.value='';
+}
+}
+},true);
+function harvest(){
+if(localStorage.getItem('aquaTempHarvested'))return;
+var have=loadT(),map={};have.forEach(function(p){map[p.d]=1;});
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i),v=localStorage.getItem(k);
+if(!v||v.charAt(0)!=='[')continue;
+var arr;try{arr=JSON.parse(v);}catch(e){continue;}
+if(!arr||!arr.length||typeof arr[0]!=='object'||!arr[0].date)continue;
+for(var j=0;j<arr.length;j++){
+var en=arr[j],s='';for(var f in en){if(typeof en[f]==='string')s+=' '+en[f];}
+var m=s.match(/(?:температур\w*|градус\w*)\s*[:=]?\s*(\d{2}(?:[.,]\d)?)/i)||s.match(/(\d{2}(?:[.,]\d)?)\s*°/);
+if(!m)continue;
+var t=parseFloat(m[1].replace(',','.'));
+if(t<15||t>40)continue;
+if(!map[en.date]){putT(en.date,t);map[en.date]=1;}
+}
+}
+localStorage.setItem('aquaTempHarvested','1');
+}
+setTimeout(harvest,1500);
+})();
