@@ -1622,7 +1622,7 @@ function fmtT(t){return (Math.round(t*10)/10).toString().replace('.',',')+'°C';
 function addTile(){
 if(document.getElementById('wpTile'))return;
 var all=document.querySelectorAll('*'),leaf=null;
-for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t==='Дневник'&&all[i].querySelectorAll('*').length<=1){leaf=all[i];break;}}
+for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t==='Дневник'){leaf=all[i];break;}} 
 if(!leaf)return;
 var tile=leaf;
 while(tile.parentElement){var p=tile.parentElement;if(p.textContent.length<300){tile=p;}else{break;}}
