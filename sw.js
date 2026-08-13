@@ -13,7 +13,7 @@ var mine=url.origin===self.location.origin;
 var font=url.hostname.indexOf('fonts.googleapis.com')===0||url.hostname.indexOf('fonts.gstatic.com')===0;
 if(!mine&&!font)return;
 e.respondWith(
-fetch(e.request).then(function(r){
+fetch(e.request {cache:'no-store'}).then(function(r){
 if(r&&r.ok){var copy=r.clone();caches.open(CACHE).then(function(c){c.put(e.request,copy);});}
 return r;
 }).catch(function(){
