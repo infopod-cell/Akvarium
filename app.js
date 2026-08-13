@@ -1592,7 +1592,7 @@ return [parseInt(ins[0].value)||7,parseInt(ins[1].value)||10];
 function fix(word,label){
 var t=tileOf(word);if(!t)return;
 var P=periods();if(!P)return;
-var per=(word.indexOf('Подмены')===0)?P[0]:P[1];
+var per=(word.indexOf('Подмена')===0)?P[0]:P[1];
 var m=t.textContent.match(/последн\w+\s+(\d{2}\.\d{2}\.\d{4})/);if(!m)return;
 var last=parseD(m[1]);if(!last)return;
 var now=new Date();var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
