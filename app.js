@@ -1102,3 +1102,61 @@ updateTiles();
 initParams();
 }
 init();
+
+/* ===== Дневник для ИИ: файл контекста ===== */
+(function(){
+function buildCtx(){
+var L=[];
+L.push('МОЙ АКВАРИУМ — контекст для консультации.');
+L.push('Сегодня: '+new Date().toLocaleDateString('ru-RU'));
+L.push('');
+L.push('Параметры аквариума: '+aquaInfo.size+' | свет: '+aquaInfo.light+' | фильтр: '+aquaInfo.filter+' | грунт: '+aquaInfo.grunt);
+L.push('Периоды: подмена каждые '+settings.water+' дн., разгрузка каждые '+settings.hunger+' дн.');
+L.push('');
+L.push('ДНЕВНИК ('+entries.length+' записей):');
+for(var i=entries.length-1;i>=0;i--){
+var e=entries[i];
+var s=e.date||'';
+if(e.actions)s+=' — '+e.actions;
+if(e.activity)s+='; активность: '+e.activity;
+if(e.appetite)s+='; аппетит: '+e.appetite;
+if(e.fins)s+='; плавники: '+e.fins;
+var t=e.tests||parseTests((e.actions||'')+' '+(e.text||''));
+var tk=['ph','kh','gh','cl','no3','no2'];
+for(var q=0;q<tk.length;q++){if(t[tk[q]]!==undefined)s+='; '+tk[q]+'='+t[tk[q]];}
+L.push(s);
+}
+var temps=loadT();
+if(temps.length){
+L.push('');
+L.push('ТЕМПЕРАТУРА ВОДЫ:');
+for(var i=0;i<temps.length;i++){L.push(temps[i].d+' — '+temps[i].t+'°C');}
+}
+return L.join('\n');
+}
+function addCtxBtn(){
+if(document.getElementById('ctxBtn'))return;
+var b=null,bs=document.querySelectorAll('button');
+for(var i=0;i<bs.length;i++){if(bs[i].textContent.trim()==='Сохранить в файл'){b=bs[i];break;}}
+if(!b)return;
+var card=b;
+while(card&&card!==document.body&&card.textContent.indexOf('Резервная копия')===-1)card=card.parentElement;
+if(!card||card===document.body)return;
+var nb=document.createElement('button');
+nb.id='ctxBtn';
+nb.style.cssText='display:block;width:100%;margin:10px 0 0;padding:12px;border-radius:12px;border:1px solid #2b4a66;background:#16283c;color:#eaf6ff;font-size:14px';
+nb.textContent='📄 Дневник для ИИ';
+nb.onclick=function(){
+var txt=buildCtx();
+var bl=new Blob([txt],{type:'text/plain;charset=utf-8'});
+var a=document.createElement('a');
+a.href=URL.createObjectURL(bl);
+a.download='Дневник для ИИ '+new Date().toISOString().slice(0,10)+'.txt';
+document.body.appendChild(a);a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+};
+card.appendChild(nb);
+}
+setTimeout(addCtxBtn,800);
+setInterval(addCtxBtn,2000);
+})();
