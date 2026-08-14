@@ -1615,16 +1615,16 @@ setTimeout(tick,600);
 setInterval(tick,5000);
 })();
 
-/* ===== Параметры воды v4 ===== */
+/* ===== Параметры воды v5 ===== */
 (function(){
 function leaf(text){var all=document.querySelectorAll('*');for(var i=0;i<all.length;i++){var t=(all[i].textContent||'').trim();if(t===text)return all[i];}return null;}
 function cardOf(el,test){var n=el;while(n&&n!==document.body){if(test(n.textContent||''))return n;n=n.parentElement;}return null;}
 function minDiv(ok){var all=document.querySelectorAll('div'),best=null;for(var i=0;i<all.length;i++){var t=all[i].textContent||'';if(ok(t)){if(!best||t.length<best.textContent.length)best=all[i];}}return best;}
+function pd(s){var m=String(s).match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):new Date(0);}
 function lastTemp(){var a=localStorage.getItem('aquaTemps');if(a){try{var j=JSON.parse(a);return j.length?j[j.length-1]:null;}catch(e){}}return null;}
 function fmtT(t){return (Math.round(t*10)/10).toString().replace('.',',')+'°C';}
 function loadT(){var a=localStorage.getItem('aquaTemps');if(a){try{return JSON.parse(a);}catch(e){}}return [];}
 function saveT(arr){arr.sort(function(a,b){return pd(a.d)-pd(b.d);});localStorage.setItem('aquaTemps',JSON.stringify(arr));}
-function pd(s){var m=String(s).match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?new Date(+m[3],+m[2]-1,+m[1]):new Date(0);}
 function putT(d,t){var arr=loadT();var f=null;for(var i=0;i<arr.length;i++){if(arr[i].d===d){f=arr[i];break;}}if(f){f.t=t;}else{arr.push({d:d,t:t});}saveT(arr);}
 var fCard=null,wCard=null;
 function refs(){
@@ -1655,57 +1655,61 @@ var s=document.getElementById('wpSub');if(s)s.textContent=lt?('замер '+lt.d
 var v=document.getElementById('wpTempV');if(v)v.textContent=lt?fmtT(lt.t):'—';
 var d=document.getElementById('wpTempD');if(d)d.textContent=lt?('замер '+lt.d):'';
 }
-var ov=null;
-function openWP(){if(!ov)buildWP();ov.style.display='block';refreshTile();setTimeout(injectT,80);}
+var ov=null,graphCard=null;
+function openWP(){
+if(!ov)buildWP();
+if(ov.style.display!=='block'){ov.style.display='block';try{history.pushState({wp:1},'');}catch(e){}}
+refreshTile();
+}
+window.addEventListener('popstate',function(){if(ov&&ov.style.display==='block')ov.style.display='none';});
 function buildWP(){
 ov=document.createElement('div');ov.id='wpOv';
 ov.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;display:none';
 ov.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:20px;color:#eaf6ff"><span>💧 Параметры и тесты воды</span><button id="wpClose" style="background:none;border:1px solid #3a5a7a;color:#eaf6ff;border-radius:12px;padding:6px 14px;font-size:14px">✕</button></div>';
 document.body.appendChild(ov);
-document.getElementById('wpClose').onclick=function(){ov.style.display='none';};
+document.getElementById('wpClose').onclick=function(){try{if(history.state&&history.state.wp){history.back();return;}}catch(e){}ov.style.display='none';};
 if(refs()){
 var tc=fCard.cloneNode(true);
-tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 14px';
+tc.id='wpTempCard';
+tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 14px;cursor:pointer';
 var c=tc.children;
 c[0].innerHTML='<span>🌡️</span><span>Температура воды</span>';
 c[1].id='wpTempV';c[2].id='wpTempD';
+tc.onclick=drawTemp;
 ov.appendChild(tc);
 }
 var host=document.createElement('div');host.id='wpHost';ov.appendChild(host);
 var tests=minDiv(function(t){return t.indexOf('Последние тесты воды')!==-1&&t.indexOf('pH')!==-1&&t.length<2000;});
 if(tests){tests.parentNode.removeChild(tests);tests.style.cssText='width:100%;box-sizing:border-box;margin:0';host.appendChild(tests);}
 var gh=minDiv(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
-if(gh){var g=gh;while(g&&g!==document.body&&!g.querySelector('svg'))g=g.parentElement;if(g&&g!==document.body){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);watchGraph(g);}}
+if(gh){var g=gh;while(g&&g!==document.body&&!g.querySelector('svg'))g=g.parentElement;if(g&&g!==document.body){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);graphCard=g;}}
 }
-var obs=null,watched=null;
-function watchGraph(card){
-if(!card||watched===card)return;
-watched=card;
-if(obs)obs.disconnect();
-obs=new MutationObserver(function(){setTimeout(injectT,60);});
-obs.observe(card,{childList:true,subtree:true});
-}
-function injectT(){
-if(!watched)return;
-var svg=watched.querySelector('svg');if(!svg)return;
-var old=svg.querySelectorAll('.wpTemp');for(var i=0;i<old.length;i++)old[i].parentNode.removeChild(old[i]);
-var pts=loadT();if(!pts.length)return;
-var W=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width)?svg.viewBox.baseVal.width:(svg.clientWidth||300);
-var H=(svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.height)?svg.viewBox.baseVal.height:(svg.clientHeight||150);
-var vals=pts.map(function(p){return p.t;});
+function drawTemp(){
+if(!graphCard)return;
+var hd=null,ds=graphCard.querySelectorAll('div');
+for(var i=0;i<ds.length;i++){var t=(ds[i].textContent||'').trim();if(t.indexOf('График')===0&&t.length<40){hd=ds[i];break;}}
+if(hd)hd.textContent='График температуры';
+var old=graphCard.querySelector('svg');
+var pts=loadT();
+var W=320,H=170,PL=34,PR=10,PT=14,PB=26;
+var out='<svg viewBox="0 0 320 170" style="width:100%;display:block">';
+if(!pts.length){
+out+='<text x="'+PL+'" y="'+(H/2)+'" fill="#88aabb" font-size="9">замеров температуры пока нет</text></svg>';
+}else{
+var vals=[];for(var i=0;i<pts.length;i++)vals.push(pts[i].t);
 var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);if(mx===mn){mx+=1;mn-=1;}
 var n=pts.length;
-var X=function(i){return n<=1?W/2:20+(i/(n-1))*(W-40);};
-var Y=function(v){return H-((v-mn)/(mx-mn))*(H*0.6)-H*0.2;};
-var d='M'+X(0).toFixed(1)+' '+Y(vals[0]).toFixed(1);
-for(var i=1;i<n;i++)d+=' L'+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
-var p=document.createElementNS('http://www.w3.org/2000/svg','path');
-p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9432');p.setAttribute('stroke-width','2');p.setAttribute('class','wpTemp');
-svg.appendChild(p);
-var t=document.createElementNS('http://www.w3.org/2000/svg','text');
-t.setAttribute('x',X(n-1).toFixed(1));t.setAttribute('y',(Y(vals[n-1])-5).toFixed(1));t.setAttribute('fill','#ff9432');t.setAttribute('font-size','10');t.setAttribute('class','wpTemp');
-t.textContent=fmtT(vals[n-1]);
-svg.appendChild(t);
+var X=function(i){return n<=1?W/2:PL+(i/(n-1))*(W-PL-PR);};
+var Y=function(v){return PT+(1-(v-mn)/(mx-mn))*(H-PT-PB);};
+for(var g=0;g<3;g++){var vv=mn+(mx-mn)*g/2;var yy=Y(vv);out+='<line x1="'+PL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+yy.toFixed(1)+'" stroke="#22364a" stroke-width="1"/><text x="0" y="'+(yy+3).toFixed(1)+'" fill="#88aabb" font-size="8">'+(Math.round(vv*10)/10)+'</text>';}
+var d='';for(var i=0;i<n;i++){d+=(i?' L':'M')+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);}
+out+='<path d="'+d+'" fill="none" stroke="#ff9432" stroke-width="2"/>';
+for(var i=0;i<n;i++){out+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(vals[i]).toFixed(1)+'" r="3" fill="#ff9432"/><text x="'+X(i).toFixed(1)+'" y="'+(Y(vals[i])-5).toFixed(1)+'" fill="#ffd9b0" font-size="8" text-anchor="middle">'+fmtT(vals[i])+'</text>';}
+var step=Math.max(1,Math.floor(n/5));
+for(var i=0;i<n;i+=step){out+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" fill="#88aabb" font-size="8" text-anchor="middle">'+pts[i].d.slice(0,5)+'</text>';}
+out+='</svg>';
+}
+if(old)old.outerHTML=out;else graphCard.insertAdjacentHTML('beforeend',out);
 }
 function harvest(){
 if(localStorage.getItem('aquaTempHarvestV3'))return;
