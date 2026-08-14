@@ -157,7 +157,7 @@ const set=mode==='water'?calSets.water:calSets.hunger;
 const period=mode==='water'?settings.water:settings.hunger;
 if(!set||set.size===0)return null;
 let last=null;
-set.forEach(s=>{let d=parseDateRU(s);if(d&&(!last||d>last))last=d;});
+set.forEach(s=>{let d;if(String(s).indexOf('-')===4){d=new Date(+String(s).slice(0,4),+String(s).slice(5,7)-1,+String(s).slice(8,10));}else{d=parseDateRU(s);}if(d&&(!last||d>last))last=d;}); 
 if(!last)return null;
 const next=new Date(last.getTime()+period*86400000);
 const today=new Date();today.setHours(0,0,0,0);
