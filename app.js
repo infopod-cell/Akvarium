@@ -1760,3 +1760,60 @@ start();
 setInterval(refreshTile,4000);
 setInterval(addField,1000);
 })();
+
+/* ===== v6: добор карбоната из текста + крестик поиска ===== */
+(function(){
+function findStore(){
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i),v=localStorage.getItem(k);
+if(!v||(v.charAt(0)!=='['&&v.charAt(0)!=='{'))continue;
+var o;try{o=JSON.parse(v);}catch(e){continue;}
+var found=[];
+function walk(x){if(!x||typeof x!=='object')return;if(Object.prototype.toString.call(x)==='[object Array]'){for(var i=0;i<x.length;i++)walk(x[i]);return;}if(typeof x.date==='string'&&/\d{2}\.\d{2}\.\d{4}/.test(x.date))found.push(x);for(var q in x){walk(x[q]);}}
+walk(o);
+if(found.length>=3)return {key:k,obj:o,entries:found};
+}
+return null;
+}
+function khKey(store){
+for(var i=0;i<store.entries.length;i++){
+var en=store.entries[i];
+if(en.date==='29.07.2026'){for(var k in en){var val=parseFloat(String(en[k]).replace(',','.'));if(val===80)return k;}}
+}
+for(var i=0;i<store.entries.length;i++){
+var en=store.entries[i];
+for(var k in en){if(/^(kh|карбонат|carbonate)/i.test(k))return k;}
+}
+return 'kh';
+}
+function repair(){
+if(localStorage.getItem('aquaKhRepair'))return;
+var store=findStore();if(!store)return;
+var key=khKey(store);
+var changed=false;
+store.entries.forEach(function(en){
+var cur=en[key];
+if(cur!==undefined&&cur!==''&&cur!==null)return;
+var s='';for(var f in en){if(typeof en[f]==='string')s+=' '+en[f];}
+var v=null,m;
+m=s.match(/карбонат\w*\s+жесткост\w*[^0-9]{0,30}с\s+(\d+)\s+до\s+(\d+)/i);
+if(m){v=parseFloat(m[2]);}
+if(v==null){m=s.match(/карбонат\w*\s+жесткост\w*[^0-9]{0,15}(\d{2,3})/i);if(m)v=parseFloat(m[1]);}
+if(v==null){m=s.match(/(?:КН|KH)\s*[:=]?\s*(\d{2,3})/i);if(m)v=parseFloat(m[1]);}
+if(v==null||v<10||v>300)return;
+en[key]=v;changed=true;
+});
+if(changed){localStorage.setItem(store.key,JSON.stringify(store.obj));}
+localStorage.setItem('aquaKhRepair','1');
+}
+setTimeout(repair,1200);
+function fixX(){
+var inp=null,ins=document.querySelectorAll('input');
+for(var i=0;i<ins.length;i++){var a=ins[i].getAttribute('oninput')||'';if(a.indexOf('onSearch')!==-1){inp=ins[i];break;}}
+if(!inp)return;
+var p=inp.parentElement;p.style.position='relative';
+var xs=p.querySelectorAll('*');
+for(var i=0;i<xs.length;i++){var t=(xs[i].textContent||'').trim();if(t==='✕'||t==='×'){var el=xs[i];el.style.position='absolute';el.style.right='12px';el.style.top='50%';el.style.transform='translateY(-50%)';el.style.margin='0';}}
+}
+setInterval(fixX,2000);
+})();
