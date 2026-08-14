@@ -168,7 +168,6 @@ body.light .cc-bar{background:rgba(22,50,74,.12)}
 <div class="h-days"><span class="num" id="headDaysNum">0</span><span class="word" id="headDaysWord">дней</span></div>
 </div>
 </div>
-<input type="file" id="csvInput" accept=".csv,text/csv" style="display:none" onchange="handleCSV(this)">
 <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
 <div class="waves">
 <svg class="wave wave2" viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,0 H1440 V14 C1240,44 1040,4 720,22 C400,40 200,8 0,26 Z"/></svg>
@@ -182,7 +181,7 @@ body.light .cc-bar{background:rgba(22,50,74,.12)}
 <div class="tile wide" onclick="openDiary()"><div class="t-l"><span data-ico="book"></span>Дневник</div><div class="t-v" id="tdVal">—</div><div class="t-s" id="tdSub"></div></div>
 <div class="tile" onclick="tilePhoto()"><div class="t-l"><span data-ico="camera"></span>Последнее фото</div><div id="tpBox"><div class="t-v">пока нет</div></div></div>
 <div class="tile" onclick="openInfo()"><div class="t-l"><span data-ico="tank"></span>Аквариум</div><div class="t-s">параметры и затраты</div></div>
-<div class="tile wide" onclick="openSettings()"><div class="t-l"><span data-ico="gear"></span>Настройки</div><div class="t-s">оформление, периоды, таблица, резервная копия</div></div>
+<div class="tile wide" onclick="openSettings()"><div class="t-l"><span data-ico="gear"></span>Настройки</div><div class="t-s">оформление, периоды, резервная копия</div></div>
 </div>
 
 <button class="fab" onclick="openModal()">+</button>
@@ -268,12 +267,6 @@ body.light .cc-bar{background:rgba(22,50,74,.12)}
 <button class="mic" onclick="savePeriods()">Сохранить периоды</button>
 </div>
 <div class="info-card">
-<div class="info-head"><span class="ih-l"><span data-ico="rub"></span>Таблица</span></div>
-<button class="photo-btn" onclick="exportToSheet()">Отправить в таблицу</button>
-<button class="photo-btn" onclick="document.getElementById('csvInput').click()">Добавить из таблицы (CSV)</button>
-<button class="photo-btn" onclick="openSyncFromSettings()">Ссылка робота</button>
-</div>
-<div class="info-card">
 <div class="info-head"><span class="ih-l"><span data-ico="image"></span>Резервная копия</span></div>
 <button class="photo-btn" onclick="backupSave()">Сохранить в файл</button>
 <button class="photo-btn" onclick="document.getElementById('restoreInput').click()">Восстановить из файла</button>
@@ -314,25 +307,6 @@ body.light .cc-bar{background:rgba(22,50,74,.12)}
 
 <button class="save-btn" onclick="saveEntry()">Сохранить</button>
 <button class="cancel-btn" onclick="closeModal()">Отмена</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="syncOverlay">
-<div class="modal">
-<h2>Связь с Google-таблицей</h2>
-<p class="sync-note">Вставь сюда ссылку робота (заканчивается на /exec).</p>
-<input id="syncUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
-<button class="save-btn" onclick="saveSyncUrl()">Сохранить ссылку</button>
-<button class="cancel-btn" onclick="closeSync()">Позже</button>
-</div>
-</div>
-
-<div class="modal-overlay" id="exportOverlay">
-<div class="modal">
-<h2>В таблицу</h2>
-<button class="save-btn" onclick="doSendNow()">Отправить записи</button>
-<button class="photo-btn" style="margin-top:8px" onclick="openSyncFromExport()">Сменить ссылку на робота</button>
-<button class="cancel-btn" onclick="closeExport()">Отмена</button>
 </div>
 </div>
 
