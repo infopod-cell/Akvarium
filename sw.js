@@ -1,5 +1,5 @@
 var CACHE='aqua-v1';
-var CORE=['/Akvarium/','/Akvarium/index.html','/Akvarium/app.js','/Akvarium/manifest.webmanifest','/Akvarium/bettafish.png'];
+var CORE=['/Akvarium/','/Akvarium/index.html','/Akvarium/app.js?v=7','/Akvarium/manifest.webmanifest','/Akvarium/bettafish.png'];
 self.addEventListener('install',function(e){
 e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
 });
