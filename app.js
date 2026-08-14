@@ -1850,3 +1850,14 @@ var en=null;for(var i=0;i<found.length;i++)if(found[i].date==='09.07.2026')en=fo
 if(en)out.push('f09:'+Object.keys(en).join(','));
 alert(out.join(' | '));
 },3500);
+
+/* ===== диагностика v8 (последняя) ===== */
+setTimeout(function(){
+var inp=null,ins=document.querySelectorAll('input');
+for(var i=0;i<ins.length;i++){var a=ins[i].getAttribute('oninput')||'';if(a.indexOf('onSearch')!==-1){inp=ins[i];break;}}
+var html=inp?inp.parentElement.innerHTML:'';
+var kh1='?',kh2='?';
+var o;try{o=JSON.parse(localStorage.getItem('aquaEntries'));}catch(e){}
+if(o&&o.length){for(var i=0;i<o.length;i++){if(o[i].date==='09.07.2026')kh1=String(o[i].kh);if(o[i].date==='29.07.2026')kh2=String(o[i].kh);}}
+alert('KH09:['+kh1+'] KH29:['+kh2+'] HTML:'+html.slice(0,260));
+},3000);
