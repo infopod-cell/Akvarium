@@ -68,8 +68,6 @@ function pushLayer(){try{history.pushState({aqua:1},'');}catch(e){}}
 function topLayer(){
 if(document.getElementById('lightbox').classList.contains('open'))return 'lightbox';
 if(document.getElementById('modalOverlay').classList.contains('active'))return 'modal';
-if(document.getElementById('syncOverlay').classList.contains('active'))return 'sync';
-if(document.getElementById('exportOverlay').classList.contains('active'))return 'export';
 const order=['settingsView','infoView','calView','diaryView'];
 for(let i=0;i<order.length;i++){if(document.getElementById(order[i]).classList.contains('open'))return order[i];}
 return null;
