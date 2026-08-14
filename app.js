@@ -1851,22 +1851,3 @@ localStorage.setItem('aquaKhTail','1');
 }
 setTimeout(fixKh,1200);
 })();
-
-/* ===== v10: свой крестик поиска ===== */
-(function(){
-function fix(){
-var inp=document.getElementById('searchInput');
-if(!inp)return;
-var old=document.getElementById('searchClear');
-if(old)old.style.display='none';
-if(document.getElementById('myClear'))return;
-var row=inp.parentElement;
-row.style.position='relative';
-var b=document.createElement('button');
-b.id='myClear';b.textContent='✕';
-b.style.cssText='position:absolute;right:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;border:none;background:transparent;color:#88aabb;font-size:16px;z-index:5;cursor:pointer;padding:0';
-b.onclick=function(){inp.value='';if(window.onSearch)window.onSearch('');inp.focus();};
-row.appendChild(b);
-}
-setInterval(fix,1500);
-})();
