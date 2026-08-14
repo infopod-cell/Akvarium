@@ -1818,46 +1818,36 @@ for(var i=0;i<xs.length;i++){var t=(xs[i].textContent||'').trim();if(t==='✕'||
 setInterval(fixX,2000);
 })();
 
-/* ===== диагностика v7 ===== */
-setTimeout(function(){
-var out=[];
-var inp=null,ins=document.querySelectorAll('input');
-for(var i=0;i<ins.length;i++){var a=ins[i].getAttribute('oninput')||'';if(a.indexOf('onSearch')!==-1){inp=ins[i];break;}}
-out.push('inp:'+(inp?'DA':'NET'));
-if(inp){
-var p=inp.parentElement;
-out.push('pclass:'+p.className);
-out.push('hasX:'+(p.innerHTML.indexOf('✕')!==-1||p.innerHTML.indexOf('×')!==-1));
-out.push('hasSVG:'+((p.querySelector('svg'))?'DA':'NET'));
+/* ===== v9: карбонат для родного графика + крестик на место ===== */
+(function(){
+var st=document.createElement('style');
+st.textContent='#searchClear{position:absolute !important;right:12px !important;top:50% !important;transform:translateY(-50%) !important;z-index:5;} .search-row{position:relative !important;}';
+document.head.appendChild(st);
+function khParse(s){
+var m=s.match(/карбонат\w*\s+жесткост\w*[^0-9]{0,30}с\s+(\d+)\s+до\s+(\d+)/i);
+if(m)return parseFloat(m[2]);
+m=s.match(/карбонат\w*\s+жесткост\w*[^0-9]{0,15}(\d{2,3})/i);
+if(m)return parseFloat(m[1]);
+m=s.match(/(?:КН|KH)\s*[:=]?\s*(\d{2,3})/i);
+if(m)return parseFloat(m[1]);
+return null;
 }
-alert(out.join(' | '));
-},2500);
-setTimeout(function(){
-var out=[];var keys=[];for(var i=0;i<localStorage.length;i++)keys.push(localStorage.key(i));
-var storeKey=null,found=[];
-for(var i=0;i<keys.length;i++){
-var v=localStorage.getItem(keys[i]);
-if(!v||(v.charAt(0)!=='['&&v.charAt(0)!=='{'))continue;
-var o;try{o=JSON.parse(v);}catch(e){continue;}
-var f=[];
-function walk(x){if(!x||typeof x!=='object')return;if(Object.prototype.toString.call(x)==='[object Array]'){for(var i2=0;i2<x.length;i2++)walk(x[i2]);return;}if(typeof x.date==='string'&&/\d{2}\.\d{2}\.\d{4}/.test(x.date))f.push(x);for(var q in x){walk(x[q]);}}
-walk(o);
-if(f.length>=3){storeKey=keys[i];found=f;break;}
+function fixKh(){
+if(localStorage.getItem('aquaKhTail'))return;
+var o;try{o=JSON.parse(localStorage.getItem('aquaEntries'));}catch(e){return;}
+if(!o||!o.length)return;
+var changed=false;
+for(var i=0;i<o.length;i++){
+var en=o[i];
+if(typeof en.actions!=='string')continue;
+if(en.actions.indexOf('карбонатная жесткость')!==-1)continue;
+var v=khParse(en.actions);
+if(v==null||v<10||v>300)continue;
+en.actions+=' (карбонатная жесткость '+v+')';
+changed=true;
 }
-out.push('keys:'+keys.join(','));
-out.push('store:'+storeKey);
-var en=null;for(var i=0;i<found.length;i++)if(found[i].date==='09.07.2026')en=found[i];
-if(en)out.push('f09:'+Object.keys(en).join(','));
-alert(out.join(' | '));
-},3500);
-
-/* ===== диагностика v8 (последняя) ===== */
-setTimeout(function(){
-var inp=null,ins=document.querySelectorAll('input');
-for(var i=0;i<ins.length;i++){var a=ins[i].getAttribute('oninput')||'';if(a.indexOf('onSearch')!==-1){inp=ins[i];break;}}
-var html=inp?inp.parentElement.innerHTML:'';
-var kh1='?',kh2='?';
-var o;try{o=JSON.parse(localStorage.getItem('aquaEntries'));}catch(e){}
-if(o&&o.length){for(var i=0;i<o.length;i++){if(o[i].date==='09.07.2026')kh1=String(o[i].kh);if(o[i].date==='29.07.2026')kh2=String(o[i].kh);}}
-alert('KH09:['+kh1+'] KH29:['+kh2+'] HTML:'+html.slice(0,260));
-},3000);
+if(changed)localStorage.setItem('aquaEntries',JSON.stringify(o));
+localStorage.setItem('aquaKhTail','1');
+}
+setTimeout(fixKh,1200);
+})();
