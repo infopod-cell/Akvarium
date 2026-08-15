@@ -183,6 +183,13 @@ body.light .wtc.active{border-color:#0077aa!important;background:rgba(0,119,170,
 .wtc-v{text-shadow:0 0 12px currentColor;}
 .fab{background:linear-gradient(135deg,#22c4ff,#006994)!important;box-shadow:0 4px 24px rgba(0,153,204,.65),0 0 30px rgba(77,217,255,.35)!important;}
 body.light .h-days .num,body.light .t-v,body.light .cc-num,body.light .wtc-v{text-shadow:none;}
+/* ===== Живая вода (фон) ===== */
+html{background:linear-gradient(135deg,#0a1628 0%,#0d2137 50%,#0a1628 100%);}
+body:not(.light){background:transparent!important;}
+body:not(.light)::before{content:'';position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+background:radial-gradient(45% 32% at 22% 12%,rgba(77,217,255,.14),transparent 70%),radial-gradient(38% 26% at 78% 8%,rgba(0,166,222,.10),transparent 70%),radial-gradient(60% 45% at 50% 108%,rgba(0,90,140,.25),transparent 72%),radial-gradient(28% 20% at 60% 45%,rgba(77,217,255,.06),transparent 70%);
+animation:waterDrift 26s ease-in-out infinite alternate;}
+@keyframes waterDrift{from{transform:translate3d(-2%,-1.5%,0) scale(1);}to{transform:translate3d(2%,1.5%,0) scale(1.05);}}
 </style>
 </head>
 <body>
