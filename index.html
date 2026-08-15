@@ -183,17 +183,11 @@ body.light .wtc.active{border-color:#0077aa!important;background:rgba(0,119,170,
 .wtc-v{text-shadow:0 0 12px currentColor;}
 .fab{background:linear-gradient(135deg,#22c4ff,#006994)!important;box-shadow:0 4px 24px rgba(0,153,204,.65),0 0 30px rgba(77,217,255,.35)!important;}
 body.light .h-days .num,body.light .t-v,body.light .cc-num,body.light .wtc-v{text-shadow:none;}
-/* ===== Живая вода v2 (фон) ===== */
-html{background:linear-gradient(180deg,#0e2a44 0%,#0a1c30 40%,#0a1628 100%);}
-body:not(.light){background:transparent!important;}
-body:not(.light)::before{content:'';position:fixed;inset:-30%;z-index:-1;pointer-events:none;
-background:radial-gradient(50% 35% at 20% 8%,rgba(77,217,255,.30),transparent 70%),radial-gradient(42% 30% at 80% 4%,rgba(0,166,222,.22),transparent 70%),radial-gradient(70% 50% at 50% 110%,rgba(0,90,140,.45),transparent 75%),radial-gradient(30% 22% at 62% 42%,rgba(77,217,255,.12),transparent 70%),radial-gradient(24% 18% at 30% 65%,rgba(0,166,222,.10),transparent 70%);
-animation:waterDrift 18s ease-in-out infinite alternate;}
-body:not(.light)::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
-background:linear-gradient(115deg,transparent 42%,rgba(120,220,255,.07) 47%,transparent 53%),linear-gradient(65deg,transparent 30%,rgba(120,220,255,.05) 36%,transparent 42%);
-animation:raysSway 11s ease-in-out infinite alternate;}
-@keyframes waterDrift{from{transform:translate3d(-3%,-2%,0) scale(1);}to{transform:translate3d(3%,2%,0) scale(1.08);}}
-@keyframes raysSway{from{transform:translateX(-2%);opacity:.7;}to{transform:translateX(2%);opacity:1;}}
+/* ===== Живая волна в шапке ===== */
+.waves{overflow:hidden}
+.wave{width:200%;animation:waveMove 10s linear infinite;}
+.wave2{animation-duration:16s;animation-direction:reverse;}
+@keyframes waveMove{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 </style>
 </head>
 <body>
@@ -207,8 +201,8 @@ animation:raysSway 11s ease-in-out infinite alternate;}
 </div>
 <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
 <div class="waves">
-<svg class="wave wave2" viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,0 H1440 V14 C1240,44 1040,4 720,22 C400,40 200,8 0,26 Z"/></svg>
-<svg class="wave wave1" viewBox="0 0 1440 48" preserveAspectRatio="none"><path d="M0,0 H1440 V14 C1240,44 1040,4 720,22 C400,40 200,8 0,26 Z"/></svg>
+<svg class="wave wave2" viewBox="0 0 2880 48" preserveAspectRatio="none"><path d="M0,24 C120,34 240,14 360,24 C480,34 600,14 720,24 C840,34 960,14 1080,24 C1200,34 1320,14 1440,24 C1560,34 1680,14 1800,24 C1920,34 2040,14 2160,24 C2280,34 2400,14 2520,24 C2640,34 2760,14 2880,24 V48 H0 Z"/></svg> 
+<svg class="wave wave1" viewBox="0 0 2880 48" preserveAspectRatio="none"><path d="M0,24 C120,34 240,14 360,24 C480,34 600,14 720,24 C840,34 960,14 1080,24 C1200,34 1320,14 1440,24 C1560,34 1680,14 1800,24 C1920,34 2040,14 2160,24 C2280,34 2400,14 2520,24 C2640,34 2760,14 2880,24 V48 H0 Z"/></svg>
 </div>
 </div>
 
