@@ -912,7 +912,7 @@ const el=document.getElementById('bkInfo');
 if(!el)return;
 const t=Number(localStorage.getItem('aquaLastBackup')||0);
 if(!t){el.textContent='⚠️ Копия — твоя единственная страховка. Нажми «Сохранить в файл»!';el.style.color='#ffb74d';return;}
-const d=Math.floor((Date.now()-t)/86400000);
+const d=Math.round((new Date(new Date().setHours(0,0,0,0))-new Date(new Date(t).setHours(0,0,0,0)))/86400000); 
 if(d<=0){el.textContent='✅ Копия сделана сегодня';el.style.color='#3ddc84';}
 else if(d<=7){el.textContent='✅ Копия сделана '+d+' дн. назад';el.style.color='#3ddc84';}
 else{el.textContent='⚠️ Копия была '+d+' дн. назад — обнови её!';el.style.color='#ff6b6b';}
