@@ -80,6 +80,16 @@ if(l==='export'){dismissExport();return;}
 dismiss(l);
 }
 window.addEventListener('popstate',function(){const l=topLayer();if(l)dismissLayer(l);});
+let swX=0,swY=0;
+document.addEventListener('touchstart',function(e){if(e.touches.length===1){swX=e.touches[0].clientX;swY=e.touches[0].clientY;}else{swX=0;swY=0;}},{passive:true});
+document.addEventListener('touchend',function(e){
+if(!swX)return;
+const dx=e.changedTouches[0].clientX-swX,dy=e.changedTouches[0].clientY-swY;
+swX=0;
+if(dx>70&&Math.abs(dy)<60){
+if((wpOv&&wpOv.style.display==='block')||topLayer()){try{history.back();}catch(err){}}
+}
+},{passive:true});
 function openView(id){document.getElementById(id).classList.add('open');pushLayer();var v=document.getElementById(id);if(v)v.scrollTop=0;}
 function dismiss(id){document.getElementById(id).classList.remove('open');if(id==='calView')calOpen=false;if(id==='diaryView'){var inp=document.getElementById('searchInput');if(inp)inp.value='';searchQuery='';var c=document.getElementById('searchClear');if(c)c.style.display='none';render();}}
 function closeView(id){if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}}
