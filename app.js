@@ -74,8 +74,6 @@ return null;
 function dismissLayer(l){
 if(l==='lightbox'){closeLightbox();return;}
 if(l==='modal'){dismissModal();return;}
-if(l==='sync'){dismissSync();return;}
-if(l==='export'){dismissExport();return;}
 dismiss(l);
 }
 window.addEventListener('popstate',function(){const l=topLayer();if(l)dismissLayer(l);});
@@ -94,10 +92,6 @@ function dismiss(id){document.getElementById(id).classList.remove('open');if(id=
 function closeView(id){if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}}
 function dismissModal(){const el=document.getElementById('modalOverlay');if(el.classList.contains('active')){el.classList.remove('active');if(isRecording)stopVoice();editingIndex=null;}}
 function closeModal(){if(document.getElementById('modalOverlay').classList.contains('active')){dismissModal();try{history.back();}catch(e){}}}
-function dismissSync(){document.getElementById('syncOverlay').classList.remove('active');}
-function closeSync(){if(document.getElementById('syncOverlay').classList.contains('active')){dismissSync();try{history.back();}catch(e){}}}
-function dismissExport(){document.getElementById('exportOverlay').classList.remove('active');}
-function closeExport(){if(document.getElementById('exportOverlay').classList.contains('active')){dismissExport();try{history.back();}catch(e){}}}
 function goHome(){closeView('calView');closeView('diaryView');closeView('infoView');closeView('settingsView');}
 function openDiary(){openView('diaryView')}
 function hideDiary(){closeView('diaryView')}
@@ -341,49 +335,6 @@ fld(ico('pencil',OR),'Заметка',e.text)+
 }).join('');
 renderWaterTests();
 markActive();
-}
-function parseCSV(t){
-const rows=[];let row=[],cur='',inQ=false;
-for(let i=0;i<t.length;i++){
-const c=t[i];
-if(inQ){
-if(c=='"'){if(t[i+1]==='"'){cur+='"';i++;}else inQ=false;}
-else cur+=c;
-}else{
-if(c=='"')inQ=true;
-else if(c===','){row.push(cur);cur='';}
-else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
-else if(c!=='\r')cur+=c;
-}
-}
-row.push(cur);rows.push(row);
-return rows.filter(r=>r.join('').trim()!='');
-}
-function handleCSV(input){
-if(!input.files||!input.files[0])return;
-const reader=new FileReader();
-reader.onload=function(e){
-const t=String(e.target.result).replace(/^\uFEFF/,'');
-const rows=parseCSV(t);
-if(rows.length<2){alert('В файле нет строк с данными.');input.value='';return;}
-const head=rows[0].map(h=>String(h).trim().toLowerCase());
-const idx={};
-head.forEach((h,i)=>{idx[h]=i});
-const col=(r,n)=>(idx[n]!==undefined?String(r[idx[n]]||'').trim():'');
-const imported=[];
-for(let r=1;r<rows.length;r++){
-const row=rows[r];
-const en={date:col(row,'дата')||'без даты',actions:col(row,'действия'),activity:col(row,'активность'),appetite:col(row,'аппетит'),fins:col(row,'плавники'),photo:null,src:'csv'};
-if(en.actions||en.activity||en.appetite||en.fins)imported.push(en);
-}
-if(imported.length===0){alert('Не нашлось записей для импорта.');input.value='';return;}
-if(!confirm('Найдено записей: '+imported.length+'. Добавить их в дневник?')){input.value='';return;}
-entries=entries.concat(imported.reverse());
-if(persist())alert('Готово! Добавлено записей: '+imported.length);
-buildSets();render();updateStats();updateTiles();
-input.value='';
-};
-reader.readAsText(input.files[0]);
 }
 /* ===== Форма записи ===== */
 function openModal(){
