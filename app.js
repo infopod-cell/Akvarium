@@ -766,7 +766,7 @@ return '<button class="wt-chip'+(p.k===curChart?' active':'')+'" onclick="setWtC
 }).join('');
 renderWtChart(series);
 }
-function setWtChart(k){curChart=k;renderWaterTests();markActive();}
+function setWtChart(k){curChart=k;const tc=document.getElementById('wpTempCard');if(tc)tc.classList.remove('active');renderWaterTests();markActive();} 
 function markActive(){
 const grid=document.getElementById('wtGrid');
 if(!grid)return;
