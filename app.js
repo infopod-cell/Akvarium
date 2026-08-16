@@ -498,7 +498,6 @@ entries.unshift(en);
 if(!persist()){entries.shift();return;}
 closeModal();
 buildSets();render();updateStats();updateTiles();
-if(syncUrl)sendRows([en],true);
 }
 if(tempV&&tempN>=15&&tempN<=40){
 const n=new Date();
