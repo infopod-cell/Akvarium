@@ -490,7 +490,6 @@ e.date=dv;
 e.actions=a;e.activity=ac;e.appetite=ap;e.fins=f;e.photo=currentPhoto;e.synced=false;
 if(hasTests)e.tests=t;
 persist();closeModal();buildSets();render();updateStats();updateTiles();
-if(syncUrl)sendRows([e],true);
 }else{
 const date=new Date().toLocaleDateString('ru-RU');
 const en={date:date,actions:a,activity:ac,appetite:ap,fins:f,photo:currentPhoto,src:'app',synced:false};
