@@ -996,7 +996,6 @@ wpOv=document.createElement('div');wpOv.id='wpOv';
 wpOv.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;display:none';
 wpOv.innerHTML='';
 document.body.appendChild(wpOv);
-document.getElementById('wpClose').onclick=function(){try{if(history.state&&history.state.wp){history.back();return;}}catch(e){}wpOv.style.display='none';};
 if(wpRefs()){
 const tc=wpFCard.cloneNode(true);
 tc.id='wpTempCard';
