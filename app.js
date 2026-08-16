@@ -508,36 +508,7 @@ refreshWpTile();
 function deleteEntry(i){
 if(confirm('Удалить эту запись?')){entries.splice(i,1);persist();buildSets();render();updateStats();updateTiles();}
 }
-/* ===== Таблица и резервные копии ===== */
-function exportToSheet(){
-if(!syncUrl){document.getElementById('syncUrlInput').value='';document.getElementById('syncOverlay').classList.add('active');pushLayer();return;}
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return;}
-document.getElementById('exportOverlay').classList.add('active');
-pushLayer();
-}
-function doSendNow(){
-closeExport();
-const pending=entries.filter(e=>e.src!=='csv'&&!e.synced);
-if(pending.length===0){alert('Всё уже отправлено в таблицу ✅');return;}
-sendRows(pending,false);
-}
-function openSyncFromExport(){closeExport();openSyncFromSettings();}
-function openSyncFromSettings(){document.getElementById('syncUrlInput').value=syncUrl;document.getElementById('syncOverlay').classList.add('active');pushLayer();}
-function sendRows(list,silent){
-const rows=list.map(e=>({date:e.date,actions:e.actions||e.text||'',activity:e.activity||'',appetite:e.appetite||'',fins:e.fins||''}));
-fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rows)})
-.then(function(){list.forEach(e=>e.synced=true);persist();if(!silent)alert('Отправлено в таблицу: '+list.length);})
-.catch(function(){if(!silent)alert('Не получилось отправить. Попробуй ещё раз через Настройки → Таблица.');});
-}
-function saveSyncUrl(){
-const v=document.getElementById('syncUrlInput').value.trim();
-if(!v.startsWith('https://')){alert('Ссылка должна начинаться с https://');return;}
-syncUrl=v;
-localStorage.setItem('aquaSyncUrl',syncUrl);
-closeSync();
-alert('Ссылка сохранена!');
-}
+/* ===== Резервные копии ===== */
 function backupSave(){
 const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings};
 const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
