@@ -806,7 +806,7 @@ st.textContent='body *{font-weight:400!important}'+
 '.wt-gridcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}'+
 '.wtc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;text-align:center;cursor:pointer}'+
 '.wtc.active{border-color:#4dd9ff;box-shadow:0 0 10px rgba(77,217,255,.25)}'+
-'#wpTempCard.active{background:linear-gradient(160deg,rgba(255,255,255,.26),rgba(77,217,255,.16) 55%,rgba(77,217,255,.10))!important;}'+
+'#wpTempCard.active{background:linear-gradient(160deg,rgba(255,255,255,.26),rgba(77,217,255,.10) 55%,rgba(77,217,255,.10))!important;}'+
 '.wtc-n{font-size:12px;color:rgba(255,255,255,.6)}'+
 '.wtc-v{font-size:24px;margin:2px 0}'+
 '.wtc-u{font-size:11px;color:rgba(255,255,255,.45)}'+
