@@ -1023,6 +1023,12 @@ while(g&&g!==document.body&&!g.querySelector('svg'))g=g.parentElement;
 if(g&&g!==document.body){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);wpGraphCard=g;}
 }
 }
+function markTempActive(){
+const tc=document.getElementById('wpTempCard');
+if(tc)tc.classList.add('active');
+const g=document.getElementById('wtGrid');
+if(g)for(let i=0;i<g.children.length;i++)g.children[i].classList.remove('active');
+}
 function drawTemp(){
 if(!wpGraphCard)return;
 const ds=wpGraphCard.querySelectorAll('div');
