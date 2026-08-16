@@ -994,7 +994,7 @@ window.addEventListener('popstate',function(){if(wpOv&&wpOv.style.display==='blo
 function buildWP(){
 wpOv=document.createElement('div');wpOv.id='wpOv';
 wpOv.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;display:none';
-wpOv.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:20px;color:#eaf6ff"><span>💧 Параметры и тесты воды</span><button id="wpClose" style="background:none;border:1px solid #3a5a7a;color:#eaf6ff;border-radius:12px;padding:6px 14px;font-size:14px">✕</button></div>';
+wpOv.innerHTML='';
 document.body.appendChild(wpOv);
 document.getElementById('wpClose').onclick=function(){try{if(history.state&&history.state.wp){history.back();return;}}catch(e){}wpOv.style.display='none';};
 if(wpRefs()){
