@@ -1000,9 +1000,6 @@ document.getElementById('wpClose').onclick=function(){try{if(history.state&&hist
 if(wpRefs()){
 const tc=wpFCard.cloneNode(true);
 tc.id='wpTempCard';
-tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 14px;cursor:pointer';
-const tc=wpFCard.cloneNode(true);
-tc.id='wpTempCard';
 tc.classList.add('wtc');
 tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 10px;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:0';
 const c=tc.children;
