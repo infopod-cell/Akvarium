@@ -996,12 +996,13 @@ const s=document.getElementById('wpSub');if(s)s.textContent=lt?('замер '+lt
 const v=document.getElementById('wpTempV');if(v)v.textContent=lt?fmtT(lt.t):'—';
 const d=document.getElementById('wpTempD');if(d)d.textContent=lt?('замер '+lt.d):'';
 }
+let wpOpen=false;
 function openWP(){
 if(!wpOv)buildWP();
-if(wpOv.style.display!=='block'){wpOv.style.display='block';try{history.pushState({wp:1},'');}catch(e){}}
+if(!wpOpen){wpOpen=true;wpOv.style.transform='translateX(0)';try{history.pushState({wp:1},'');}catch(e){}}
 refreshWpTile();
 }
-window.addEventListener('popstate',function(){if(wpOv&&wpOv.style.display==='block')wpOv.style.display='none';});
+window.addEventListener('popstate',function(){if(wpOv&&wpOpen){wpOpen=false;wpOv.style.transform='translateX(100%)';}});
 function buildWP(){
 wpOv=document.createElement('div');wpOv.id='wpOv';
 wpOv.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:999;overflow-y:auto;padding:16px;box-sizing:border-box;transform:translateX(100%);transition:transform .3s ease'; 
