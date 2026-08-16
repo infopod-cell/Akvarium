@@ -1,6 +1,5 @@
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 1) ===== */
 let entries=JSON.parse(localStorage.getItem('aquaEntries')||'[]');
-let syncUrl=localStorage.getItem('aquaSyncUrl')||'';
 let currentPhoto=null,recognition=null,isRecording=false,currentField=null,currentMic=null,baseText='',finalText='';
 let calSets={water:new Set(),hunger:new Set()};
 let calDate=new Date(),calMode='water',calOpen=false,searchQuery='',editingIndex=null;
