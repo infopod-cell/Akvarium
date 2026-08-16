@@ -1001,10 +1001,16 @@ if(wpRefs()){
 const tc=wpFCard.cloneNode(true);
 tc.id='wpTempCard';
 tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 14px;cursor:pointer';
+const tc=wpFCard.cloneNode(true);
+tc.id='wpTempCard';
+tc.classList.add('wtc');
+tc.style.cssText='width:100%;box-sizing:border-box;margin:0 0 10px;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:0';
 const c=tc.children;
 c[0].innerHTML='<span>🌡️</span><span>Температура воды</span>';
-c[1].id='wpTempV';c[2].id='wpTempD';
-tc.onclick=drawTemp;
+c[0].style.cssText='font-size:13px';
+c[1].id='wpTempV';c[1].style.cssText='font-size:18px;margin:0';
+c[2].id='wpTempD';c[2].style.cssText='font-size:11px;margin:0 0 0 auto';
+tc.onclick=function(){drawTemp();markTempActive();};
 wpOv.appendChild(tc);
 }
 const host=document.createElement('div');host.id='wpHost';wpOv.appendChild(host);
