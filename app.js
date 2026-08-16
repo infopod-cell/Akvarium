@@ -87,7 +87,7 @@ if(!swX)return;
 const dx=e.changedTouches[0].clientX-swX,dy=e.changedTouches[0].clientY-swY;
 swX=0;
 if(dx>70&&Math.abs(dy)<60){
-if((wpOv&&wpOv.style.display==='block')||topLayer()){try{history.back();}catch(err){}}
+if((wpOv&&wpOpen)||topLayer()){try{history.back();}catch(err){}} 
 }
 },{passive:true});
 function openView(id){document.getElementById(id).classList.add('open');pushLayer();var v=document.getElementById(id);if(v)v.scrollTop=0;}
