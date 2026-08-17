@@ -1,4 +1,4 @@
-var CACHE='aqua-v1';
+var CACHE='aqua-v2';
 var CORE=['/Akvarium/','/Akvarium/index.html','/Akvarium/app.js?v=7','/Akvarium/manifest.webmanifest','/Akvarium/bettafish.png'];
 self.addEventListener('install',function(e){
 e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
@@ -13,13 +13,13 @@ var mine=url.origin===self.location.origin;
 var font=url.hostname.indexOf('fonts.googleapis.com')===0||url.hostname.indexOf('fonts.gstatic.com')===0;
 if(!mine&&!font)return;
 e.respondWith(
-fetch(e.request, {cache:'no-store'}).then(function(r){
+caches.match(e.request).then(function(cached){
+var network=fetch(e.request,{cache:'no-store'}).then(function(r){
 if(r&&r.ok){var copy=r.clone();caches.open(CACHE).then(function(c){c.put(e.request,copy);});}
 return r;
-}).catch(function(){
-return caches.match(e.request).then(function(m){
-return m||caches.match('/Akvarium/index.html');
-});
+}).catch(function(){return null;});
+if(cached)return cached;
+return network.then(function(r){return r||caches.match('/Akvarium/index.html');});
 })
 );
 });
