@@ -1,7 +1,9 @@
-var CACHE='aqua-v2';
+var CACHE='aqua-v3';
 var CORE=['/Akvarium/','/Akvarium/index.html','/Akvarium/app.js?v=7','/Akvarium/manifest.webmanifest','/Akvarium/bettafish.png'];
 self.addEventListener('install',function(e){
-e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(CORE);}).then(function(){return self.skipWaiting();}));
+e.waitUntil(caches.open(CACHE).then(function(c){
+return Promise.all(CORE.map(function(u){return c.add(u).catch(function(){});}))
+;}).then(function(){return self.skipWaiting();}));
 });
 self.addEventListener('activate',function(e){
 e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));
@@ -10,8 +12,7 @@ self.addEventListener('fetch',function(e){
 if(e.request.method!=='GET')return;
 var url=new URL(e.request.url);
 var mine=url.origin===self.location.origin;
-var font=url.hostname.indexOf('fonts.googleapis.com')===0||url.hostname.indexOf('fonts.gstatic.com')===0;
-if(!mine&&!font)return;
+if(!mine)return;
 e.respondWith(
 caches.match(e.request).then(function(cached){
 var network=fetch(e.request,{cache:'no-store'}).then(function(r){
