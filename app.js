@@ -296,8 +296,10 @@ function saveInfo(){
 const ex=document.getElementById('i_extra');
 const extra=[];
 if(ex)for(let i=0;i<ex.children.length;i++){
-const ta=ex.children[i].querySelectorAll('textarea');
-if(ta.length>=2){const n=ta[0].value.trim(),v=ta[1].value.trim();if(n||v)extra.push({n:n,v:v});}
+const nm=ex.children[i].querySelector('input');
+const ta=ex.children[i].querySelector('textarea');
+const n=nm?nm.value.trim():'';const v=ta?ta.value.trim():'';
+if(n||v)extra.push({n:n,v:v});
 }
 aquaInfo={size:document.getElementById('i_size').value.trim(),light:document.getElementById('i_light').value.trim(),filter:document.getElementById('i_filter').value.trim(),grunt:document.getElementById('i_grunt').value.trim(),extra:extra};
 localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
@@ -305,8 +307,9 @@ closeInfoEdit();renderInfo();
 }
 function extraRow(n,v){
 const w=document.createElement('div');
-const nm=document.getElementById('i_size').cloneNode();
-nm.id='';nm.value=n||'';nm.placeholder='Название';nm.setAttribute('rows','1');
+const nm=document.createElement('input');
+nm.value=n||'';nm.placeholder='Название';
+nm.style.cssText='display:block;width:100%;box-sizing:border-box;background:none;border:none;color:#4dd9ff;font-size:14px;padding:0;margin:0 0 6px';
 const t=document.getElementById('i_size').cloneNode();
 t.id='';t.value=v||'';t.placeholder='Значение';
 const del=document.createElement('button');
