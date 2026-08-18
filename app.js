@@ -266,7 +266,8 @@ document.getElementById('infoText').innerHTML=
 fld(ico('search',OR),'Размер',aquaInfo.size+vol)+
 fld(ico('bolt',OR),'Свет',aquaInfo.light)+
 fld(ico('wrench',OR),'Фильтр',aquaInfo.filter)+
-fld(ico('tank',OR),'Грунт',aquaInfo.grunt);
+fld(ico('tank',OR),'Грунт',aquaInfo.grunt)+
+(aquaInfo.extra||[]).map(function(x){return fld(ico('wrench',OR),x.n,x.v);}).join('');
 }
 function toggleInfoEdit(){
 const f=document.getElementById('infoForm');
@@ -275,13 +276,45 @@ document.getElementById('i_size').value=aquaInfo.size;
 document.getElementById('i_light').value=aquaInfo.light;
 document.getElementById('i_filter').value=aquaInfo.filter;
 document.getElementById('i_grunt').value=aquaInfo.grunt;
+let ex=document.getElementById('i_extra');
+if(!ex){
+ex=document.createElement('div');ex.id='i_extra';
+const addB=document.createElement('button');
+addB.type='button';addB.textContent='+ добавить параметр';
+addB.style.cssText='display:block;width:100%;margin:0 0 10px;padding:10px;border-radius:12px;border:1px dashed #4dd9ff;background:none;color:#4dd9ff;cursor:pointer';
+addB.onclick=function(){ex.appendChild(extraRow('',''));};
+const btns=f.querySelectorAll('button');let saveBtn=null;
+for(let i=0;i<btns.length;i++){if(btns[i].textContent.indexOf('Сохранить')!==-1){saveBtn=btns[i];break;}}
+f.insertBefore(ex,saveBtn);f.insertBefore(addB,saveBtn);
+}
+ex.innerHTML='';
+(aquaInfo.extra||[]).forEach(function(x){ex.appendChild(extraRow(x.n,x.v));});
 f.style.display='block';
 }else{f.style.display='none';}
 }
 function saveInfo(){
-aquaInfo={size:document.getElementById('i_size').value.trim(),light:document.getElementById('i_light').value.trim(),filter:document.getElementById('i_filter').value.trim(),grunt:document.getElementById('i_grunt').value.trim()};
+const ex=document.getElementById('i_extra');
+const extra=[];
+if(ex)for(let i=0;i<ex.children.length;i++){
+const ta=ex.children[i].querySelectorAll('textarea');
+if(ta.length>=2){const n=ta[0].value.trim(),v=ta[1].value.trim();if(n||v)extra.push({n:n,v:v});}
+}
+aquaInfo={size:document.getElementById('i_size').value.trim(),light:document.getElementById('i_light').value.trim(),filter:document.getElementById('i_filter').value.trim(),grunt:document.getElementById('i_grunt').value.trim(),extra:extra};
 localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
 closeInfoEdit();renderInfo();
+}
+function extraRow(n,v){
+const w=document.createElement('div');
+const nm=document.getElementById('i_size').cloneNode();
+nm.id='';nm.value=n||'';nm.placeholder='Название';nm.setAttribute('rows','1');
+const t=document.getElementById('i_size').cloneNode();
+t.id='';t.value=v||'';t.placeholder='Значение';
+const del=document.createElement('button');
+del.type='button';del.textContent='✕ удалить';
+del.style.cssText='margin:6px 0 10px;background:none;border:none;color:#ff8a80;cursor:pointer;font-size:12px';
+del.onclick=function(){w.remove();};
+w.appendChild(nm);w.appendChild(t);w.appendChild(del);
+return w;
 }
 function renderCosts(){
 let total=0;
