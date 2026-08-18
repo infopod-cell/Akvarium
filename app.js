@@ -1040,6 +1040,7 @@ initParams();
 }
 init();
 
+setTimeout(function(){var s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},500);}},1000);
 /* ===== Дневник для ИИ: файл контекста ===== */
 (function(){
 function buildCtx(){
