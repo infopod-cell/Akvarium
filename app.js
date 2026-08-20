@@ -765,6 +765,14 @@ if(pointers.size===0)panning=false;
 }
 img.addEventListener('pointerup',up);
 img.addEventListener('pointercancel',up);
+let gswX=0,gswY=0;
+img.addEventListener('touchstart',function(e){if(e.touches.length===1){gswX=e.touches[0].clientX;gswY=e.touches[0].clientY;}else{gswX=0;gswY=0;}},{passive:true});
+img.addEventListener('touchend',function(e){
+if(!gswX||!lbFromGallery)return;
+const dx=e.changedTouches[0].clientX-gswX,dy=e.changedTouches[0].clientY-gswY;
+gswX=0;
+if(Math.abs(dx)>70&&Math.abs(dy)<60){if(dx>0)prevPhoto();else nextPhoto();}
+},{passive:true});
 }
 /* ===== Тесты воды ===== */
 const PARAMS=[
