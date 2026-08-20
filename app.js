@@ -773,7 +773,7 @@ lb.addEventListener('click',function(e){if(e.target===lb)closeLB();});
 lb.querySelector('#lbClose').addEventListener('click',closeLB);
 document.addEventListener('click',function(e){
 const t=e.target.closest?e.target.closest('.entry-photo img'):null;
-if(t){lbFromGallery=false;openLightbox(t.getAttribute('src'));updateLightboxArrows();}
+if(t){openLightboxForPhoto(null,t.getAttribute('src'));}
 });
 function dist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
 img.addEventListener('pointerdown',function(e){
