@@ -254,6 +254,25 @@ if(p.dataUrl){window.openLightbox(p.dataUrl);}
 else if(p.photoId){getPhoto(p.photoId).then(function(rec){if(rec&&rec.dataUrl)window.openLightbox(rec.dataUrl);});}
 updateLightboxArrows();
 }
+function delCurrentPhoto(){
+const p=galleryPhotos[galleryCurrentIndex];
+if(!p)return;
+if(!confirm('Удалить это фото?'))return;
+if(p.photoId){
+const id=p.photoId;
+delPhoto(id);
+entries.forEach(function(e){if(e.photos){const ix=e.photos.indexOf(id);if(ix!==-1)e.photos.splice(ix,1);}});
+}else{
+entries.forEach(function(e){if(e.photo&&e.photo===p.dataUrl)e.photo=null;});
+}
+persist();
+galleryPhotos.splice(galleryCurrentIndex,1);
+buildSets();render();updateStats();updateTiles();
+renderGallery();
+if(!galleryPhotos.length){window.closeLightbox();return;}
+if(galleryCurrentIndex>=galleryPhotos.length)galleryCurrentIndex=galleryPhotos.length-1;
+openLightboxFromGallery(galleryCurrentIndex);
+}
 function prevPhoto(){if(galleryCurrentIndex>0)openLightboxFromGallery(galleryCurrentIndex-1);}
 function nextPhoto(){if(galleryCurrentIndex<galleryPhotos.length-1)openLightboxFromGallery(galleryCurrentIndex+1);}
 function updateLightboxArrows(){
