@@ -275,8 +275,17 @@ nextBtn.textContent='›';
 nextBtn.onclick=nextPhoto;
 lb.appendChild(nextBtn);
 }
+let delBtn=document.getElementById('lbDel');
+if(!delBtn){
+delBtn=document.createElement('button');delBtn.id='lbDel';
+delBtn.style.cssText='position:fixed;top:12px;right:64px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:16px;z-index:1201;cursor:pointer';
+delBtn.textContent='🗑';
+delBtn.onclick=delCurrentPhoto;
+lb.appendChild(delBtn);
+}
 prevBtn.style.display=(lbFromGallery&&galleryCurrentIndex>0)?'block':'none';
 nextBtn.style.display=(lbFromGallery&&galleryCurrentIndex<galleryPhotos.length-1)?'block':'none';
+delBtn.style.display=lbFromGallery?'block':'none';
 }
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 2) ===== */
 /* ===== Календарь ===== */
