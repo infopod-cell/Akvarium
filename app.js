@@ -193,9 +193,102 @@ document.getElementById('tdSub').textContent='нажми «+», чтобы на�
 }
 refreshWpTile();
 }
-function tilePhoto(){
-for(let i=0;i<entries.length;i++){if(entries[i].photo){openLightbox(entries[i].photo);return;}}
-alert('Пока нет ни одного фото. Добавь первое через «+»!');
+function openGallery(){
+if(!galleryPhotos.length){
+const allPhotos=[];
+entries.forEach(function(e,i){
+if(e.photo)allPhotos.push({dataUrl:e.photo,date:e.date,entryIndex:i,photoIndex:0});
+if(e.photos&&e.photos.length){
+e.photos.forEach(function(pid,pi){
+allPhotos.push({photoId:pid,date:e.date,entryIndex:i,photoIndex:pi});
+});
+}
+});
+getAllPhotos().then(function(dbPhotos){
+dbPhotos.forEach(function(p){
+if(!allPhotos.find(function(a){return a.photoId===p.id;})){
+allPhotos.push({photoId:p.id,dataUrl:p.dataUrl,date:p.date,entryIndex:-1,photoIndex:-1});
+}
+});
+allPhotos.sort(function(a,b){return pd(b.date)-pd(a.date);});
+galleryPhotos=allPhotos;
+renderGallery();
+});
+}else{renderGallery();}
+}
+function renderGallery(){
+let gv=document.getElementById('galleryView');
+if(!gv){
+gv=document.createElement('div');gv.id='galleryView';
+gv.style.cssText='position:fixed;inset:0;background:#0a1428;z-index:998;overflow-y:auto;padding:16px;box-sizing:border-box;transform:translateX(100%);transition:transform .3s ease';
+document.body.appendChild(gv);
+}
+const byDate={};
+galleryPhotos.forEach(function(p,i){
+if(!byDate[p.date])byDate[p.date]=[];
+byDate[p.date].push({photo:p,index:i});
+});
+let html='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="closeGallery()" style="background:none;border:none;color:#4dd9ff;font-size:20px;cursor:pointer">←</button><h2 style="margin:0;color:#eaf6ff;font-size:18px">Фотоальбом</h2></div>';
+const dates=Object.keys(byDate).sort(function(a,b){return pd(b)-pd(a);});
+dates.forEach(function(date){
+html+='<div style="margin-bottom:16px"><div style="color:#4dd9ff;font-size:13px;margin-bottom:8px">'+date+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
+byDate[date].forEach(function(item){
+const p=item.photo;
+const src=p.dataUrl||'';
+html+='<div onclick="openLightboxFromGallery('+item.index+')" style="aspect-ratio:1;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;cursor:pointer">';
+if(src){html+='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">';}
+html+='</div>';
+});
+html+='</div></div>';
+});
+gv.innerHTML=html;
+gv.style.transform='translateX(0)';
+pushLayer();
+}
+function closeGallery(){
+const gv=document.getElementById('galleryView');
+if(gv)gv.style.transform='translateX(100%)';
+try{history.back();}catch(e){}
+}
+function openLightboxFromGallery(index){
+galleryCurrentIndex=index;
+const p=galleryPhotos[index];
+if(p.dataUrl){
+window.openLightbox(p.dataUrl);
+}else if(p.photoId){
+getPhoto(p.photoId).then(function(rec){
+if(rec&&rec.dataUrl)window.openLightbox(rec.dataUrl);
+});
+}
+updateLightboxArrows();
+}
+function prevPhoto(){
+if(galleryCurrentIndex>0){galleryCurrentIndex--;openLightboxFromGallery(galleryCurrentIndex);}
+}
+function nextPhoto(){
+if(galleryCurrentIndex<galleryPhotos.length-1){galleryCurrentIndex++;openLightboxFromGallery(galleryCurrentIndex);}
+}
+function updateLightboxArrows(){
+const lb=document.getElementById('lightbox');
+if(!lb)return;
+let prevBtn=document.getElementById('lbPrev');
+let nextBtn=document.getElementById('lbNext');
+if(!prevBtn){
+prevBtn=document.createElement('button');prevBtn.id='lbPrev';
+prevBtn.style.cssText='position:fixed;left:12px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:20px;z-index:401;cursor:pointer';
+prevBtn.textContent='‹';
+prevBtn.onclick=prevPhoto;
+lb.appendChild(prevBtn);
+}
+if(!nextBtn){
+nextBtn=document.createElement('button');nextBtn.id='lbNext';
+nextBtn.style.cssText='position:fixed;right:12px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:20px;z-index:401;cursor:pointer';
+nextBtn.textContent='›';
+nextBtn.onclick=nextPhoto;
+lb.appendChild(nextBtn);
+}
+prevBtn.style.display=galleryCurrentIndex>0?'block':'none';
+nextBtn.style.display=galleryCurrentIndex<galleryPhotos.length-1?'block':'none';
 }
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 2) ===== */
 /* ===== Календарь ===== */
