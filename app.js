@@ -92,6 +92,7 @@ function dismiss(id){document.getElementById(id).classList.remove('open');if(id=
 function closeView(id){if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}}
 function dismissModal(){const el=document.getElementById('modalOverlay');if(el.classList.contains('active')){el.classList.remove('active');if(isRecording)stopVoice();editingIndex=null;}}
 function closeModal(){if(document.getElementById('modalOverlay').classList.contains('active')){dismissModal();try{history.back();}catch(e){}}}
+currentPhotos=[];const pr=document.getElementById('photoRow');if(pr){pr.innerHTML='';pr.style.display='none';}
 function goHome(){closeView('calView');closeView('diaryView');closeView('infoView');closeView('settingsView');}
 function openDiary(){openView('diaryView')}
 function hideDiary(){closeView('diaryView')}
