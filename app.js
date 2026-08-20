@@ -465,14 +465,15 @@ return '<div class="fld"><div class="fld-l">'+icon+label+'</div><div class="fld-
 }
 function fillEntryPhotos(){
 document.querySelectorAll('[data-photos]').forEach(function(box){
-box.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin:8px 0';
 const ids=box.getAttribute('data-photos').split(',');
+const n=Math.min(ids.length,3);
+box.style.cssText='display:grid;grid-template-columns:repeat('+n+',1fr);gap:6px;margin:8px 0';
 ids.forEach(function(id){
 getPhoto(id).then(function(rec){
 if(rec&&rec.dataUrl){
 const im=document.createElement('img');
 im.src=rec.dataUrl;
-im.style.cssText='width:100px;height:100px;object-fit:cover;border-radius:10px;display:block;cursor:pointer';
+im.style.cssText='width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block;cursor:pointer';
 im.onclick=function(){openLightboxForPhoto(id,null);};
 box.appendChild(im);
 }
