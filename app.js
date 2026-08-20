@@ -197,25 +197,33 @@ refreshWpTile();
 }
 let galleryPhotos=[],galleryCurrentIndex=0,galOpen=false,lbFromGallery=false;
 function tilePhoto(){openGallery();}
-function openGallery(){
+function buildGalleryList(cb){
 getAllPhotos().then(function(dbPhotos){
 const byId={};dbPhotos.forEach(function(p){byId[p.id]=p;});
-const allPhotos=[];
+const list=[];
 entries.forEach(function(e){
-if(e.photo)allPhotos.push({dataUrl:e.photo,date:e.date});
+if(e.photo)list.push({dataUrl:e.photo,date:e.date});
 (e.photos||[]).forEach(function(pid){
 const rec=byId[pid];
-allPhotos.push(rec?{dataUrl:rec.dataUrl,photoId:pid,date:e.date}:{photoId:pid,date:e.date});
+list.push(rec?{dataUrl:rec.dataUrl,photoId:pid,date:e.date}:{photoId:pid,date:e.date});
 });
 });
 dbPhotos.forEach(function(p){
 let used=false;
 for(let i=0;i<entries.length;i++){if((entries[i].photos||[]).indexOf(p.id)!==-1){used=true;break;}}
-if(!used)allPhotos.push({dataUrl:p.dataUrl,photoId:p.id,date:p.date});
+if(!used)list.push({dataUrl:p.dataUrl,photoId:p.id,date:p.date});
 });
-allPhotos.sort(function(a,b){return pd(b.date)-pd(a.date);});
-galleryPhotos=allPhotos;
-renderGallery();
+list.sort(function(a,b){return pd(b.date)-pd(a.date);});
+cb(list);
+});
+}
+function openGallery(){buildGalleryList(function(list){galleryPhotos=list;renderGallery();});}
+function openLightboxForPhoto(id,src){
+buildGalleryList(function(list){
+galleryPhotos=list;
+let idx=0;
+for(let i=0;i<list.length;i++){if((id&&list[i].photoId===id)||(src&&list[i].dataUrl===src)){idx=i;break;}}
+openLightboxFromGallery(idx);
 });
 }
 function renderGallery(){
