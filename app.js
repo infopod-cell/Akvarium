@@ -1,6 +1,6 @@
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 1) ===== */
 let entries=JSON.parse(localStorage.getItem('aquaEntries')||'[]');
-let currentPhoto=null,recognition=null,isRecording=false,currentField=null,currentMic=null,baseText='',finalText='';
+let currentPhoto=null,currentPhotos=[],recognition=null,isRecording=false,currentField=null,currentMic=null,baseText='',finalText='';
 let calSets={water:new Set(),hunger:new Set()};
 let calDate=new Date(),calMode='water',calOpen=false,searchQuery='',editingIndex=null;
 let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Длина 41 см, Ширина 18 см, Высота 27 см',light:'Kodak e14, 6500K, 630лм, 7Вт',filter:'Naribo F-200, 3вт, 150 л/с',grunt:'морская галька N2 12-20 мм, обкатанная, Prime'};
