@@ -476,6 +476,7 @@ fld(ico('plate',OR),'Аппетит',e.appetite)+
 fld(ico('fish',OR),'Плавники',e.fins)+
 fld(ico('pencil',OR),'Заметка',e.text)+
 (e.photo?'<div class="entry-photo"><img src="'+e.photo+'" loading="lazy"></div>':'')+
+((e.photos&&e.photos.length)?'<div class="entry-photo" data-photos="'+e.photos.join(',')+'"></div>':'')+
 '<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',OR,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
