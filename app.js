@@ -463,6 +463,22 @@ function fld(icon,label,v){
 if(!v)return'';
 return '<div class="fld"><div class="fld-l">'+icon+label+'</div><div class="fld-v">'+v+'</div></div>';
 }
+function fillEntryPhotos(){
+document.querySelectorAll('[data-photos]').forEach(function(box){
+const ids=box.getAttribute('data-photos').split(',');
+ids.forEach(function(id){
+getPhoto(id).then(function(rec){
+if(rec&&rec.dataUrl){
+const im=document.createElement('img');
+im.src=rec.dataUrl;im.loading='lazy';
+im.style.cursor='pointer';
+im.onclick=function(){openLightboxForPhoto(id,null);};
+box.appendChild(im);
+}
+});
+});
+});
+}
 function onSearch(v){searchQuery=v;const c=document.getElementById('searchClear');if(c)c.style.display=v.trim()?'block':'none';render();}
 function render(){
 const list=document.getElementById('entriesList');
