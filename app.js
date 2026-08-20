@@ -205,13 +205,13 @@ entries.forEach(function(e){
 if(e.photo)allPhotos.push({dataUrl:e.photo,date:e.date});
 (e.photos||[]).forEach(function(pid){
 const rec=byId[pid];
-allPhotos.push(rec?{dataUrl:rec.dataUrl,date:e.date}:{photoId:pid,date:e.date});
+allPhotos.push(rec?{dataUrl:rec.dataUrl,photoId:pid,date:e.date}:{photoId:pid,date:e.date});
 });
 });
 dbPhotos.forEach(function(p){
 let used=false;
 for(let i=0;i<entries.length;i++){if((entries[i].photos||[]).indexOf(p.id)!==-1){used=true;break;}}
-if(!used)allPhotos.push({dataUrl:p.dataUrl,date:p.date});
+if(!used)allPhotos.push({dataUrl:p.dataUrl,photoId:p.id,date:p.date});
 });
 allPhotos.sort(function(a,b){return pd(b.date)-pd(a.date);});
 galleryPhotos=allPhotos;
