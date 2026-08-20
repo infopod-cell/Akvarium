@@ -488,6 +488,7 @@ fld(ico('pencil',OR),'Заметка',e.text)+
 '<div class="card-foot"><button class="del-btn" onclick="deleteEntry('+i+')">'+ico('trash',OR,14)+' удалить запись</button></div>'+
 '</div>';
 }).join('');
+fillEntryPhotos();
 renderWaterTests();
 markActive();
 }
