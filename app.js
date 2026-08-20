@@ -93,7 +93,7 @@ if(l!=='lightbox'&&((wpOv&&wpOpen)||l)){try{history.back();}catch(err){}}
 function openView(id){document.getElementById(id).classList.add('open');pushLayer();var v=document.getElementById(id);if(v)v.scrollTop=0;}
 function dismiss(id){document.getElementById(id).classList.remove('open');if(id==='calView')calOpen=false;if(id==='diaryView'){var inp=document.getElementById('searchInput');if(inp)inp.value='';searchQuery='';var c=document.getElementById('searchClear');if(c)c.style.display='none';render();}}
 function closeView(id){if(document.getElementById(id).classList.contains('open')){dismiss(id);try{history.back();}catch(e){}}}
-function dismissModal(){const el=document.getElementById('modalOverlay');if(el.classList.contains('active')){el.classList.remove('active');if(isRecording)stopVoice();editingIndex=null;}}
+function dismissModal(){const el=document.getElementById('modalOverlay');if(el.classList.contains('active')){el.classList.remove('active');if(isRecording)stopVoice();editingIndex=null;currentPhotos=[];const pr=document.getElementById('photoRow');if(pr){pr.innerHTML='';pr.style.display='none';}}}
 function closeModal(){if(document.getElementById('modalOverlay').classList.contains('active')){dismissModal();currentPhotos=[];const pr=document.getElementById('photoRow');if(pr){pr.innerHTML='';pr.style.display='none';}try{history.back();}catch(e){}}}
 function goHome(){closeView('calView');closeView('diaryView');closeView('infoView');closeView('settingsView');}
 function openDiary(){openView('diaryView')}
