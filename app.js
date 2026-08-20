@@ -1,7 +1,6 @@
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 1) ===== */
 let entries=JSON.parse(localStorage.getItem('aquaEntries')||'[]');
 let currentPhoto=null,currentPhotos=[],recognition=null,isRecording=false,currentField=null,currentMic=null,baseText='',finalText='';
-let galleryPhotos=[],galleryCurrentIndex=0;
 let calSets={water:new Set(),hunger:new Set()};
 let calDate=new Date(),calMode='water',calOpen=false,searchQuery='',editingIndex=null;
 let aquaInfo=JSON.parse(localStorage.getItem('aquaInfo')||'null')||{size:'Длина 41 см, Ширина 18 см, Высота 27 см',light:'Kodak e14, 6500K, 630лм, 7Вт',filter:'Naribo F-200, 3вт, 150 л/с',grunt:'морская галька N2 12-20 мм, обкатанная, Prime'};
@@ -68,6 +67,7 @@ function pushLayer(){try{history.pushState({aqua:1},'');}catch(e){}}
 function topLayer(){
 if(document.getElementById('lightbox').classList.contains('open'))return 'lightbox';
 if(document.getElementById('modalOverlay').classList.contains('active'))return 'modal';
+if(galOpen)return 'gallery';
 const order=['settingsView','infoView','calView','diaryView'];
 for(let i=0;i<order.length;i++){if(document.getElementById(order[i]).classList.contains('open'))return order[i];}
 return null;
@@ -75,6 +75,7 @@ return null;
 function dismissLayer(l){
 if(l==='lightbox'){closeLightbox();return;}
 if(l==='modal'){dismissModal();return;}
+if(l==='gallery'){hideGallery();return;}
 dismiss(l);
 }
 window.addEventListener('popstate',function(){const l=topLayer();if(l)dismissLayer(l);});
@@ -85,7 +86,8 @@ if(!swX)return;
 const dx=e.changedTouches[0].clientX-swX,dy=e.changedTouches[0].clientY-swY;
 swX=0;
 if(dx>70&&Math.abs(dy)<60){
-if((wpOv&&wpOpen)||topLayer()){try{history.back();}catch(err){}} 
+const l=topLayer();
+if(l!=='lightbox'&&((wpOv&&wpOpen)||l)){try{history.back();}catch(err){}}
 }
 },{passive:true});
 function openView(id){document.getElementById(id).classList.add('open');pushLayer();var v=document.getElementById(id);if(v)v.scrollTop=0;}
@@ -193,28 +195,28 @@ document.getElementById('tdSub').textContent='нажми «+», чтобы на�
 }
 refreshWpTile();
 }
+let galleryPhotos=[],galleryCurrentIndex=0,galOpen=false,lbFromGallery=false;
+function tilePhoto(){openGallery();}
 function openGallery(){
-if(!galleryPhotos.length){
-const allPhotos=[];
-entries.forEach(function(e,i){
-if(e.photo)allPhotos.push({dataUrl:e.photo,date:e.date,entryIndex:i,photoIndex:0});
-if(e.photos&&e.photos.length){
-e.photos.forEach(function(pid,pi){
-allPhotos.push({photoId:pid,date:e.date,entryIndex:i,photoIndex:pi});
-});
-}
-});
 getAllPhotos().then(function(dbPhotos){
+const byId={};dbPhotos.forEach(function(p){byId[p.id]=p;});
+const allPhotos=[];
+entries.forEach(function(e){
+if(e.photo)allPhotos.push({dataUrl:e.photo,date:e.date});
+(e.photos||[]).forEach(function(pid){
+const rec=byId[pid];
+allPhotos.push(rec?{dataUrl:rec.dataUrl,date:e.date}:{photoId:pid,date:e.date});
+});
+});
 dbPhotos.forEach(function(p){
-if(!allPhotos.find(function(a){return a.photoId===p.id;})){
-allPhotos.push({photoId:p.id,dataUrl:p.dataUrl,date:p.date,entryIndex:-1,photoIndex:-1});
-}
+let used=false;
+for(let i=0;i<entries.length;i++){if((entries[i].photos||[]).indexOf(p.id)!==-1){used=true;break;}}
+if(!used)allPhotos.push({dataUrl:p.dataUrl,date:p.date});
 });
 allPhotos.sort(function(a,b){return pd(b.date)-pd(a.date);});
 galleryPhotos=allPhotos;
 renderGallery();
 });
-}else{renderGallery();}
 }
 function renderGallery(){
 let gv=document.getElementById('galleryView');
@@ -230,44 +232,30 @@ byDate[p.date].push({photo:p,index:i});
 });
 let html='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="closeGallery()" style="background:none;border:none;color:#4dd9ff;font-size:20px;cursor:pointer">←</button><h2 style="margin:0;color:#eaf6ff;font-size:18px">Фотоальбом</h2></div>';
 const dates=Object.keys(byDate).sort(function(a,b){return pd(b)-pd(a);});
+if(!dates.length)html+='<div style="color:rgba(255,255,255,.5);font-size:13px">Пока нет фото. Добавь первое через «+»!</div>';
 dates.forEach(function(date){
 html+='<div style="margin-bottom:16px"><div style="color:#4dd9ff;font-size:13px;margin-bottom:8px">'+date+'</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
 byDate[date].forEach(function(item){
-const p=item.photo;
-const src=p.dataUrl||'';
-html+='<div onclick="openLightboxFromGallery('+item.index+')" style="aspect-ratio:1;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;cursor:pointer">';
-if(src){html+='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">';}
-html+='</div>';
+const src=item.photo.dataUrl||'';
+html+='<div onclick="openLightboxFromGallery('+item.index+')" style="aspect-ratio:1;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;cursor:pointer">'+(src?'<img src="'+src+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div>';
 });
 html+='</div></div>';
 });
 gv.innerHTML=html;
-gv.style.transform='translateX(0)';
+gv.style.transform='translateX(0)';galOpen=true;
 pushLayer();
 }
-function closeGallery(){
-const gv=document.getElementById('galleryView');
-if(gv)gv.style.transform='translateX(100%)';
-try{history.back();}catch(e){}
-}
+function hideGallery(){const gv=document.getElementById('galleryView');if(gv)gv.style.transform='translateX(100%)';galOpen=false;}
+function closeGallery(){hideGallery();try{history.back();}catch(e){}}
 function openLightboxFromGallery(index){
-galleryCurrentIndex=index;
+galleryCurrentIndex=index;lbFromGallery=true;
 const p=galleryPhotos[index];
-if(p.dataUrl){
-window.openLightbox(p.dataUrl);
-}else if(p.photoId){
-getPhoto(p.photoId).then(function(rec){
-if(rec&&rec.dataUrl)window.openLightbox(rec.dataUrl);
-});
-}
+if(p.dataUrl){window.openLightbox(p.dataUrl);}
+else if(p.photoId){getPhoto(p.photoId).then(function(rec){if(rec&&rec.dataUrl)window.openLightbox(rec.dataUrl);});}
 updateLightboxArrows();
 }
-function prevPhoto(){
-if(galleryCurrentIndex>0){galleryCurrentIndex--;openLightboxFromGallery(galleryCurrentIndex);}
-}
-function nextPhoto(){
-if(galleryCurrentIndex<galleryPhotos.length-1){galleryCurrentIndex++;openLightboxFromGallery(galleryCurrentIndex);}
-}
+function prevPhoto(){if(galleryCurrentIndex>0)openLightboxFromGallery(galleryCurrentIndex-1);}
+function nextPhoto(){if(galleryCurrentIndex<galleryPhotos.length-1)openLightboxFromGallery(galleryCurrentIndex+1);}
 function updateLightboxArrows(){
 const lb=document.getElementById('lightbox');
 if(!lb)return;
@@ -287,8 +275,8 @@ nextBtn.textContent='›';
 nextBtn.onclick=nextPhoto;
 lb.appendChild(nextBtn);
 }
-prevBtn.style.display=galleryCurrentIndex>0?'block':'none';
-nextBtn.style.display=galleryCurrentIndex<galleryPhotos.length-1?'block':'none';
+prevBtn.style.display=(lbFromGallery&&galleryCurrentIndex>0)?'block':'none';
+nextBtn.style.display=(lbFromGallery&&galleryCurrentIndex<galleryPhotos.length-1)?'block':'none';
 }
 /* ===== Мой Аквариум — app.js (чистая сборка, часть 2) ===== */
 /* ===== Календарь ===== */
