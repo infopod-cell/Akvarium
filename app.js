@@ -695,11 +695,11 @@ input.value='';
 /* ===== Полноэкранный просмотр фото ===== */
 function initLightbox(){
 const st=document.createElement('style');
-st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:400;display:none;align-items:center;justify-content:center}'+
+st.textContent='#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:1200;display:none;align-items:center;justify-content:center}'+
 '#lightbox.open{display:flex}'+
 '#lbImg{max-width:100%;max-height:100vh;touch-action:none;user-select:none;-webkit-user-select:none}'+
-'#lbClose{position:fixed;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;z-index:401;cursor:pointer}'+
-'#lbHint{position:fixed;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;z-index:401}';
+'#lbClose{position:fixed;top:12px;right:12px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:18px;z-index:1201;cursor:pointer}'+
+'#lbHint{position:fixed;bottom:14px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;z-index:1201}';
 document.head.appendChild(st);
 const lb=document.createElement('div');
 lb.id='lightbox';
