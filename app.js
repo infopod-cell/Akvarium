@@ -372,6 +372,43 @@ fld(ico('pencil',OR),'Заметка',e.text)+
 renderWaterTests();
 markActive();
 }
+/* ===== Фотохранилище (IndexedDB) ===== */
+let photoDB=null;
+function openPhotoDB(){
+return new Promise(function(res,rej){
+if(photoDB){res(photoDB);return;}
+const rq=indexedDB.open('aquaPhotos',1);
+rq.onupgradeneeded=function(){const db=rq.result;if(!db.objectStoreNames.contains('photos')){db.createObjectStore('photos',{keyPath:'id'});}};
+rq.onsuccess=function(){photoDB=rq.result;res(photoDB);};
+rq.onerror=function(){rej(rq.error);};
+});
+}
+function putPhoto(rec){
+return openPhotoDB().then(function(db){return new Promise(function(res,rej){
+const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(rec);
+tx.oncomplete=function(){res();};tx.onerror=function(){rej(tx.error);};
+});});
+}
+function getPhoto(id){
+return openPhotoDB().then(function(db){return new Promise(function(res,rej){
+const rq=db.transaction('photos').objectStore('photos').get(id);
+rq.onsuccess=function(){res(rq.result||null);};rq.onerror=function(){rej(rq.error);};
+});});
+}
+function getAllPhotos(){
+return openPhotoDB().then(function(db){return new Promise(function(res,rej){
+const rq=db.transaction('photos').objectStore('photos').getAll();
+rq.onsuccess=function(){res(rq.result||[]);};rq.onerror=function(){rej(rq.error);};
+});});
+}
+function delPhoto(id){
+return openPhotoDB().then(function(db){return new Promise(function(res,rej){
+const tx=db.transaction('photos','readwrite');tx.objectStore('photos').delete(id);
+tx.oncomplete=function(){res();};tx.onerror=function(){rej(tx.error);};
+});});
+}
+function newPhotoId(){return 'p'+Date.now()+'_'+Math.floor(Math.random()*100000);}
+
 /* ===== Форма записи ===== */
 function openModal(){
 editingIndex=null;
