@@ -677,6 +677,7 @@ const tempV=tv?tv.value.trim().replace(',','.'):'';
 const tempN=parseFloat(tempV);
 const shots=currentPhotos.slice();
 const finish=function(ids){
+const dateForTemp=(editingIndex!==null)?entries[editingIndex].date:new Date().toLocaleDateString('ru-RU');
 if(editingIndex!==null){
 const e=entries[editingIndex];
 const dv=document.getElementById('f_date').value.trim();
@@ -699,8 +700,7 @@ closeModal();
 buildSets();render();updateStats();updateTiles();
 }
 if(tempV&&tempN>=15&&tempN<=40){
-const n=new Date();
-putTPad(n.getDate()+'-'+(n.getMonth()+1)+'-'+n.getFullYear(),tempN);
+putT(dateForTemp,tempN);
 refreshWpTile();
 }
 };
