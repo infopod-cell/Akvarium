@@ -182,9 +182,14 @@ document.getElementById('thSub').textContent='последний '+h.last.toLoca
 document.getElementById('tileHunger').classList.toggle('late',h.diff<0);
 }else{document.getElementById('thVal').textContent='—';document.getElementById('thSub').textContent='нет данных';}
 const box=document.getElementById('tpBox');
-let ph=null;
-for(let i=0;i<entries.length;i++){if(entries[i].photo){ph=entries[i];break;}}
-if(ph){box.innerHTML='<img src="'+ph.photo+'">';}else{box.innerHTML='<div class="t-v">пока нет</div>';}
+let ph=null,phId=null;
+for(let i=0;i<entries.length;i++){
+if(entries[i].photos&&entries[i].photos.length){phId=entries[i].photos[entries[i].photos.length-1];break;}
+if(entries[i].photo){ph=entries[i];break;}
+}
+if(phId){getPhoto(phId).then(function(rec){if(rec&&rec.dataUrl)box.innerHTML='<img src="'+rec.dataUrl+'">';});}
+else if(ph){box.innerHTML='<img src="'+ph.photo+'">';}
+else{box.innerHTML='<div class="t-v">пока нет</div>';}
 if(entries.length){
 const le=entries[0];
 document.getElementById('tdVal').textContent=le.date;
