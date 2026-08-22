@@ -563,7 +563,7 @@ document.getElementById('dateBlock').style.display='none';
 clearTestInputs();
 const tv=document.getElementById('tempInput');if(tv)tv.value='';
 document.getElementById('photoPreview').style.display='none';
-currentPhoto=null;
+currentPhoto=null;buildFieldChips();
 }
 function openEdit(i){
 editingIndex=i;
@@ -582,6 +582,7 @@ const tv=document.getElementById('tempInput');if(tv)tv.value='';
 currentPhoto=e.photo||null;
 const preview=document.getElementById('photoPreview');
 if(currentPhoto){preview.src=currentPhoto;preview.style.display='block';}else{preview.style.display='none';}
+buildFieldChips();
 }
 function buildFieldChips(){
 ['appetite','fins'].forEach(function(field){
