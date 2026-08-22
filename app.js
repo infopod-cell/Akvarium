@@ -591,8 +591,13 @@ if(!ta)return;
 let box=document.getElementById('chips_'+field);
 if(!box){
 box=document.createElement('div');box.id='chips_'+field;
-box.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0';
+box.style.cssText='display:none;gap:6px;flex-wrap:wrap;margin:6px 0 0';
 ta.parentNode.insertBefore(box,ta.nextSibling);
+}
+if(!ta._chipsWired){
+ta._chipsWired=true;
+ta.addEventListener('focus',function(){box.style.display='flex';});
+ta.addEventListener('blur',function(){setTimeout(function(){box.style.display='none';},250);});
 }
 const seen=[];const vals=[];
 for(let i=0;i<entries.length&&vals.length<3;i++){
