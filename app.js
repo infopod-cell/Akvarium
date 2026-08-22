@@ -1306,6 +1306,19 @@ updateStats();
 updateTiles();
 initParams();
 }
+(function(){
+getAllPhotos().then(function(all){
+const byId={};all.forEach(function(p){byId[p.id]=p;});
+let changed=false;
+entries.forEach(function(e){
+if(e.photo&&e.photos&&e.photos.length){
+const rec=byId[e.photos[0]];
+if(rec&&rec.dataUrl===e.photo){e.photo=null;changed=true;}
+}
+});
+if(changed){persist();render();updateTiles();}
+});
+})();
 init();
 
 setTimeout(function(){var s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);},500);}},1000);
