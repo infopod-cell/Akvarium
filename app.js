@@ -691,7 +691,7 @@ if(hasTests)e.tests=t;
 persist();closeModal();buildSets();render();updateStats();updateTiles();
 }else{
 const date=new Date().toLocaleDateString('ru-RU');
-const en={date:date,actions:a,activity:ac,appetite:ap,fins:f,photo:shots[0]||null,src:'app',synced:false};
+const en={date:date,actions:a,activity:ac,appetite:ap,fins:f,photo:null,src:'app',synced:false};
 if(ids.length)en.photos=ids;
 if(hasTests)en.tests=t;
 entries.unshift(en);
