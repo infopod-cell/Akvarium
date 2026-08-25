@@ -877,10 +877,32 @@ img.addEventListener('pointercancel',up);
 let gswX=0,gswY=0;
 img.addEventListener('touchstart',function(e){if(e.touches.length===1){gswX=e.touches[0].clientX;gswY=e.touches[0].clientY;}else{gswX=0;gswY=0;}},{passive:true});
 img.addEventListener('touchend',function(e){
-if(!gswX||!lbFromGallery)return;
+if(!gswX||!lbFromGallery||scale>1)return;
 const dx=e.changedTouches[0].clientX-gswX,dy=e.changedTouches[0].clientY-gswY;
 gswX=0;
 if(Math.abs(dx)>70&&Math.abs(dy)<60){if(dx>0)prevPhoto();else nextPhoto();}
+},{passive:true});
+let pinchD=0,pinchS=1,panSX=0,panSY=0,panBX=0,panBY=0,panMode=false;
+function tdist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);}
+img.addEventListener('touchstart',function(e){
+if(e.touches.length===2){pinchD=tdist(e.touches[0],e.touches[1]);pinchS=scale;panMode=false;}
+else if(e.touches.length===1&&scale>1){panMode=true;panSX=e.touches[0].clientX;panSY=e.touches[0].clientY;panBX=x;panBY=y;}
+},{passive:true});
+img.addEventListener('touchmove',function(e){
+if(e.touches.length===2&&pinchD>0){
+const d=tdist(e.touches[0],e.touches[1]);
+scale=Math.min(8,Math.max(1,pinchS*d/pinchD));
+if(scale===1){x=0;y=0;}
+apply();
+}else if(e.touches.length===1&&panMode&&scale>1){
+x=panBX+(e.touches[0].clientX-panSX);
+y=panBY+(e.touches[0].clientY-panSY);
+apply();
+}
+},{passive:true});
+img.addEventListener('touchend',function(e){
+if(e.touches.length<2)pinchD=0;
+if(e.touches.length===0)panMode=false;
 },{passive:true});
 }
 /* ===== Тесты воды ===== */
