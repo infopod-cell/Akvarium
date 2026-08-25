@@ -753,6 +753,16 @@ if(confirm('Удалить эту запись?')){entries.splice(i,1);persist()
 }
 /* ===== Резервные копии ===== */
 function backupSave(){
+getAllPhotos().then(function(photos){
+const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings,photos:photos||[]};
+const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='aqua-backup-'+new Date().toISOString().slice(0,10)+'.json';
+a.click();
+setTimeout(function(){URL.revokeObjectURL(a.href);},5000);
+alert('Резервная копия сохранена в «Загрузки» (вместе с фото).');
+}).catch(function(){
 const data={entries:entries,costs:costs,aquaInfo:aquaInfo,settings:settings};
 const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
 const a=document.createElement('a');
@@ -761,6 +771,7 @@ a.download='aqua-backup-'+new Date().toISOString().slice(0,10)+'.json';
 a.click();
 setTimeout(function(){URL.revokeObjectURL(a.href);},5000);
 alert('Резервная копия сохранена в «Загрузки».');
+});
 }
 function backupRestore(input){
 if(!input.files||!input.files[0])return;
@@ -778,8 +789,13 @@ localStorage.setItem('aquaEntries',JSON.stringify(entries));
 localStorage.setItem('aquaCosts',JSON.stringify(costs));
 localStorage.setItem('aquaInfo',JSON.stringify(aquaInfo));
 localStorage.setItem('aquaSettings',JSON.stringify(settings));
+const done=function(){
 applySettings();buildSets();render();updateStats();updateTiles();renderCosts();
-alert('Восстановлено записей: '+entries.length);
+alert('Восстановлено записей: '+entries.length+(d.photos&&d.photos.length?', фото: '+d.photos.length:''));
+};
+if(d.photos&&d.photos.length){
+Promise.all(d.photos.map(function(p){return putPhoto(p);})).then(done).catch(done);
+}else{done();}
 }catch(err){alert('Файл копии не читается.');}
 };
 r.readAsText(input.files[0]);
