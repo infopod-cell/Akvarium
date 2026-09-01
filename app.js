@@ -1310,7 +1310,7 @@ if(tests){tests.parentNode.removeChild(tests);tests.style.cssText='width:100%;bo
 const gh=minDiv(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
 if(gh){
 let g=gh;
-while(g&&g!==document.body&&!g.querySelector('svg'))g=g.parentElement;
+while(g&&g!==document.body&&(!g.classList||!g.classList.contains('wt-card')))g=g.parentElement;
 if(g&&g!==document.body){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);wpGraphCard=g;}
 }
 }
