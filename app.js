@@ -1066,7 +1066,7 @@ for(let i=0;i<grid.children.length;i++){grid.children[i].classList.toggle('activ
 const ch=document.getElementById('wtChart');
 if(ch&&ch.closest){
 const card=ch.closest('.wt-card');
-if(card){const t=card.querySelector('.wt-title');if(t)t.textContent='График тестов: '+NAMES[curChart];}
+if(card){const t=card.querySelector('.wt-title');if(t)t.textContent=NAMES[curChart];}
 }
 }
 function readTestInputs(){
