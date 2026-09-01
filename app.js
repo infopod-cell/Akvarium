@@ -1325,11 +1325,8 @@ if(g)for(let i=0;i<g.children.length;i++)g.children[i].classList.remove('active'
 }
 function drawTemp(){
 if(!wpGraphCard)return;
-const ds=wpGraphCard.querySelectorAll('div');
-for(let i=0;i<ds.length;i++){
-const t=(ds[i].textContent||'').trim();
-if(t.indexOf('График')===0&&t.length<40){ds[i].textContent='График температуры';break;}
-}
+const tt=wpGraphCard.querySelector('.wt-title');
+if(tt)tt.textContent='Температура';
 const old=wpGraphCard.querySelector('svg');
 let pts=loadT();
 if(chartMonth!=='all')pts=pts.filter(function(p){return mOf(p.d)===chartMonth;});
