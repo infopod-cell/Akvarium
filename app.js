@@ -917,6 +917,21 @@ const PARAMS=[
 const COL={ok:'#3ddc84',warn:'#ffb74d',lo:'#ffb74d',hi:'#ff6b6b'};
 const TXT={ok:'норма',warn:'внимание',lo:'низко',hi:'высоко'};
 let curChart='no3';
+let chartMonth=new Date().getFullYear()+'-'+pad(new Date().getMonth()+1);
+function mOf(d){const m=String(d).match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);return m?m[3]+'-'+pad(+m[2]):'';}
+function monthLabel(v){if(v==='all')return 'весь период';const y=+v.slice(0,4),mo=+v.slice(5,7);return new Date(y,mo-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});}
+function refreshMonthSel(){
+const sel=document.getElementById('chartMonthSel');
+if(!sel)return;
+const set={};
+entries.forEach(function(e){const m=mOf(e.date);if(m)set[m]=1;});
+loadT().forEach(function(p){const m=mOf(p.d);if(m)set[m]=1;});
+const n=new Date();set[n.getFullYear()+'-'+pad(n.getMonth()+1)]=1;
+const months=Object.keys(set).sort().reverse();
+let html='<option value="all"'+(chartMonth==='all'?' selected':'')+'>весь период</option>';
+months.forEach(function(m){html+='<option value="'+m+'"'+(m===chartMonth?' selected':'')+'>'+monthLabel(m)+'</option>';});
+sel.innerHTML=html;
+}
 function num(s){return Number(String(s).replace(',','.'));}
 function statusOf(p,v){
 if(p.k==='cl')return v===0?'ok':'hi';
