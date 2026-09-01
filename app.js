@@ -1316,6 +1316,7 @@ const tests=minDiv(function(t){return t.indexOf('Последние тесты �
 if(tests){tests.parentNode.removeChild(tests);tests.style.cssText='width:100%;box-sizing:border-box;margin:0';host.appendChild(tests);}
 const g=document.getElementById('wtGraphCard');
 if(g){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);wpGraphCard=g;}
+}
 function markTempActive(){
 const tc=document.getElementById('wpTempCard');
 if(tc)tc.classList.add('active');
