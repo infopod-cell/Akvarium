@@ -1121,8 +1121,11 @@ photoBtn.insertAdjacentElement('beforebegin',tb);
 const cv=document.getElementById('calView');
 if(cv&&!document.getElementById('wtGrid')){
 const wrap=document.createElement('div');
-wrap.innerHTML='<div class="wt-card"><div class="wt-title">Последние тесты воды</div><div class="wt-gridcards" id="wtGrid"></div></div><div class="wt-card"><div class="wt-title">График тестов</div><div class="wt-chips" id="wtChips"></div><div id="wtChart"></div></div>';
+wrap.innerHTML='<div class="wt-card"><div class="wt-title">Последние тесты воды</div><div class="wt-gridcards" id="wtGrid"></div></div><div class="wt-card"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px"><div class="wt-title" style="margin-bottom:0">График тестов</div><select id="chartMonthSel" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#e0f0ff;font-size:12px;padding:6px 8px;max-width:46%"></select></div><div class="wt-chips" id="wtChips"></div><div id="wtChart"></div></div>';
 cv.appendChild(wrap);
+const cms=wrap.querySelector('#chartMonthSel');
+if(cms)cms.onchange=function(){chartMonth=cms.value;renderWaterTests();const tc=document.getElementById('wpTempCard');if(tc&&tc.classList.contains('active'))drawTemp();};
+const mst=document.createElement('style');mst.textContent='body.light #chartMonthSel{background:#fff;border-color:#cfdcea;color:#16324a}';document.head.appendChild(mst);
 }
 const sr=document.querySelector('.search-row');
 if(sr&&!document.getElementById('searchClear')){
