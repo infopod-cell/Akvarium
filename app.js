@@ -917,7 +917,13 @@ const PARAMS=[
 const COL={ok:'#3ddc84',warn:'#ffb74d',lo:'#ffb74d',hi:'#ff6b6b'};
 const TXT={ok:'норма',warn:'внимание',lo:'низко',hi:'высоко'};
 let curChart='no3';
-let chartMonth=new Date().getFullYear()+'-'+pad(new Date().getMonth()+1);
+let chartMonth=(function(){
+let best='';
+entries.forEach(function(e){const m=mOf(e.date);if(m>best)best=m;});
+loadT().forEach(function(p){const m=mOf(p.d);if(m>best)best=m;});
+if(!best){const n=new Date();best=n.getFullYear()+'-'+pad(n.getMonth()+1);}
+return best;
+})();
 function mOf(d){const m=String(d).match(/(\d{1,2})[./](\d{1,2})[./](\d{4})/);return m?m[3]+'-'+pad(+m[2]):'';}
 function monthLabel(v){if(v==='all')return 'весь период';const y=+v.slice(0,4),mo=+v.slice(5,7);return new Date(y,mo-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});}
 function refreshMonthSel(){
