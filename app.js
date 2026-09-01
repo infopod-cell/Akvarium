@@ -1307,13 +1307,8 @@ wpOv.appendChild(tc);
 const host=document.createElement('div');host.id='wpHost';wpOv.appendChild(host);
 const tests=minDiv(function(t){return t.indexOf('Последние тесты воды')!==-1&&t.indexOf('pH')!==-1&&t.length<2000;});
 if(tests){tests.parentNode.removeChild(tests);tests.style.cssText='width:100%;box-sizing:border-box;margin:0';host.appendChild(tests);}
-const gh=minDiv(function(t){return t.indexOf('График тестов')!==-1&&t.length<2000;});
-if(gh){
-let g=gh;
-while(g&&g!==document.body&&(!g.classList||!g.classList.contains('wt-card')))g=g.parentElement;
-if(g&&g!==document.body){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);wpGraphCard=g;}
-}
-}
+const g=document.getElementById('wtGraphCard');
+if(g){g.parentNode.removeChild(g);g.style.cssText='width:100%;box-sizing:border-box;margin:14px 0 0';host.appendChild(g);wpGraphCard=g;}
 function markTempActive(){
 const tc=document.getElementById('wpTempCard');
 if(tc)tc.classList.add('active');
