@@ -993,7 +993,8 @@ return series;
 }
 function renderWtChart(series){
 const box=document.getElementById('wtChart');
-const arr=series[curChart]||[];
+let arr=series[curChart]||[];
+if(chartMonth!=='all')arr=arr.filter(function(a){return mOf(a.d)===chartMonth;});
 if(arr.length<2){box.innerHTML='<div class="wt-empty">Для графика нужно хотя бы два теста этого параметра.</div>';return;}
 const W=340,H=150,PL=34,PR=10,PT=14,PB=26;
 const vs=arr.map(a=>a.v);
@@ -1047,6 +1048,7 @@ document.getElementById('wtChips').innerHTML=PARAMS.map(function(p){
 return '<button class="wt-chip'+(p.k===curChart?' active':'')+'" onclick="setWtChart(\''+p.k+'\')">'+p.n+'</button>';
 }).join('');
 renderWtChart(series);
+refreshMonthSel();
 }
 function setWtChart(k){curChart=k;const tc=document.getElementById('wpTempCard');if(tc)tc.classList.remove('active');renderWaterTests();markActive();} 
 function markActive(){
