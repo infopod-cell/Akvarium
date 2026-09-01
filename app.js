@@ -1319,7 +1319,9 @@ const t=(ds[i].textContent||'').trim();
 if(t.indexOf('График')===0&&t.length<40){ds[i].textContent='График температуры';break;}
 }
 const old=wpGraphCard.querySelector('svg');
-const pts=loadT();
+let pts=loadT();
+if(chartMonth!=='all')pts=pts.filter(function(p){return mOf(p.d)===chartMonth;});
+refreshMonthSel();
 const W=340,H=150,PL=34,PR=10,PT=14,PB=26;
 let out='<svg viewBox="0 0 340 150" style="width:100%;display:block">';
 if(!pts.length){
