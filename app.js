@@ -1358,7 +1358,7 @@ const step=Math.max(1,Math.floor(n/5));
 for(let i=0;i<n;i+=step){out+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" fill="#88aabb" font-size="8" text-anchor="middle">'+pts[i].d.slice(0,5)+'</text>';}
 out+='</svg>';
 }
-if(old)old.outerHTML=out;else wpGraphCard.insertAdjacentHTML('beforeend',out);
+tb.innerHTML=out;
 }
 function harvestTemps(){
 if(localStorage.getItem('aquaTempHarvestV3'))return;
