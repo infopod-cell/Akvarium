@@ -999,6 +999,8 @@ return series;
 }
 function renderWtChart(series){
 const box=document.getElementById('wtChart');
+const tb=document.getElementById('tempChartBox');if(tb)tb.innerHTML='';
+box.style.display='block';
 let arr=series[curChart]||[];
 if(chartMonth!=='all')arr=arr.filter(function(a){return mOf(a.d)===chartMonth;});
 if(arr.length<2){box.innerHTML='<div class="wt-empty">Для графика нужно хотя бы два теста этого параметра.</div>';return;}
