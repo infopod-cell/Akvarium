@@ -1327,7 +1327,9 @@ function drawTemp(){
 if(!wpGraphCard)return;
 const tt=wpGraphCard.querySelector('.wt-title');
 if(tt)tt.textContent='Температура';
-const old=wpGraphCard.querySelector('svg');
+let tb=document.getElementById('tempChartBox');
+if(!tb){tb=document.createElement('div');tb.id='tempChartBox';wpGraphCard.appendChild(tb);}
+const wc=document.getElementById('wtChart');if(wc)wc.style.display='none';
 let pts=loadT();
 if(chartMonth!=='all')pts=pts.filter(function(p){return mOf(p.d)===chartMonth;});
 refreshMonthSel();
